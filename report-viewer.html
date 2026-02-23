@@ -229,6 +229,7 @@
                     return response.text();
                 })
                 .then(function(md) {
+                    md = md.replace(/\.\.\//g, '');
                     var html = marked.parse(md);
                     container.innerHTML =
                         '<div class="report-actions">' +
