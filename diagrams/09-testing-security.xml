@@ -1,0 +1,160 @@
+<mxfile host="app.diagrams.net" agent="Claude" version="24.0.0">
+  <diagram name="Security Testing Architecture" id="security-testing-09">
+    <mxGraphModel dx="900" dy="650" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="900" pageHeight="650" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ===== TOP: TARGET SYSTEM ===== -->
+        <mxCell id="target_system" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;strokeWidth=2;verticalAlign=top;align=center;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="820" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="target_title" value="&lt;b&gt;Цільова система (Ubuntu 22.04)&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=top;resizable=0;points=[];fontSize=14;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="290" y="30" width="320" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="target_subtitle" value="Відкриті порти та сервіси" style="text;html=1;align=center;verticalAlign=top;resizable=0;points=[];fontSize=11;fontStyle=2;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="340" y="52" width="220" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- Port :22 SSH (OK - green) -->
+        <mxCell id="port_22" value="&lt;b&gt;:22 SSH&lt;/b&gt;&lt;br&gt;OPEN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;fontSize=11;verticalAlign=middle;align=center;" vertex="1" parent="1">
+          <mxGeometry x="60" y="80" width="140" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Port :80 HTTP (OK - green) -->
+        <mxCell id="port_80" value="&lt;b&gt;:80 HTTP&lt;/b&gt;&lt;br&gt;OPEN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;fontSize=11;verticalAlign=middle;align=center;" vertex="1" parent="1">
+          <mxGeometry x="215" y="80" width="140" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Port :3306 MySQL (risky - red) -->
+        <mxCell id="port_3306" value="&lt;b&gt;:3306 MySQL&lt;/b&gt;&lt;br&gt;OPEN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=2;fontSize=11;verticalAlign=middle;align=center;" vertex="1" parent="1">
+          <mxGeometry x="370" y="80" width="140" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Port :5432 PostgreSQL (risky - red) -->
+        <mxCell id="port_5432" value="&lt;b&gt;:5432 PostgreSQL&lt;/b&gt;&lt;br&gt;OPEN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=2;fontSize=11;verticalAlign=middle;align=center;" vertex="1" parent="1">
+          <mxGeometry x="525" y="80" width="140" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Port :8080 Node.js (risky - red) -->
+        <mxCell id="port_8080" value="&lt;b&gt;:8080 Node.js&lt;/b&gt;&lt;br&gt;OPEN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=2;fontSize=11;verticalAlign=middle;align=center;" vertex="1" parent="1">
+          <mxGeometry x="680" y="80" width="140" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- ===== ARROWS: Target System -> Tools ===== -->
+        <mxCell id="arrow_target_nmap" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#6c8ebf;strokeWidth=2;endArrow=classic;" edge="1" source="target_system" target="tool_nmap" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow_target_curl" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#82b366;strokeWidth=2;endArrow=classic;" edge="1" source="target_system" target="tool_curl" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow_target_lynis" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#d6b656;strokeWidth=2;endArrow=classic;" edge="1" source="target_system" target="tool_lynis" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Section label: Testing Tools -->
+        <mxCell id="tools_label" value="&lt;font color=&quot;#333333&quot;&gt;&lt;b&gt;Інструменти тестування&lt;/b&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="350" y="195" width="200" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- ===== MIDDLE: TESTING TOOLS ===== -->
+
+        <!-- Tool 1: Nmap (blue) -->
+        <mxCell id="tool_nmap" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;verticalAlign=top;align=center;" vertex="1" parent="1">
+          <mxGeometry x="40" y="220" width="260" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="nmap_title" value="&lt;b&gt;Nmap&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=top;resizable=0;points=[];fontSize=14;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="130" y="225" width="80" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="nmap_cmd" value="&lt;font face=&quot;monospace&quot;&gt;nmap -sV localhost&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="70" y="252" width="200" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="nmap_desc" value="Виявлення портів, сервісів, версій" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;fontColor=#555555;" vertex="1" parent="1">
+          <mxGeometry x="60" y="278" width="220" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="nmap_result_box" value="&lt;b&gt;5 open, 995 closed&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6c8ebf;strokeWidth=1;fontSize=11;verticalAlign=middle;align=center;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="80" y="310" width="180" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Tool 2: curl (green) -->
+        <mxCell id="tool_curl" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;verticalAlign=top;align=center;" vertex="1" parent="1">
+          <mxGeometry x="320" y="220" width="260" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="curl_title" value="&lt;b&gt;curl&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=top;resizable=0;points=[];fontSize=14;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="415" y="225" width="70" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="curl_cmd" value="&lt;font face=&quot;monospace&quot;&gt;curl -I https://site.com&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="345" y="252" width="210" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="curl_desc" value="HTTP-заголовки безпеки" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;fontColor=#555555;" vertex="1" parent="1">
+          <mxGeometry x="365" y="278" width="170" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="curl_result_box" value="&lt;b&gt;HSTS, CSP, X-Frame-Options&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#82b366;strokeWidth=1;fontSize=11;verticalAlign=middle;align=center;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="345" y="310" width="210" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Tool 3: Lynis (orange) -->
+        <mxCell id="tool_lynis" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;strokeWidth=2;verticalAlign=top;align=center;" vertex="1" parent="1">
+          <mxGeometry x="600" y="220" width="260" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="lynis_title" value="&lt;b&gt;Lynis&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=top;resizable=0;points=[];fontSize=14;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="695" y="225" width="70" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="lynis_cmd" value="&lt;font face=&quot;monospace&quot;&gt;lynis audit system&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="650" y="252" width="160" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lynis_desc" value="Аудит конфігурації ОС" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;fontColor=#555555;" vertex="1" parent="1">
+          <mxGeometry x="655" y="278" width="150" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="lynis_result_box" value="&lt;b&gt;Hardening Index: 56/100&lt;/b&gt;&lt;br&gt;3 warnings, 12 suggestions" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#d6b656;strokeWidth=1;fontSize=11;verticalAlign=middle;align=center;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="630" y="305" width="200" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- ===== ARROWS: Tools -> Results ===== -->
+        <mxCell id="arrow_nmap_results" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#6c8ebf;strokeWidth=2;endArrow=classic;" edge="1" source="tool_nmap" target="results_box" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow_curl_results" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#82b366;strokeWidth=2;endArrow=classic;" edge="1" source="tool_curl" target="results_box" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow_lynis_results" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#d6b656;strokeWidth=2;endArrow=classic;" edge="1" source="tool_lynis" target="results_box" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ===== BOTTOM: RESULTS ===== -->
+        <mxCell id="results_box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=2;verticalAlign=top;align=center;" vertex="1" parent="1">
+          <mxGeometry x="180" y="440" width="540" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="results_title" value="&lt;b&gt;Зведена таблиця знахідок&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=top;resizable=0;points=[];fontSize=14;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="325" y="448" width="250" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="results_high" value="&lt;font color=&quot;#b85450&quot;&gt;&lt;b&gt;4 × Висока&lt;/b&gt;&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=1;fontSize=12;verticalAlign=middle;align=center;" vertex="1" parent="1">
+          <mxGeometry x="210" y="480" width="130" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="results_medium" value="&lt;font color=&quot;#d6b656&quot;&gt;&lt;b&gt;4 × Середня&lt;/b&gt;&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=1;fontSize=12;verticalAlign=middle;align=center;" vertex="1" parent="1">
+          <mxGeometry x="370" y="480" width="130" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="results_low" value="&lt;font color=&quot;#82b366&quot;&gt;&lt;b&gt;2 × Низька&lt;/b&gt;&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1;fontSize=12;verticalAlign=middle;align=center;" vertex="1" parent="1">
+          <mxGeometry x="530" y="480" width="130" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Diagram title -->
+        <mxCell id="diagram_title" value="&lt;b&gt;Архітектура тестування безпеки — Практична робота 9&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="250" y="555" width="400" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- Legend -->
+        <mxCell id="legend_green" value="&lt;font color=&quot;#82b366&quot;&gt;■&lt;/font&gt; Безпечно" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#555555;" vertex="1" parent="1">
+          <mxGeometry x="280" y="578" width="90" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="legend_red" value="&lt;font color=&quot;#b85450&quot;&gt;■&lt;/font&gt; Потребує уваги" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#555555;" vertex="1" parent="1">
+          <mxGeometry x="390" y="578" width="120" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="legend_yellow" value="&lt;font color=&quot;#d6b656&quot;&gt;■&lt;/font&gt; Результати" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#555555;" vertex="1" parent="1">
+          <mxGeometry x="520" y="578" width="100" height="18" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

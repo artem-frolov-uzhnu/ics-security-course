@@ -1,0 +1,167 @@
+<mxfile host="app.diagrams.net" agent="Claude" version="24.0.0">
+  <diagram name="UFW Firewall Configuration" id="ufw-firewall-diagram">
+    <mxGraphModel dx="800" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="800" pageHeight="600" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ІНТЕРНЕТ (cloud) -->
+        <mxCell id="internet" value="ІНТЕРНЕТ" style="shape=cloud;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=14;fontStyle=1;verticalAlign=middle;align=center;" vertex="1" parent="1">
+          <mxGeometry x="300" y="10" width="200" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow: Internet -> Firewall -->
+        <mxCell id="arrow_inet_fw" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#666666;strokeWidth=2;endArrow=classic;" edge="1" source="internet" target="firewall" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- UFW Firewall (large orange rectangle) -->
+        <mxCell id="firewall" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;strokeWidth=2;verticalAlign=top;align=center;spacingTop=5;" vertex="1" parent="1">
+          <mxGeometry x="100" y="120" width="600" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="fw_title" value="&lt;b&gt;UFW Firewall&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=top;resizable=0;points=[];autosize=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="330" y="125" width="140" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="fw_policy" value="Default: DENY incoming, ALLOW outgoing" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;fontSize=11;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="260" y="155" width="280" height="25" as="geometry" />
+        </mxCell>
+
+        <!-- ===== ALLOWED PORTS (green boxes) ===== -->
+
+        <!-- :22/tcp SSH -->
+        <mxCell id="port_ssh" value="&lt;b&gt;:22/tcp SSH&lt;/b&gt;&lt;br&gt;ALLOW from&lt;br&gt;192.168.1.0/24" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;fontSize=10;verticalAlign=middle;align=center;" vertex="1" parent="1">
+          <mxGeometry x="20" y="240" width="130" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- :80/tcp HTTP -->
+        <mxCell id="port_http" value="&lt;b&gt;:80/tcp HTTP&lt;/b&gt;&lt;br&gt;ALLOW Anywhere" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;fontSize=10;verticalAlign=middle;align=center;" vertex="1" parent="1">
+          <mxGeometry x="165" y="240" width="130" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- :443/tcp HTTPS -->
+        <mxCell id="port_https" value="&lt;b&gt;:443/tcp HTTPS&lt;/b&gt;&lt;br&gt;ALLOW Anywhere" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;fontSize=10;verticalAlign=middle;align=center;" vertex="1" parent="1">
+          <mxGeometry x="310" y="240" width="130" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- :3306 MySQL -->
+        <mxCell id="port_mysql" value="&lt;b&gt;:3306 MySQL&lt;/b&gt;&lt;br&gt;ALLOW from&lt;br&gt;192.168.1.10 only" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;fontSize=10;verticalAlign=middle;align=center;" vertex="1" parent="1">
+          <mxGeometry x="455" y="240" width="130" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Green arrows: Firewall -> Allowed ports -->
+        <mxCell id="arrow_fw_ssh" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#82b366;strokeWidth=2;endArrow=classic;" edge="1" source="firewall" target="port_ssh" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow_fw_http" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#82b366;strokeWidth=2;endArrow=classic;" edge="1" source="firewall" target="port_http" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow_fw_https" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#82b366;strokeWidth=2;endArrow=classic;" edge="1" source="firewall" target="port_https" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow_fw_mysql" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#82b366;strokeWidth=2;endArrow=classic;" edge="1" source="firewall" target="port_mysql" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ===== BLOCKED TRAFFIC (red boxes) ===== -->
+
+        <!-- :8888/tcp REJECT -->
+        <mxCell id="block_8888" value="&lt;b&gt;:8888/tcp&lt;/b&gt;&lt;br&gt;REJECT" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=2;fontSize=10;verticalAlign=middle;align=center;" vertex="1" parent="1">
+          <mxGeometry x="600" y="240" width="110" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- :445, :135 DROP -->
+        <mxCell id="block_smb" value="&lt;b&gt;:445, :135&lt;/b&gt;&lt;br&gt;DROP&lt;br&gt;(default deny)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=2;fontSize=10;verticalAlign=middle;align=center;" vertex="1" parent="1">
+          <mxGeometry x="600" y="310" width="110" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- 10.0.0.100 full block -->
+        <mxCell id="block_ip" value="&lt;b&gt;10.0.0.100&lt;/b&gt;&lt;br&gt;Повна заборона" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=2;fontSize=10;verticalAlign=middle;align=center;" vertex="1" parent="1">
+          <mxGeometry x="600" y="380" width="110" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Red arrows with X: Firewall -> Blocked -->
+        <mxCell id="arrow_fw_8888" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#b85450;strokeWidth=2;endArrow=classic;dashed=1;" edge="1" source="firewall" target="block_8888" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Red X labels on blocked arrows -->
+        <mxCell id="x_label_1" value="&lt;font color=&quot;#b85450&quot; style=&quot;font-size:16px;&quot;&gt;&lt;b&gt;X&lt;/b&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" parent="1">
+          <mxGeometry x="720" y="245" width="25" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="x_label_2" value="&lt;font color=&quot;#b85450&quot; style=&quot;font-size:16px;&quot;&gt;&lt;b&gt;X&lt;/b&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" parent="1">
+          <mxGeometry x="720" y="315" width="25" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="x_label_3" value="&lt;font color=&quot;#b85450&quot; style=&quot;font-size:16px;&quot;&gt;&lt;b&gt;X&lt;/b&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" parent="1">
+          <mxGeometry x="720" y="385" width="25" height="25" as="geometry" />
+        </mxCell>
+
+        <!-- Blocked label -->
+        <mxCell id="blocked_label" value="&lt;font color=&quot;#b85450&quot;&gt;&lt;b&gt;Заблокований трафік&lt;/b&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="590" y="218" width="140" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- Allowed label -->
+        <mxCell id="allowed_label" value="&lt;font color=&quot;#82b366&quot;&gt;&lt;b&gt;Дозволений трафік&lt;/b&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="225" y="218" width="140" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- Green arrows: Allowed ports -> Server -->
+        <mxCell id="arrow_ssh_srv" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#82b366;strokeWidth=2;endArrow=classic;" edge="1" source="port_ssh" target="server" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow_http_srv" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#82b366;strokeWidth=2;endArrow=classic;" edge="1" source="port_http" target="server" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow_https_srv" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#82b366;strokeWidth=2;endArrow=classic;" edge="1" source="port_https" target="server" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="arrow_mysql_srv" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#82b366;strokeWidth=2;endArrow=classic;" edge="1" source="port_mysql" target="server" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ===== UBUNTU SERVER (bottom) ===== -->
+        <mxCell id="server" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="140" y="460" width="420" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="srv_title" value="&lt;b&gt;Ubuntu Server&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=top;resizable=0;points=[];fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="290" y="465" width="120" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- Services inside server -->
+        <mxCell id="svc_sshd" value="&lt;b&gt;sshd&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;verticalAlign=middle;align=center;" vertex="1" parent="1">
+          <mxGeometry x="160" y="500" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="svc_apache" value="&lt;b&gt;Apache2&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;verticalAlign=middle;align=center;" vertex="1" parent="1">
+          <mxGeometry x="280" y="500" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="svc_mysql" value="&lt;b&gt;MySQL&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;verticalAlign=middle;align=center;" vertex="1" parent="1">
+          <mxGeometry x="400" y="500" width="100" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Diagram title -->
+        <mxCell id="title" value="&lt;b&gt;Схема конфігурації UFW Firewall&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="275" y="575" width="250" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- Red dashed arrows from blocked to nothing (showing rejection) -->
+        <mxCell id="arrow_block_smb" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#b85450;strokeWidth=2;dashed=1;endArrow=cross;endSize=8;" edge="1" source="block_smb" target="server" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="570" y="340" />
+              <mxPoint x="570" y="440" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arrow_block_ip" style="edgeStyle=orthogonalEdgeStyle;strokeColor=#b85450;strokeWidth=2;dashed=1;endArrow=cross;endSize=8;" edge="1" source="block_ip" target="server" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="580" y="410" />
+              <mxPoint x="580" y="450" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

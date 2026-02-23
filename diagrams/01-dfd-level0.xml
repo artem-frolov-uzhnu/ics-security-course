@@ -1,0 +1,148 @@
+<mxfile host="app.diagrams.net" modified="2026-02-19T12:00:00.000Z" agent="Claude Code" version="21.0.0" type="device">
+  <diagram id="dfd-level0" name="DFD Level 0 - TechSoft">
+    <mxGraphModel dx="1200" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1000" pageHeight="750" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ============ ЗОНА: ІНТЕРНЕТ (зверху) ============ -->
+        <mxCell id="zone_inet" value="ЗОНА: ІНТЕРНЕТ (недовірена)" style="text;html=1;fontSize=11;fontStyle=3;fontColor=#b85450;align=center;" vertex="1" parent="1">
+          <mxGeometry x="20" y="10" width="300" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- External Entity E2: Працівник (віддалений) — Internet zone -->
+        <mxCell id="e2" value="[E2] Працівник&#xa;(віддалений)" style="shape=doubleRectangle;rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1;arcSize=10;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="170" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- External Entity E3: Клієнт — Internet zone -->
+        <mxCell id="e3" value="[E3] Клієнт&#xa;(HTTP/HTTPS)" style="shape=doubleRectangle;rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1;arcSize=10;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="260" y="40" width="170" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- ============ МЕЖА 1: Інтернет | Периметр ============ -->
+        <mxCell id="tb1" value="МЕЖА 1: Інтернет | Периметр мережі (Mikrotik)" style="text;html=1;fontSize=11;fontStyle=1;fontColor=#b85450;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="120" y="115" width="380" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="tb1_line" value="" style="endArrow=none;html=1;strokeColor=#b85450;strokeWidth=2;dashed=1;dashPattern=8 4;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="20" y="115" as="sourcePoint" />
+            <mxPoint x="980" y="115" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ============ ЗОНА: КОРПОРАТИВНА МЕРЕЖА (середина) ============ -->
+        <mxCell id="zone_corp" value="ЗОНА: КОРПОРАТИВНА МЕРЕЖА (довірена)" style="text;html=1;fontSize=11;fontStyle=3;fontColor=#82b366;align=center;" vertex="1" parent="1">
+          <mxGeometry x="20" y="140" width="350" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- External Entity E1: Працівник (офіс) — Corporate zone -->
+        <mxCell id="e1" value="[E1] Працівник&#xa;(офіс)" style="shape=doubleRectangle;rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;fontStyle=1;arcSize=10;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="40" y="180" width="170" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- Central Process P0: ІКС «TechSoft» — Corporate zone center -->
+        <mxCell id="p0" value="[P0]&#xa;ІКС «TechSoft»" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=14;fontStyle=1;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="340" y="200" width="200" height="120" as="geometry" />
+        </mxCell>
+
+        <!-- Data Store D1: Файловий сервер — Corporate zone -->
+        <mxCell id="d1" value="[D1] Файловий сервер&#xa;(документи, договори)" style="shape=partialRectangle;top=0;left=0;right=0;bottom=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;strokeWidth=2;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="320" width="220" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- ============ МЕЖА 2: Корпоративна мережа | Хмарні сервіси ============ -->
+        <mxCell id="tb2" value="МЕЖА 2: Корпоративна мережа | Хмарні сервіси" style="text;html=1;fontSize=11;fontStyle=1;fontColor=#b85450;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="200" y="410" width="380" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="tb2_line" value="" style="endArrow=none;html=1;strokeColor=#b85450;strokeWidth=2;dashed=1;dashPattern=8 4;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="20" y="410" as="sourcePoint" />
+            <mxPoint x="980" y="410" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ============ ЗОНА: ХМАРНІ СЕРВІСИ (знизу) ============ -->
+        <mxCell id="zone_cloud" value="ЗОНА: ХМАРНІ СЕРВІСИ (напівдовірена)" style="text;html=1;fontSize=11;fontStyle=3;fontColor=#9673a6;align=center;" vertex="1" parent="1">
+          <mxGeometry x="20" y="435" width="350" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- External Entity E4: GitHub — Cloud zone -->
+        <mxCell id="e4" value="[E4] GitHub&#xa;(хмарний сервіс)" style="shape=doubleRectangle;rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;fontStyle=1;arcSize=10;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="240" y="470" width="180" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- External Entity E5: AWS — Cloud zone -->
+        <mxCell id="e5" value="[E5] AWS&#xa;(хмарна платформа)" style="shape=doubleRectangle;rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;fontStyle=1;arcSize=10;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="560" y="470" width="180" height="55" as="geometry" />
+        </mxCell>
+
+        <!-- Data Store D2: БД PostgreSQL (AWS RDS) — Cloud zone -->
+        <mxCell id="d2" value="[D2] БД PostgreSQL&#xa;(AWS RDS)" style="shape=partialRectangle;top=0;left=0;right=0;bottom=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;strokeWidth=2;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="580" y="560" width="200" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- ============ ПОТОКИ ДАНИХ ============ -->
+
+        <!-- E2 -> P0: Облікові дані + VPN, код (crosses Trust Boundary 1) -->
+        <mxCell id="f_e2_p0" value="Облікові дані&#xa;+ VPN, код" style="endArrow=block;html=1;strokeColor=#4D4D4D;strokeWidth=1.5;fontSize=10;fontColor=#333;endFill=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;labelBackgroundColor=#FFFFFF;curved=1;" edge="1" source="e2" target="p0" parent="1">
+          <mxGeometry x="-0.2" y="10" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- E3 -> P0: HTTP/HTTPS-запити (crosses Trust Boundary 1) -->
+        <mxCell id="f_e3_p0" value="HTTP/HTTPS-&#xa;запити" style="endArrow=block;html=1;strokeColor=#4D4D4D;strokeWidth=1.5;fontSize=10;fontColor=#333;endFill=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;labelBackgroundColor=#FFFFFF;curved=1;" edge="1" source="e3" target="p0" parent="1">
+          <mxGeometry x="-0.2" y="-10" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- E1 -> P0: Облікові дані, код, документи (internal, no boundary crossing) -->
+        <mxCell id="f_e1_p0" value="Облікові дані,&#xa;код, документи" style="endArrow=block;html=1;strokeColor=#4D4D4D;strokeWidth=1.5;fontSize=10;fontColor=#333;endFill=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;labelBackgroundColor=#FFFFFF;" edge="1" source="e1" target="p0" parent="1">
+          <mxGeometry x="-0.1" y="-15" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- P0 -> D1: Документи (SMB) (internal, no boundary crossing) -->
+        <mxCell id="f_p0_d1" value="Документи&#xa;(SMB)" style="endArrow=block;html=1;strokeColor=#4D4D4D;strokeWidth=1.5;fontSize=10;fontColor=#333;endFill=1;exitX=0;exitY=0.75;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;labelBackgroundColor=#FFFFFF;curved=1;" edge="1" source="p0" target="d1" parent="1">
+          <mxGeometry x="0.1" y="10" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- P0 -> E4: Git push/pull, CI/CD (crosses Trust Boundary 2) -->
+        <mxCell id="f_p0_e4" value="Git push/pull,&#xa;CI/CD" style="endArrow=block;html=1;strokeColor=#4D4D4D;strokeWidth=1.5;fontSize=10;fontColor=#333;endFill=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;labelBackgroundColor=#FFFFFF;curved=1;" edge="1" source="p0" target="e4" parent="1">
+          <mxGeometry x="0.1" y="-10" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- P0 -> E5: Запити до БД, deploy (crosses Trust Boundary 2) -->
+        <mxCell id="f_p0_e5" value="Запити до БД,&#xa;deploy" style="endArrow=block;html=1;strokeColor=#4D4D4D;strokeWidth=1.5;fontSize=10;fontColor=#333;endFill=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;labelBackgroundColor=#FFFFFF;curved=1;" edge="1" source="p0" target="e5" parent="1">
+          <mxGeometry x="0.1" y="10" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- P0 -> D2: SQL-запити (crosses Trust Boundary 2, via E5/AWS) -->
+        <mxCell id="f_p0_d2" value="SQL-запити" style="endArrow=block;html=1;strokeColor=#4D4D4D;strokeWidth=1.5;fontSize=10;fontColor=#333;endFill=1;exitX=1;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;labelBackgroundColor=#FFFFFF;" edge="1" source="e5" target="d2" parent="1">
+          <mxGeometry x="0.1" y="10" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ============ ПОЗНАЧКИ ПЕРЕТИНУ МЕЖ ============ -->
+        <mxCell id="cross1_note" value="⚠ Потоки E2→P0 та E3→P0&#xa;перетинають Межу 1" style="text;html=1;fontSize=9;fontColor=#b85450;align=left;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="700" y="120" width="200" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="cross2_note" value="⚠ Потоки P0→E4 та P0→E5&#xa;перетинають Межу 2" style="text;html=1;fontSize=9;fontColor=#b85450;align=left;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="700" y="395" width="200" height="30" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

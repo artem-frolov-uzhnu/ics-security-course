@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лекція 6. Захист кінцевих точок та контроль даних — Захист ІКС</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="overlay" id="overlay"></div>
+    <button class="menu-toggle" id="menuToggle">☰</button>
+
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="../index.html">Технології захисту ІКС</a>
+        </div>
+        <div class="nav-section">
+            <h3>Лекції</h3>
+            <ul>
+                <li><a href="../lectures/01.html">1. Вступ. ІКС як об'єкт захисту</a></li>
+                <li><a href="../lectures/02.html">2. Моделювання загроз</a></li>
+                <li><a href="../lectures/03.html">3. Політика безпеки та доступ</a></li>
+                <li><a href="../lectures/04.html">4. Криптографічний захист</a></li>
+                <li><a href="../lectures/05.html">5. Захист мережевої інфраструктури</a></li>
+                <li><a href="../lectures/06.html" class="active">6. Захист кінцевих точок</a></li>
+                <li><a href="../lectures/07.html">7. Zero Trust та SIEM</a></li>
+                <li><a href="../lectures/08.html">8. Проєктування КСЗІ</a></li>
+                <li><a href="../lectures/09.html">9. Впровадження та тестування</a></li>
+                <li><a href="../lectures/10.html">10. Експлуатація та інциденти</a></li>
+            </ul>
+        </div>
+        <div class="nav-section">
+            <h3>Практичні</h3>
+            <ul>
+                <li><a href="../practicals/01.html">1. Моделювання загроз</a></li>
+                <li><a href="../practicals/02.html">2. Політика безпеки</a></li>
+                <li><a href="../practicals/03.html">3. Криптографічні засоби</a></li>
+                <li><a href="../practicals/04.html">4. Міжмережевий екран</a></li>
+                <li><a href="../practicals/05.html">5. VPN та захист каналів</a></li>
+                <li><a href="../practicals/06.html">6. IDS/IPS</a></li>
+                <li><a href="../practicals/07.html">7. SIEM-системи</a></li>
+                <li><a href="../practicals/08.html">8. Проєктування КСЗІ</a></li>
+                <li><a href="../practicals/09.html">9. Тестування захищеності</a></li>
+                <li><a href="../practicals/10.html">10. Захист проєктів</a></li>
+            </ul>
+        </div>
+        <div class="nav-section">
+            <h3>Звіти</h3>
+            <ul>
+                <li><a href="../report-viewer.html">Приклади звітів</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="content">
+        <article>
+            <h1>Лекція 6. Захист кінцевих точок та контроль даних</h1>
+            <p class="subtitle">EDR, харденінг ОС, DLP-системи та захист електронної пошти</p>
+
+            <!-- ================= SECTION 1 ================= -->
+            <h2>1. Захист робочих станцій та серверів</h2>
+
+            <h3>1.1. Еволюція захисту кінцевих точок</h3>
+            <p>Захист кінцевих точок (endpoint security) пройшов значний шлях еволюції, від простих антивірусних програм до комплексних платформ, що використовують машинне навчання, поведінковий аналіз та автоматичне реагування. Розглянемо основні етапи цієї еволюції:</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Покоління</th>
+                        <th>Технологія</th>
+                        <th>Принцип роботи</th>
+                        <th>Обмеження</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Антивірус (AV)</strong></td>
+                        <td>Сигнатурний аналіз</td>
+                        <td>Порівняння файлів з базою відомих сигнатур шкідливого ПЗ. Сканування файлів при доступі (on-access) та за розкладом</td>
+                        <td>Не виявляє невідомі загрози. Безсилий проти безфайлових атак (fileless). Легко обходиться обфускацією</td>
+                    </tr>
+                    <tr>
+                        <td><strong>EPP (Endpoint Protection Platform)</strong></td>
+                        <td>AV + HIPS + Device Control + FW</td>
+                        <td>Поєднання антивірусу, хостової IPS, контролю пристроїв та персонального міжмережевого екрану. Додана евристика та базова поведінкова аналітика</td>
+                        <td>Орієнтація на запобігання (prevention). Обмежені можливості розслідування та реагування. Ізольовані сповіщення без кореляції</td>
+                    </tr>
+                    <tr>
+                        <td><strong>EDR (Endpoint Detection and Response)</strong></td>
+                        <td>Телеметрія + поведінковий аналіз + threat hunting</td>
+                        <td>Безперервний збір детальної телеметрії з кінцевих точок. Поведінковий аналіз, кореляція подій, виявлення ланцюжків атак. Можливість ретроспективного аналізу та проактивного полювання на загрози</td>
+                        <td>Потребує кваліфікованого персоналу для аналізу. Генерує великий обсяг даних. Зосереджений лише на кінцевих точках</td>
+                    </tr>
+                    <tr>
+                        <td><strong>XDR (Extended Detection and Response)</strong></td>
+                        <td>EDR + NDR + Cloud + Email + Identity</td>
+                        <td>Інтеграція даних з множинних джерел: кінцеві точки, мережа, хмара, email, identity. Єдина платформа для виявлення та реагування. Автоматична кореляція між різними рівнями</td>
+                        <td>Висока вартість. Залежність від єдиного вендора (vendor lock-in). Складність інтеграції</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="info-box">
+                <strong>Ключова відмінність EDR від антивірусу</strong>
+                Традиційний антивірус працює за принципом "чорного списку" — блокує те, що знає як шкідливе. EDR працює за принципом безперервного моніторингу — записує ВСЮ активність на кінцевій точці та аналізує її на предмет підозрілої поведінки. Це дозволяє виявляти раніше невідомі загрози, безфайлові атаки та складні багатоетапні атаки (APT).
+            </div>
+
+            <h3>1.2. EDR: Endpoint Detection and Response</h3>
+            <p>EDR — це клас рішень безпеки, що забезпечує безперервний моніторинг, виявлення загроз та можливості реагування на кінцевих точках (робочі станції, сервери, ноутбуки).</p>
+
+            <h4>Основні принципи роботи EDR</h4>
+            <ol>
+                <li><strong>Збір телеметрії (Telemetry Collection)</strong>
+                    <ul>
+                        <li>Процеси: створення, завершення, ієрархія батьківських/дочірніх процесів</li>
+                        <li>Файлова система: створення, модифікація, видалення файлів</li>
+                        <li>Реєстр Windows: зміни ключів реєстру (Run, Services, Scheduled Tasks)</li>
+                        <li>Мережева активність: з'єднання, DNS-запити, завантажені дані</li>
+                        <li>Автентифікація: спроби входу (успішні та невдалі), ескалація привілеїв</li>
+                        <li>Командний рядок: повний вміст виконаних команд (PowerShell, cmd, bash)</li>
+                        <li>Завантаження DLL/SO: модулі, що завантажуються процесами</li>
+                    </ul>
+                </li>
+                <li><strong>Поведінковий аналіз (Behavioral Analysis)</strong>
+                    <ul>
+                        <li>Визначення базової (нормальної) поведінки кожного хоста</li>
+                        <li>Виявлення відхилень: незвичні процеси, нетипові мережеві з'єднання</li>
+                        <li>Детектування тактик за MITRE ATT&CK: credential dumping, lateral movement, persistence</li>
+                        <li>Кореляція подій для побудови ланцюжка атаки (attack chain)</li>
+                    </ul>
+                </li>
+                <li><strong>Полювання на загрози (Threat Hunting)</strong>
+                    <ul>
+                        <li>Проактивний пошук загроз, що не були виявлені автоматичними засобами</li>
+                        <li>Ретроспективний аналіз: пошук індикаторів компрометації (IoC) у збережених даних</li>
+                        <li>Hypothesis-driven hunting: перевірка гіпотез аналітиком</li>
+                        <li>Запити до збереженої телеметрії (наприклад, "покажи всі процеси PowerShell, що виконували Base64-декодування за останній тиждень")</li>
+                    </ul>
+                </li>
+                <li><strong>Автоматичне реагування (Automated Response)</strong>
+                    <ul>
+                        <li>Ізоляція хоста від мережі (network isolation) — зберігаючи зв'язок з EDR-сервером</li>
+                        <li>Завершення шкідливих процесів (process termination)</li>
+                        <li>Карантин файлів (file quarantine)</li>
+                        <li>Блокування хешів файлів (hash blocking)</li>
+                        <li>Віддалений збір артефактів (remote forensics collection)</li>
+                    </ul>
+                </li>
+            </ol>
+
+            <h4>Провідні EDR-рішення</h4>
+
+            <p><strong>CrowdStrike Falcon</strong></p>
+            <ul>
+                <li>Хмарна архітектура (cloud-native) — єдиний легкий агент, вся аналітика у хмарі</li>
+                <li>Threat Graph — графова база даних для кореляції подій у реальному часі</li>
+                <li>Overwatch — сервіс керованого threat hunting (24/7)</li>
+                <li>Falcon X — автоматизована розвідка загроз (threat intelligence)</li>
+                <li>Лідер у квадранті Gartner для Endpoint Protection Platforms</li>
+            </ul>
+
+            <p><strong>Microsoft Defender for Endpoint</strong></p>
+            <ul>
+                <li>Глибока інтеграція з Windows та Microsoft 365 (Microsoft Defender Suite)</li>
+                <li>Attack Surface Reduction (ASR) — правила зменшення поверхні атаки</li>
+                <li>Automated Investigation and Remediation (AIR) — автоматичне розслідування</li>
+                <li>Threat & Vulnerability Management — управління вразливостями</li>
+                <li>Частина XDR-платформи Microsoft Defender XDR</li>
+            </ul>
+
+            <p><strong>Wazuh (відкрите рішення)</strong></p>
+            <ul>
+                <li>Повністю відкритий код (Open Source), безкоштовний</li>
+                <li>Поєднує функції SIEM + EDR + Compliance Monitoring</li>
+                <li>Агент для Windows, Linux, macOS, Solaris, HP-UX, AIX</li>
+                <li>Можливості: FIM (File Integrity Monitoring), rootkit detection, vulnerability detection, log analysis, SCA (Security Configuration Assessment)</li>
+                <li>Інтеграція з ELK Stack (Elasticsearch + Kibana) для візуалізації</li>
+                <li>Правила на основі MITRE ATT&CK framework</li>
+            </ul>
+
+            <div class="tip-box">
+                <strong>Wazuh для навчальних цілей</strong>
+                Wazuh є чудовим вибором для навчального середовища завдяки відкритому коду та безкоштовності. Його можна розгорнути у Docker або віртуальній машині для практичного вивчення EDR/SIEM-функціональності. Wazuh-агент збирає телеметрію (системні логи, FIM, rootcheck, SCA) і надсилає її до Wazuh Manager для аналізу та кореляції за правилами.
+            </div>
+
+            <h3>1.3. Антивірусний захист</h3>
+            <p>Незважаючи на еволюцію до EDR/XDR, антивірусні технології залишаються важливим компонентом захисту кінцевих точок. Сучасні антивірусні рішення використовують кілька методів виявлення:</p>
+
+            <h4>Сигнатурний аналіз</h4>
+            <ul>
+                <li>Порівняння хеш-сум файлів (MD5, SHA-256) або послідовностей байтів з базою відомих загроз</li>
+                <li>Бази сигнатур оновлюються кілька разів на день від виробника</li>
+                <li>YARA-правила — гнучка мова опису сигнатур шкідливого ПЗ, що дозволяє комбінувати рядки, регулярні вирази та логічні умови</li>
+                <li>Переваги: швидкість, точність для відомих загроз, мінімум false positive</li>
+            </ul>
+
+            <h4>Евристичний аналіз</h4>
+            <ul>
+                <li>Аналіз коду програми без її виконання (статичний аналіз)</li>
+                <li>Пошук підозрілих конструкцій: самомодифікація коду, обфускація, використання системних API для ін'єкцій</li>
+                <li>Емуляція виконання коду у віртуальному середовищі</li>
+                <li>Переваги: здатність виявляти варіанти відомих загроз та деякі невідомі</li>
+            </ul>
+
+            <h4>Пісочниці (Sandboxing)</h4>
+            <ul>
+                <li>Запуск підозрілого файлу в ізольованому віртуальному середовищі</li>
+                <li>Моніторинг поведінки: які файли створює, які мережеві з'єднання встановлює, які ключі реєстру змінює</li>
+                <li>Рішення на основі поведінки: якщо програма демонструє шкідливу активність — блокується</li>
+                <li>Приклади: Cuckoo Sandbox (open-source), Windows Sandbox, хмарні пісочниці вендорів (CrowdStrike Falcon Sandbox, Palo Alto WildFire)</li>
+                <li>Обмеження: деяке шкідливе ПЗ виявляє пісочницю (sandbox evasion) та змінює поведінку</li>
+            </ul>
+
+            <h4>Machine Learning Detection</h4>
+            <ul>
+                <li>Статичний ML — аналіз характеристик файлу (розмір, ентропія, імпортовані функції, структура PE/ELF) без його виконання</li>
+                <li>Динамічний ML — аналіз поведінки процесу під час виконання</li>
+                <li>Моделі навчаються на мільйонах зразків шкідливого та легітимного ПЗ</li>
+                <li>Переваги: здатність виявляти zero-day загрози; не потребує оновлення сигнатур</li>
+                <li>Обмеження: можливість false positive; adversarial ML — атаки на саму модель</li>
+            </ul>
+
+            <h3>1.4. Харденінг (Hardening) операційних систем</h3>
+            <p>Харденінг — це процес зменшення поверхні атаки операційної системи шляхом видалення непотрібних компонентів, обмеження привілеїв та налаштування безпекових параметрів. Мета — перетворити систему з конфігурації "за замовчуванням" (зазвичай оптимізованої для зручності) на захищену конфігурацію.</p>
+
+            <h4>CIS Benchmarks</h4>
+            <p>CIS (Center for Internet Security) Benchmarks — це набір рекомендацій з безпекового налаштування, розроблених міжнародною спільнотою експертів. CIS Benchmarks є де-факто стандартом для харденінгу.</p>
+
+            <p><strong>Структура CIS Benchmark:</strong></p>
+            <ul>
+                <li><strong>Profile Level 1</strong> — базові рекомендації, що не впливають суттєво на функціональність системи. Підходять для більшості організацій. Приклади: налаштування політики паролів, вимкнення непотрібних служб, обмеження прав</li>
+                <li><strong>Profile Level 2</strong> — розширені рекомендації для середовищ з підвищеними вимогами до безпеки. Можуть вплинути на продуктивність або зручність. Приклади: обов'язковий контроль доступу (MAC), розширений аудит, обмеження мережевих протоколів</li>
+            </ul>
+
+            <p><strong>Приклади рекомендацій CIS Benchmark для Ubuntu Linux:</strong></p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Категорія</th>
+                        <th>Рекомендація</th>
+                        <th>Рівень</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Файлові системи</td>
+                        <td>Вимкнути монтування USB-накопичувачів (usb-storage)</td>
+                        <td>L1</td>
+                    </tr>
+                    <tr>
+                        <td>Служби</td>
+                        <td>Вимкнути Avahi, CUPS, DHCP-сервер, SNMP, якщо не використовуються</td>
+                        <td>L1</td>
+                    </tr>
+                    <tr>
+                        <td>Мережа</td>
+                        <td>Вимкнути IP-форвардинг (якщо не маршрутизатор)</td>
+                        <td>L1</td>
+                    </tr>
+                    <tr>
+                        <td>Аудит</td>
+                        <td>Налаштувати auditd для запису змін до файлів автентифікації</td>
+                        <td>L2</td>
+                    </tr>
+                    <tr>
+                        <td>Автентифікація</td>
+                        <td>Мінімальна довжина пароля 14 символів, максимальний вік 365 днів</td>
+                        <td>L1</td>
+                    </tr>
+                    <tr>
+                        <td>SSH</td>
+                        <td>Заборонити root-логін через SSH, використовувати тільки Protocol 2</td>
+                        <td>L1</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p><strong>Приклади рекомендацій CIS Benchmark для Windows Server:</strong></p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Категорія</th>
+                        <th>Рекомендація</th>
+                        <th>Рівень</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Account Policies</td>
+                        <td>Enforce password history: 24 passwords, Maximum password age: 365 days</td>
+                        <td>L1</td>
+                    </tr>
+                    <tr>
+                        <td>Account Lockout</td>
+                        <td>Account lockout threshold: 5 invalid attempts, Duration: 15 minutes</td>
+                        <td>L1</td>
+                    </tr>
+                    <tr>
+                        <td>Audit Policy</td>
+                        <td>Audit Logon Events: Success and Failure</td>
+                        <td>L1</td>
+                    </tr>
+                    <tr>
+                        <td>User Rights</td>
+                        <td>Deny log on through Remote Desktop Services: Guests</td>
+                        <td>L1</td>
+                    </tr>
+                    <tr>
+                        <td>Security Options</td>
+                        <td>Interactive logon: Do not display last user name: Enabled</td>
+                        <td>L1</td>
+                    </tr>
+                    <tr>
+                        <td>Windows Firewall</td>
+                        <td>Windows Firewall: Domain/Private/Public Profile: State: On</td>
+                        <td>L1</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>STIG (Security Technical Implementation Guides)</h4>
+            <p>STIG — це стандарти безпекового налаштування, розроблені DISA (Defense Information Systems Agency) для Міністерства оборони США. Більш суворі за CIS Benchmarks і обов'язкові для систем DoD.</p>
+
+            <ul>
+                <li>Кожна рекомендація має рівень серйозності: <strong>CAT I</strong> (Critical), <strong>CAT II</strong> (Medium), <strong>CAT III</strong> (Low)</li>
+                <li>Доступні STIG для: Windows Server/Desktop, Red Hat Enterprise Linux, Ubuntu, Oracle, SQL Server, Cisco IOS, Apache, IIS та багатьох інших</li>
+                <li>Інструмент перевірки: <strong>STIG Viewer</strong> — для перегляду та документування відповідності</li>
+                <li>Автоматизація: OpenSCAP, Ansible STIG roles</li>
+            </ul>
+
+            <h4>Практичний харденінг Linux</h4>
+
+            <p><strong>Вимкнення непотрібних служб:</strong></p>
+<pre><code># Перегляд активних служб
+systemctl list-units --type=service --state=running
+
+# Вимкнення непотрібних служб
+sudo systemctl disable --now bluetooth.service
+sudo systemctl disable --now cups.service
+sudo systemctl disable --now avahi-daemon.service
+sudo systemctl disable --now rpcbind.service
+
+# Блокування завантаження модулів ядра для USB-накопичувачів
+echo "install usb-storage /bin/true" | sudo tee /etc/modprobe.d/disable-usb-storage.conf
+echo "blacklist usb-storage" | sudo tee -a /etc/modprobe.d/disable-usb-storage.conf</code></pre>
+
+            <p><strong>Налаштування міжмережевого екрану (UFW):</strong></p>
+<pre><code># Увімкнення UFW з політикою deny за замовчуванням
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+
+# Дозволити SSH (з обмеженням)
+sudo ufw limit ssh comment 'Rate limit SSH'
+
+# Дозволити веб-сервер
+sudo ufw allow 80/tcp comment 'HTTP'
+sudo ufw allow 443/tcp comment 'HTTPS'
+
+# Увімкнення
+sudo ufw enable
+
+# Перевірка статусу
+sudo ufw status verbose</code></pre>
+
+            <p><strong>Налаштування аудиту (auditd):</strong></p>
+<pre><code># Встановлення auditd
+sudo apt install auditd audispd-plugins
+
+# Правила аудиту: моніторинг змін до критичних файлів
+# /etc/audit/rules.d/hardening.rules
+
+# Моніторинг файлів автентифікації
+-w /etc/passwd -p wa -k identity
+-w /etc/shadow -p wa -k identity
+-w /etc/group -p wa -k identity
+-w /etc/gshadow -p wa -k identity
+
+# Моніторинг файлів sudoers
+-w /etc/sudoers -p wa -k sudoers
+-w /etc/sudoers.d/ -p wa -k sudoers
+
+# Моніторинг SSH-конфігурації
+-w /etc/ssh/sshd_config -p wa -k sshd_config
+
+# Моніторинг cron
+-w /etc/crontab -p wa -k cron
+-w /etc/cron.d/ -p wa -k cron
+-w /var/spool/cron/ -p wa -k cron
+
+# Логування виконання команд від root
+-a always,exit -F arch=b64 -F euid=0 -S execve -k rootcmd
+
+# Перезавантаження правил
+sudo augenrules --load</code></pre>
+
+            <p><strong>Налаштування політики паролів:</strong></p>
+<pre><code># Встановлення libpam-pwquality
+sudo apt install libpam-pwquality
+
+# /etc/security/pwquality.conf
+# Мінімальна довжина пароля
+minlen = 14
+# Мінімальна кількість класів символів
+minclass = 4
+# Максимум однакових послідовних символів
+maxrepeat = 3
+# Обов'язково: великі, малі літери, цифри, спецсимволи
+ucredit = -1
+lcredit = -1
+dcredit = -1
+ocredit = -1
+
+# Обмеження віку паролів (/etc/login.defs)
+# PASS_MAX_DAYS 365
+# PASS_MIN_DAYS 1
+# PASS_WARN_AGE 14
+
+# Блокування після невдалих спроб входу
+# /etc/pam.d/common-auth — додати:
+# auth required pam_tally2.so deny=5 unlock_time=900 onerr=fail</code></pre>
+
+            <p><strong>Захист SSH:</strong></p>
+<pre><code># /etc/ssh/sshd_config — ключові параметри безпеки
+
+# Заборонити вхід root
+PermitRootLogin no
+
+# Використовувати тільки SSH Protocol 2
+Protocol 2
+
+# Автентифікація тільки за ключами (вимкнути паролі)
+PubkeyAuthentication yes
+PasswordAuthentication no
+ChallengeResponseAuthentication no
+
+# Обмеження кількості спроб та часу автентифікації
+MaxAuthTries 3
+LoginGraceTime 60
+
+# Вимкнення X11 Forwarding та AgentForwarding
+X11Forwarding no
+AllowAgentForwarding no
+
+# Дозволити SSH лише для певних груп
+AllowGroups ssh-users admins
+
+# Сильні алгоритми шифрування
+Ciphers aes256-gcm@openssh.com,chacha20-poly1305@openssh.com
+MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com
+KexAlgorithms curve25519-sha256,diffie-hellman-group16-sha512
+
+# Перезапуск SSH
+sudo systemctl restart sshd</code></pre>
+
+            <div class="warning-box">
+                <strong>Важливо при харденінгу SSH</strong>
+                Перед вимкненням парольної автентифікації переконайтеся, що SSH-ключі вже налаштовані та працюють. Інакше ви можете втратити доступ до сервера. Рекомендується завжди тримати активну резервну сесію під час змін конфігурації SSH.
+            </div>
+
+            <h3>1.5. osquery: моніторинг стану ОС через SQL-запити</h3>
+            <p><code>osquery</code> — це інструмент від Facebook (Meta), що дозволяє досліджувати стан операційної системи за допомогою SQL-подібних запитів. Операційна система представляється як реляційна база даних, де системні об'єкти (процеси, файли, користувачі, мережеві з'єднання) є таблицями.</p>
+
+            <h4>Основні можливості</h4>
+            <ul>
+                <li>Підтримка Windows, macOS, Linux, FreeBSD</li>
+                <li>Більше 200 вбудованих таблиць для різних аспектів системи</li>
+                <li>Інтерактивний режим (<code>osqueryi</code>) та daemon-режим (<code>osqueryd</code>) для безперервного моніторингу</li>
+                <li>Інтеграція з EDR/SIEM (Wazuh, Fleet, Kolide, ELK)</li>
+            </ul>
+
+            <h4>Приклади SQL-запитів osquery</h4>
+<pre><code>-- Перегляд активних мережевих з'єднань з іменами процесів
+SELECT p.name, p.pid, l.address, l.port, l.protocol
+FROM listening_ports l
+JOIN processes p ON l.pid = p.pid
+WHERE l.port != 0
+ORDER BY l.port;
+
+-- Знайти процеси з мережевими з'єднаннями до зовнішніх IP
+SELECT DISTINCT p.name, p.pid, p.path, p.cmdline,
+       pn.remote_address, pn.remote_port
+FROM process_open_sockets pn
+JOIN processes p ON pn.pid = p.pid
+WHERE pn.remote_address NOT IN ('127.0.0.1', '::1', '0.0.0.0', '::')
+  AND pn.remote_address NOT LIKE '192.168.%'
+  AND pn.remote_address NOT LIKE '10.%';
+
+-- Перевірити користувачів з UID 0 (root-привілеї)
+SELECT username, uid, gid, shell, directory
+FROM users
+WHERE uid = 0;
+
+-- Знайти SUID-файли (потенційна вразливість для ескалації привілеїв)
+SELECT path, username, permissions
+FROM suid_bin;
+
+-- Перевірити автозавантаження (persistence mechanisms)
+SELECT name, path, status
+FROM startup_items;
+
+-- Моніторинг змін критичних файлів (FIM)
+SELECT target_path, action, md5, sha256, time
+FROM file_events
+WHERE target_path LIKE '/etc/%'
+ORDER BY time DESC
+LIMIT 20;
+
+-- Виявлення підозрілих процесів (без батьківського процесу або з незвичним батьком)
+SELECT p.name, p.pid, p.path, p.cmdline,
+       pp.name AS parent_name, pp.pid AS parent_pid
+FROM processes p
+LEFT JOIN processes pp ON p.parent = pp.pid
+WHERE p.name IN ('bash', 'sh', 'python', 'python3', 'perl', 'ruby')
+  AND pp.name NOT IN ('sshd', 'bash', 'login', 'systemd', 'cron');
+
+-- Перевірка встановлених пакетів на наявність відомих вразливостей
+SELECT name, version, source
+FROM deb_packages
+WHERE name LIKE '%openssl%' OR name LIKE '%apache%' OR name LIKE '%nginx%';</code></pre>
+
+            <div class="example-box">
+                <strong>Використання osquery для Threat Hunting</strong>
+                osquery дозволяє виконувати проактивний пошук загроз. Наприклад, для виявлення потенційного криптомайнера можна виконати запит:
+<pre><code>SELECT p.name, p.pid, p.path, p.cmdline, p.cpu_time, p.resident_size
+FROM processes p
+WHERE p.cpu_time > 600000      -- більше 10 хвилин CPU
+  AND p.resident_size > 100000000  -- більше 100 MB RAM
+  AND p.name NOT IN ('Xorg', 'firefox', 'chrome', 'java', 'mysqld')
+ORDER BY p.cpu_time DESC;</code></pre>
+                Результати можна інтегрувати з Wazuh або Fleet для автоматичного оповіщення.
+            </div>
+
+            <!-- ================= SECTION 2 ================= -->
+            <h2>2. DLP-системи (Data Loss Prevention)</h2>
+
+            <p>DLP (Data Loss Prevention / Data Leak Prevention) — це клас рішень, що запобігають несанкціонованому витоку конфіденційних даних за межі організації. DLP-системи контролюють канали передачі інформації та застосовують політики безпеки для захисту критичних даних.</p>
+
+            <h3>2.1. Канали витоку даних</h3>
+            <p>DLP-система повинна контролювати множину каналів, через які можливий витік інформації:</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Канал</th>
+                        <th>Приклади</th>
+                        <th>Ризик</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Електронна пошта</strong></td>
+                        <td>Вкладення, тіло листа, пересилання на особисту пошту</td>
+                        <td>Високий — найпоширеніший канал витоку</td>
+                    </tr>
+                    <tr>
+                        <td><strong>USB-носії</strong></td>
+                        <td>Флешки, зовнішні диски, смартфони (як масові накопичувачі)</td>
+                        <td>Високий — фізичне копіювання великих обсягів</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Хмарні сховища</strong></td>
+                        <td>Google Drive, Dropbox, OneDrive, iCloud</td>
+                        <td>Високий — зручність та доступність ззовні</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Месенджери</strong></td>
+                        <td>Telegram, Slack, Teams (особисті акаунти), Viber</td>
+                        <td>Середній — передача тексту, файлів, скріншотів</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Друк</strong></td>
+                        <td>Фізичний друк конфіденційних документів</td>
+                        <td>Середній — складно відстежити після друку</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Буфер обміну</strong></td>
+                        <td>Copy-paste між додатками (з корпоративного у персональний)</td>
+                        <td>Середній — складно контролювати</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Веб-завантаження</strong></td>
+                        <td>Upload на файлообмінники, веб-форми, вебмейл</td>
+                        <td>Високий — анонімність</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Скріншоти/фото екрану</strong></td>
+                        <td>PrintScreen, зовнішня камера телефону</td>
+                        <td>Низький-Середній — обмежений обсяг</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>2.2. Методи виявлення конфіденційних даних</h3>
+
+            <h4>Regex-паттерни (регулярні вирази)</h4>
+            <ul>
+                <li>Пошук структурованих даних за їх форматом</li>
+                <li>Приклади: номери кредитних карток (<code>\b[0-9]{4}[\s-]?[0-9]{4}[\s-]?[0-9]{4}[\s-]?[0-9]{4}\b</code>), ІПН (<code>\b[0-9]{10}\b</code>), номери паспортів, IBAN, email-адреси</li>
+                <li>Переваги: висока точність для структурованих даних</li>
+                <li>Обмеження: не працює для неструктурованих даних (тексти, зображення)</li>
+            </ul>
+
+            <h4>Ключові слова та словники</h4>
+            <ul>
+                <li>Пошук за визначеними ключовими словами: "конфіденційно", "для службового користування", "комерційна таємниця", "не підлягає розголошенню"</li>
+                <li>Словники термінів для конкретної галузі (медична, фінансова, юридична)</li>
+                <li>Контекстний аналіз: комбінація ключових слів підвищує точність</li>
+            </ul>
+
+            <h4>Document Fingerprinting (відбитки документів)</h4>
+            <ul>
+                <li>Створення "цифрового відбитку" конфіденційного документа</li>
+                <li>Виявлення навіть часткових копій або перефразованих фрагментів</li>
+                <li>Технологія: поділ документа на перекриваючі фрагменти (shingles), хешування кожного фрагменту, зіставлення з базою відбитків</li>
+                <li>Ефективно для: шаблонів договорів, технічної документації, фінансових звітів</li>
+            </ul>
+
+            <h4>ML-класифікація (Machine Learning)</h4>
+            <ul>
+                <li>Навчання моделі на прикладах конфіденційних та неконфіденційних документів</li>
+                <li>Natural Language Processing (NLP) для розуміння контексту</li>
+                <li>Класифікація зображень (OCR + ML) для виявлення конфіденційних даних у сканах та фотографіях</li>
+                <li>Переваги: адаптивність, здатність працювати з неструктурованими даними</li>
+            </ul>
+
+            <h3>2.3. Типи DLP-систем</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Тип</th>
+                        <th>Точка контролю</th>
+                        <th>Можливості</th>
+                        <th>Приклади</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Network DLP</strong></td>
+                        <td>Мережевий трафік (SMTP, HTTP/S, FTP)</td>
+                        <td>Моніторинг та блокування передачі конфіденційних даних через мережу. Розшифрування SSL/TLS для інспекції. Аналіз email-вкладень</td>
+                        <td>Symantec DLP Network Prevent, Forcepoint DLP</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Endpoint DLP</strong></td>
+                        <td>Кінцева точка (робоча станція)</td>
+                        <td>Контроль буферу обміну, друку, USB, хмарних сховищ. Моніторинг активності додатків. Контроль скріншотів</td>
+                        <td>Digital Guardian, CoSoSys Endpoint Protector</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Cloud DLP</strong></td>
+                        <td>Хмарні сервіси (SaaS, IaaS)</td>
+                        <td>Сканування хмарних сховищ (SharePoint, Google Drive). Контроль SaaS-додатків через CASB. API-інтеграція</td>
+                        <td>Microsoft Purview DLP, Google Cloud DLP, Netskope</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Discovery DLP</strong></td>
+                        <td>Сховища даних (файлові сервери, БД)</td>
+                        <td>Сканування та класифікація даних at rest. Виявлення конфіденційних даних у несанкціонованих місцях</td>
+                        <td>Varonis, Spirion</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>2.4. Провідні DLP-рішення</h3>
+
+            <p><strong>Broadcom Symantec DLP</strong></p>
+            <ul>
+                <li>Одне з найзріліших рішень на ринку</li>
+                <li>Компоненти: Network Prevent (email, web), Network Monitor, Endpoint Prevent, Cloud Prevent</li>
+                <li>Потужна система політик з підтримкою regex, fingerprinting, ML</li>
+                <li>Integrate з CASB для контролю хмарних додатків</li>
+            </ul>
+
+            <p><strong>Digital Guardian</strong></p>
+            <ul>
+                <li>Фокус на Endpoint DLP з глибоким агентом</li>
+                <li>Data-centric підхід: класифікація та захист даних у будь-якому стані (at rest, in motion, in use)</li>
+                <li>Managed DLP as a Service — повністю керований сервіс</li>
+            </ul>
+
+            <p><strong>Microsoft Purview DLP</strong></p>
+            <ul>
+                <li>Інтегроване рішення в екосистему Microsoft 365</li>
+                <li>Захист у: Exchange Online, SharePoint, OneDrive, Teams, Endpoint (Windows/macOS)</li>
+                <li>Sensitive Information Types — вбудовані та кастомні типи конфіденційної інформації</li>
+                <li>Sensitivity Labels — мітки конфіденційності для автоматичної класифікації</li>
+                <li>Unified DLP Policy — єдина політика для всіх каналів</li>
+                <li>Переваги для організацій з інфраструктурою Microsoft 365: нативна інтеграція, відсутність додаткових агентів</li>
+            </ul>
+
+            <div class="warning-box">
+                <strong>DLP — це не лише технологія</strong>
+                Ефективне впровадження DLP потребує попередньої роботи: інвентаризація та класифікація даних (що є конфіденційним?), визначення власників даних (хто відповідає?), побудова матриці доступу (хто має доступ?), навчання персоналу. Без цих кроків DLP-система генеруватиме велику кількість хибних спрацьовувань або пропускатиме реальні витоки.
+            </div>
+
+            <!-- ================= SECTION 3 ================= -->
+            <h2>3. Контроль знімних носіїв та периферійних пристроїв</h2>
+
+            <p>Контроль периферійних пристроїв — це критичний аспект захисту кінцевих точок, оскільки USB-пристрої є одним із основних векторів як для витоку даних, так і для впровадження шкідливого ПЗ.</p>
+
+            <h3>3.1. Загрози від USB-пристроїв</h3>
+            <ul>
+                <li><strong>Витік даних</strong> — копіювання конфіденційних файлів на знімний носій</li>
+                <li><strong>USB Rubber Ducky / BadUSB</strong> — пристрої, що імітують клавіатуру та автоматично вводять шкідливі команди</li>
+                <li><strong>USB-drop attack</strong> — підкидання заражених флешок на території організації</li>
+                <li><strong>Data exfiltration через приховані канали</strong> — використання USB-пристроїв для обходу мережевих DLP</li>
+            </ul>
+
+            <h3>3.2. USB Whitelisting</h3>
+            <p>Метод контролю, при якому дозволяється використання лише попередньо затверджених USB-пристроїв. Кожен USB-пристрій ідентифікується за допомогою: VID (Vendor ID), PID (Product ID), серійного номера.</p>
+
+            <p><strong>Реалізація USB-контролю в Linux (udev):</strong></p>
+<pre><code># /etc/udev/rules.d/99-usb-whitelist.rules
+
+# Заборонити всі USB mass storage за замовчуванням
+ACTION=="add", SUBSYSTEMS=="usb", ATTR{bInterfaceClass}=="08", \
+    RUN+="/bin/sh -c 'echo 0 > /sys$DEVPATH/../authorized'"
+
+# Дозволити конкретну флешку (за VID:PID та серійним номером)
+ACTION=="add", SUBSYSTEMS=="usb", ATTR{idVendor}=="0781", \
+    ATTR{idProduct}=="5583", ATTR{serial}=="ABC123456789", \
+    RUN+="/bin/sh -c 'echo 1 > /sys$DEVPATH/../authorized'"
+
+# Перезавантаження правил udev
+sudo udevadm control --reload-rules</code></pre>
+
+            <h3>3.3. Корпоративні рішення Device Control</h3>
+            <p>Корпоративні EPP/EDR-рішення зазвичай включають модуль Device Control:</p>
+            <ul>
+                <li><strong>Політики за типом пристрою</strong> — дозволити/заблокувати: масові накопичувачі, принтери, Bluetooth, Wi-Fi адаптери, веб-камери, модеми</li>
+                <li><strong>Гранулярний контроль</strong> — read-only для USB-накопичувачів (можна читати, але не записувати)</li>
+                <li><strong>Шифрування</strong> — обов'язкове шифрування даних, що записуються на знімні носії (BitLocker To Go, Endpoint Encryption)</li>
+                <li><strong>Аудит</strong> — логування всіх операцій з периферійними пристроями (підключення, копіювання файлів)</li>
+                <li><strong>Централізоване управління</strong> — політики застосовуються через GPO (Windows) або MDM для мобільних</li>
+            </ul>
+
+            <div class="example-box">
+                <strong>Приклад політики контролю пристроїв</strong>
+                Типова корпоративна політика може виглядати так:
+                <ul>
+                    <li>USB Mass Storage: <strong>заборонено</strong> за замовчуванням. Дозволено лише для відділу IT за запитом</li>
+                    <li>USB Keyboard/Mouse: <strong>дозволено</strong></li>
+                    <li>USB Printer: <strong>дозволено</strong> (лише корпоративні принтери)</li>
+                    <li>Bluetooth: <strong>заборонено</strong> (крім дозволених гарнітур)</li>
+                    <li>CD/DVD: <strong>read-only</strong></li>
+                    <li>Мобільний телефон (MTP/PTP): <strong>заборонено</strong></li>
+                    <li>Виключення: затверджені корпоративні шифровані USB-накопичувачі (за серійним номером)</li>
+                </ul>
+            </div>
+
+            <!-- ================= SECTION 4 ================= -->
+            <h2>4. Захист електронної пошти</h2>
+
+            <p>Електронна пошта залишається основним вектором атак: за різними оцінками, понад 90% кібератак починаються з фішингового листа. Захист електронної пошти включає як технічні заходи автентифікації відправника, так і спеціалізовані шлюзи безпеки.</p>
+
+            <h3>4.1. SPF (Sender Policy Framework)</h3>
+            <p>SPF — це механізм автентифікації електронної пошти, який дозволяє власнику домену вказати, які поштові сервери мають право надсилати листи від імені цього домену.</p>
+
+            <h4>Механізм роботи</h4>
+            <ol>
+                <li>Власник домену публікує SPF-запис у DNS (TXT-запис)</li>
+                <li>Поштовий сервер одержувача при отриманні листа перевіряє IP-адресу відправника</li>
+                <li>Якщо IP-адреса поштового сервера відправника відповідає SPF-запису — перевірка пройдена</li>
+                <li>Якщо не відповідає — лист може бути відхилений або позначений як підозрілий</li>
+            </ol>
+
+            <p><strong>Приклад SPF-запису DNS:</strong></p>
+<pre><code># DNS TXT запис для домену example.com
+example.com.  IN  TXT  "v=spf1 ip4:203.0.113.0/24 include:_spf.google.com include:spf.protection.outlook.com -all"</code></pre>
+
+            <p>Пояснення компонентів:</p>
+            <ul>
+                <li><code>v=spf1</code> — версія SPF</li>
+                <li><code>ip4:203.0.113.0/24</code> — дозволити надсилання з цього діапазону IP</li>
+                <li><code>include:_spf.google.com</code> — включити SPF-запис Google (якщо використовується Google Workspace)</li>
+                <li><code>include:spf.protection.outlook.com</code> — включити SPF-запис Microsoft 365</li>
+                <li><code>-all</code> — відхиляти всі інші джерела (hard fail). Альтернативи: <code>~all</code> (soft fail — позначити), <code>?all</code> (нейтральний)</li>
+            </ul>
+
+            <p><strong>Перевірка SPF-запису:</strong></p>
+<pre><code># Перевірка SPF-запису домену
+dig TXT example.com +short | grep spf
+
+# Або за допомогою nslookup
+nslookup -type=TXT example.com</code></pre>
+
+            <h3>4.2. DKIM (DomainKeys Identified Mail)</h3>
+            <p>DKIM — це метод автентифікації електронної пошти, який використовує цифровий підпис для підтвердження, що лист дійсно надісланий від зазначеного домену і не був модифікований під час передачі.</p>
+
+            <h4>Процес підписування та верифікації</h4>
+            <ol>
+                <li><strong>Підписування (відправник):</strong>
+                    <ul>
+                        <li>Поштовий сервер відправника обчислює хеш заголовків та тіла листа</li>
+                        <li>Хеш підписується приватним ключем домену</li>
+                        <li>Підпис додається до заголовка листа як <code>DKIM-Signature</code></li>
+                    </ul>
+                </li>
+                <li><strong>Верифікація (одержувач):</strong>
+                    <ul>
+                        <li>Поштовий сервер одержувача витягує селектор та домен із заголовка DKIM-Signature</li>
+                        <li>Отримує публічний ключ з DNS-запису (<code>selector._domainkey.example.com</code>)</li>
+                        <li>Перевіряє підпис за допомогою публічного ключа</li>
+                        <li>Якщо підпис валідний — лист автентичний та не змінений</li>
+                    </ul>
+                </li>
+            </ol>
+
+            <p><strong>Приклад DKIM DNS-запису:</strong></p>
+<pre><code># DNS TXT запис для DKIM
+selector1._domainkey.example.com.  IN  TXT  "v=DKIM1; k=rsa; p=MIIBIjANBgkqh..."</code></pre>
+
+            <p><strong>Приклад заголовка DKIM-Signature у листі:</strong></p>
+<pre><code>DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+    d=example.com; s=selector1;
+    h=from:to:subject:date:message-id;
+    bh=abcdefg1234567890=;
+    b=ABCDEF1234567890abcdef...</code></pre>
+
+            <p>Компоненти підпису:</p>
+            <ul>
+                <li><code>v=1</code> — версія DKIM</li>
+                <li><code>a=rsa-sha256</code> — алгоритм підпису</li>
+                <li><code>c=relaxed/relaxed</code> — алгоритм канонікалізації (заголовки/тіло)</li>
+                <li><code>d=example.com</code> — домен, що підписує</li>
+                <li><code>s=selector1</code> — селектор для пошуку ключа в DNS</li>
+                <li><code>h=from:to:subject:date:message-id</code> — заголовки, що підписані</li>
+                <li><code>bh=</code> — хеш тіла листа</li>
+                <li><code>b=</code> — сам підпис</li>
+            </ul>
+
+            <h3>4.3. DMARC (Domain-based Message Authentication, Reporting & Conformance)</h3>
+            <p>DMARC — це політика, яка поєднує SPF та DKIM і вказує поштовому серверу одержувача, що робити з листами, які не пройшли автентифікацію. DMARC також забезпечує зворотній зв'язок через звіти.</p>
+
+            <h4>Політики DMARC</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Політика</th>
+                        <th>Значення <code>p=</code></th>
+                        <th>Дія</th>
+                        <th>Рекомендація</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>None</strong></td>
+                        <td><code>p=none</code></td>
+                        <td>Лише моніторинг. Листи доставляються, але звіти надсилаються</td>
+                        <td>Початковий етап впровадження. Збір даних без впливу на доставку</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Quarantine</strong></td>
+                        <td><code>p=quarantine</code></td>
+                        <td>Підозрілі листи направляються до спаму</td>
+                        <td>Проміжний етап після аналізу звітів p=none</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Reject</strong></td>
+                        <td><code>p=reject</code></td>
+                        <td>Листи, що не пройшли перевірку, відхиляються повністю</td>
+                        <td>Фінальний етап — максимальний захист від спуфінгу</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>Alignment (вирівнювання)</h4>
+            <p>DMARC перевіряє, чи узгоджується домен у заголовку <code>From:</code> (видимий користувачу) з доменами, перевіреними SPF та DKIM:</p>
+            <ul>
+                <li><strong>SPF Alignment</strong> — домен у <code>Return-Path</code> (envelope sender) повинен відповідати домену у <code>From:</code></li>
+                <li><strong>DKIM Alignment</strong> — домен у DKIM-підписі (<code>d=</code>) повинен відповідати домену у <code>From:</code></li>
+                <li>Режими: <strong>strict</strong> (точне співпадіння) або <strong>relaxed</strong> (піддомени дозволені)</li>
+            </ul>
+
+            <p><strong>Приклад DMARC DNS-запису:</strong></p>
+<pre><code># DNS TXT запис для DMARC
+_dmarc.example.com.  IN  TXT  "v=DMARC1; p=reject; sp=quarantine; adkim=s; aspf=s; rua=mailto:dmarc-reports@example.com; ruf=mailto:dmarc-forensic@example.com; pct=100"</code></pre>
+
+            <p>Компоненти:</p>
+            <ul>
+                <li><code>v=DMARC1</code> — версія DMARC</li>
+                <li><code>p=reject</code> — політика для домену</li>
+                <li><code>sp=quarantine</code> — політика для піддоменів</li>
+                <li><code>adkim=s</code> — strict alignment для DKIM</li>
+                <li><code>aspf=s</code> — strict alignment для SPF</li>
+                <li><code>rua=</code> — адреса для агрегованих звітів (щоденних)</li>
+                <li><code>ruf=</code> — адреса для forensic-звітів (по кожному інциденту)</li>
+                <li><code>pct=100</code> — відсоток повідомлень, до яких застосовується політика</li>
+            </ul>
+
+            <div class="tip-box">
+                <strong>Поетапне впровадження DMARC</strong>
+                Рекомендований порядок впровадження DMARC для мінімізації ризику порушення доставки легітимної пошти:
+                <ol>
+                    <li><strong>Етап 1:</strong> Налаштуйте SPF та DKIM для домену</li>
+                    <li><strong>Етап 2:</strong> Встановіть <code>p=none</code> та збирайте звіти протягом 2-4 тижнів</li>
+                    <li><strong>Етап 3:</strong> Проаналізуйте звіти, виправте проблеми (легітимні сервіси, що не пройшли перевірку)</li>
+                    <li><strong>Етап 4:</strong> Перейдіть на <code>p=quarantine</code> з <code>pct=10</code>, поступово збільшуючи до 100%</li>
+                    <li><strong>Етап 5:</strong> Перейдіть на <code>p=reject</code> після підтвердження коректності</li>
+                </ol>
+            </div>
+
+            <h3>4.4. Поштові шлюзи безпеки (Secure Email Gateway)</h3>
+            <p>Поштовий шлюз безпеки (SEG) — це рішення, що розміщується між Інтернетом та поштовим сервером організації, аналізуючи всі вхідні та вихідні листи. Сучасні SEG забезпечують комплексний захист:</p>
+
+            <h4>Anti-Spam</h4>
+            <ul>
+                <li><strong>RBL/DNSBL</strong> — перевірка IP-адреси відправника за чорними списками (Spamhaus, Barracuda, SORBS)</li>
+                <li><strong>Байєсівський фільтр</strong> — статистичний аналіз вмісту листа на основі навченої моделі</li>
+                <li><strong>Greylisting</strong> — тимчасове відхилення листа від невідомого відправника (легітимні сервери повторюють, спам-боти — ні)</li>
+                <li><strong>Rate limiting</strong> — обмеження кількості листів від одного відправника за одиницю часу</li>
+                <li><strong>Перевірка SPF/DKIM/DMARC</strong> — відхилення листів, що не пройшли автентифікацію</li>
+            </ul>
+
+            <h4>Anti-Phishing</h4>
+            <ul>
+                <li><strong>URL Rewriting</strong> — заміна посилань у листах на захищені URL, що перевіряються при натисканні (time-of-click protection)</li>
+                <li><strong>Display Name Spoofing Detection</strong> — виявлення підміни імені відправника (наприклад, "CEO Name" з неавторизованого домену)</li>
+                <li><strong>Homoglyph Detection</strong> — виявлення схожих символів у доменах (examp1e.com замість example.com, а також Unicode-символи)</li>
+                <li><strong>Brand Impersonation Protection</strong> — виявлення спроб імітації відомих брендів (Microsoft, Google, банки)</li>
+                <li><strong>ML-Based Detection</strong> — машинне навчання для виявлення нових фішингових тактик</li>
+            </ul>
+
+            <h4>Sandboxing вкладень</h4>
+            <ul>
+                <li>Кожне вкладення (PDF, DOCX, XLSX, ZIP, EXE) перед доставкою проходить через пісочницю</li>
+                <li>Файл відкривається у ізольованому віртуальному середовищі</li>
+                <li>Аналізується поведінка: чи намагається файл завантажити додаткове ПЗ, змінити реєстр, встановити мережеві з'єднання</li>
+                <li>Рішення приймається на основі поведінки (навіть якщо файл не має відомих сигнатур)</li>
+                <li>Content Disarm and Reconstruction (CDR) — альтернативний підхід, що "перебудовує" файл, видаляючи потенційно шкідливі елементи (макроси, скрипти, вбудовані об'єкти)</li>
+            </ul>
+
+            <p><strong>Провідні рішення поштової безпеки:</strong></p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Рішення</th>
+                        <th>Тип</th>
+                        <th>Ключові функції</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Proofpoint Email Protection</strong></td>
+                        <td>Хмарний SEG</td>
+                        <td>Advanced BEC defense, URL Defense, Attachment Defense, Threat Intelligence</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Mimecast</strong></td>
+                        <td>Хмарний SEG</td>
+                        <td>Targeted Threat Protection, URL Protect, Attachment Protect, Internal Email Protect</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Microsoft Defender for Office 365</strong></td>
+                        <td>Інтегрований (M365)</td>
+                        <td>Safe Attachments, Safe Links, Anti-phishing, Automated Investigation, Attack Simulation</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Barracuda Email Security Gateway</strong></td>
+                        <td>Appliance / Хмарний</td>
+                        <td>Anti-spam, ATP, DLP, Email Encryption, Archiving</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Proxmox Mail Gateway</strong></td>
+                        <td>Open Source</td>
+                        <td>Anti-spam (SpamAssassin), Anti-virus (ClamAV), Rule-based filtering, SPF/DKIM/DMARC</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="info-box">
+                <strong>BEC (Business Email Compromise)</strong>
+                BEC — один з найбільш фінансово шкідливих типів атак. Зловмисник або компрометує реальну поштову скриньку керівника, або імітує його email. Потім надсилає фінансовому відділу запит на переказ коштів. За даними FBI, збитки від BEC перевищують мільярди доларів щорічно. Захист: навчання персоналу, верифікація фінансових запитів через альтернативний канал, DMARC з p=reject, anti-impersonation правила у SEG.
+            </div>
+
+            <!-- ================= SECTION 5: Summary ================= -->
+            <h2>5. Підсумки та контрольні питання</h2>
+
+            <h3>Ключові висновки лекції</h3>
+            <ul>
+                <li>Захист кінцевих точок еволюціонував від антивірусів до EDR/XDR з безперервним моніторингом та автоматичним реагуванням</li>
+                <li>EDR збирає телеметрію з кінцевих точок, аналізує поведінку та дозволяє проактивне полювання на загрози</li>
+                <li>Харденінг ОС за CIS Benchmarks та STIG є обов'язковим кроком для зменшення поверхні атаки</li>
+                <li><code>osquery</code> дозволяє досліджувати стан ОС за допомогою SQL-запитів для threat hunting</li>
+                <li>DLP-системи контролюють множинні канали витоку: email, USB, хмара, друк, месенджери</li>
+                <li>Контроль USB-пристроїв через whitelisting та Device Control є критичним для запобігання витокам</li>
+                <li>Тріада SPF + DKIM + DMARC забезпечує автентифікацію електронної пошти та захист від спуфінгу</li>
+                <li>Поштові шлюзи безпеки поєднують anti-spam, anti-phishing та sandboxing для комплексного захисту</li>
+            </ul>
+
+            <h3>Контрольні питання</h3>
+            <ol>
+                <li>Поясніть еволюцію від AV до EDR та XDR. У чому принципова різниця між цими класами рішень?</li>
+                <li>Які типи телеметрії збирає EDR-агент? Як ці дані використовуються для виявлення загроз?</li>
+                <li>Порівняйте CIS Benchmarks Level 1 та Level 2. Для яких середовищ рекомендується кожен рівень?</li>
+                <li>Напишіть osquery-запит для виявлення процесів, що слухають на нестандартних портах (не 22, 80, 443).</li>
+                <li>Назвіть п'ять основних каналів витоку даних та методи контролю кожного з них.</li>
+                <li>У чому різниця між Network DLP, Endpoint DLP та Cloud DLP? Який тип необхідний для контролю USB?</li>
+                <li>Поясніть механізм роботи SPF. Що означають модифікатори <code>-all</code>, <code>~all</code> та <code>?all</code>?</li>
+                <li>Опишіть поетапний процес впровадження DMARC. Чому не рекомендується одразу встановлювати <code>p=reject</code>?</li>
+                <li>Що таке BEC-атака і які технічні та організаційні заходи допомагають від неї захиститися?</li>
+                <li>Порівняйте Wazuh як EDR-рішення з комерційними аналогами. Які його переваги та обмеження?</li>
+            </ol>
+        </article>
+
+        <nav class="page-nav">
+            <a href="05.html">&larr; Захист мережевої інфраструктури</a>
+            <a href="07.html">Zero Trust та SIEM &rarr;</a>
+        </nav>
+    </main>
+
+    <script>
+        document.getElementById('menuToggle').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('active');
+        });
+        document.getElementById('overlay').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.remove('open');
+            this.classList.remove('active');
+        });
+    </script>
+</body>
+</html>

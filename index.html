@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Технології створення та застосування систем захисту ІКС</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="overlay" id="overlay"></div>
+    <button class="menu-toggle" id="menuToggle">☰</button>
+
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="index.html">Технології захисту ІКС</a>
+        </div>
+        <div class="nav-section">
+            <h3>Лекції</h3>
+            <ul>
+                <li><a href="lectures/01.html">1. Вступ. ІКС як об'єкт захисту</a></li>
+                <li><a href="lectures/02.html">2. Моделювання загроз</a></li>
+                <li><a href="lectures/03.html">3. Політика безпеки та доступ</a></li>
+                <li><a href="lectures/04.html">4. Криптографічний захист</a></li>
+                <li><a href="lectures/05.html">5. Захист мережевої інфраструктури</a></li>
+                <li><a href="lectures/06.html">6. Захист кінцевих точок</a></li>
+                <li><a href="lectures/07.html">7. Zero Trust та SIEM</a></li>
+                <li><a href="lectures/08.html">8. Проєктування КСЗІ</a></li>
+                <li><a href="lectures/09.html">9. Впровадження та тестування</a></li>
+                <li><a href="lectures/10.html">10. Експлуатація та інциденти</a></li>
+            </ul>
+        </div>
+        <div class="nav-section">
+            <h3>Практичні</h3>
+            <ul>
+                <li><a href="practicals/01.html">1. Моделювання загроз</a></li>
+                <li><a href="practicals/02.html">2. Політика безпеки</a></li>
+                <li><a href="practicals/03.html">3. Криптографічні засоби</a></li>
+                <li><a href="practicals/04.html">4. Міжмережевий екран</a></li>
+                <li><a href="practicals/05.html">5. VPN та захист каналів</a></li>
+                <li><a href="practicals/06.html">6. IDS/IPS</a></li>
+                <li><a href="practicals/07.html">7. SIEM-системи</a></li>
+                <li><a href="practicals/08.html">8. Проєктування КСЗІ</a></li>
+                <li><a href="practicals/09.html">9. Тестування захищеності</a></li>
+                <li><a href="practicals/10.html">10. Захист проєктів</a></li>
+            </ul>
+        </div>
+        <div class="nav-section">
+            <h3>Звіти</h3>
+            <ul>
+                <li><a href="report-viewer.html">Приклади звітів</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="content">
+        <article>
+            <div class="hero">
+                <h1>Технології створення та застосування систем захисту ІКС</h1>
+                <p>Курс для магістрів спеціальності 125 «Кібербезпека та захист інформації»</p>
+                <div class="hero-meta">
+                    <span><strong>10</strong> лекцій</span>
+                    <span><strong>10</strong> практичних</span>
+                    <span><strong>2</strong> модулі</span>
+                </div>
+            </div>
+
+            <h2>Про курс</h2>
+            <p>Курс охоплює повний життєвий цикл комплексної системи захисту інформації (КСЗІ) для інформаційно-комунікаційних систем: від моделювання загроз та проєктування архітектури захисту до впровадження, тестування та експлуатації. Особливий акцент — на практичних інструментах та сучасних технологіях кібербезпеки.</p>
+
+            <h2>Лекції</h2>
+            <div class="cards">
+                <div class="card">
+                    <a href="lectures/01.html">
+                        <span class="tag tag-lecture">Лекція 1</span>
+                        <h3>Вступ. ІКС як об'єкт захисту</h3>
+                        <p>Поняття та класифікація ІКС. Архітектура захисту. Життєвий цикл КСЗІ. Огляд загроз.</p>
+                    </a>
+                </div>
+                <div class="card">
+                    <a href="lectures/02.html">
+                        <span class="tag tag-lecture">Лекція 2</span>
+                        <h3>Моделювання загроз та оцінка ризиків</h3>
+                        <p>Методологія STRIDE. Моделі порушника. MITRE ATT&amp;CK. Microsoft Threat Modeling Tool.</p>
+                    </a>
+                </div>
+                <div class="card">
+                    <a href="lectures/03.html">
+                        <span class="tag tag-lecture">Лекція 3</span>
+                        <h3>Політика безпеки та управління доступом</h3>
+                        <p>DAC, MAC, RBAC, ABAC. Active Directory, FreeIPA. MFA та SSO. OAuth 2.0, SAML.</p>
+                    </a>
+                </div>
+                <div class="card">
+                    <a href="lectures/04.html">
+                        <span class="tag tag-lecture">Лекція 4</span>
+                        <h3>Криптографічний захист ІКС</h3>
+                        <p>AES, ДСТУ 7624 (Калина). RSA, ECC. PKI та X.509. TLS 1.3, IPsec. OpenSSL.</p>
+                    </a>
+                </div>
+                <div class="card">
+                    <a href="lectures/05.html">
+                        <span class="tag tag-lecture">Лекція 5</span>
+                        <h3>Захист мережевої інфраструктури</h3>
+                        <p>Firewalls (iptables, pfSense, NGFW). IDS/IPS (Snort, Suricata). VPN (WireGuard, OpenVPN). Сегментація мережі.</p>
+                    </a>
+                </div>
+                <div class="card">
+                    <a href="lectures/06.html">
+                        <span class="tag tag-lecture">Лекція 6</span>
+                        <h3>Захист кінцевих точок та контроль даних</h3>
+                        <p>EDR (Wazuh, CrowdStrike). Харденінг ОС. DLP-системи. Захист електронної пошти.</p>
+                    </a>
+                </div>
+                <div class="card">
+                    <a href="lectures/07.html">
+                        <span class="tag tag-lecture">Лекція 7</span>
+                        <h3>Zero Trust та SIEM</h3>
+                        <p>Архітектура Zero Trust (NIST SP 800-207). SIEM: ELK Stack, Wazuh, Splunk. SOAR.</p>
+                    </a>
+                </div>
+                <div class="card">
+                    <a href="lectures/08.html">
+                        <span class="tag tag-lecture">Лекція 8</span>
+                        <h3>Проєктування КСЗІ</h3>
+                        <p>Передпроєктне обстеження. Технічне завдання. Технічний проєкт. Вибір засобів захисту.</p>
+                    </a>
+                </div>
+                <div class="card">
+                    <a href="lectures/09.html">
+                        <span class="tag tag-lecture">Лекція 9</span>
+                        <h3>Впровадження та тестування КСЗІ</h3>
+                        <p>Етапи впровадження. Nmap, OpenVAS, Metasploit. Пентест. Kali Linux. Lynis.</p>
+                    </a>
+                </div>
+                <div class="card">
+                    <a href="lectures/10.html">
+                        <span class="tag tag-lecture">Лекція 10</span>
+                        <h3>Експлуатація КСЗІ та реагування на інциденти</h3>
+                        <p>Ansible, Terraform. Patch management. SOC. TheHive, MISP. Forensics: Volatility, Autopsy.</p>
+                    </a>
+                </div>
+            </div>
+
+            <h2>Практичні заняття</h2>
+            <div class="cards">
+                <div class="card">
+                    <a href="practicals/01.html">
+                        <span class="tag tag-practical">Практична 1</span>
+                        <h3>Моделювання загроз для ІКС</h3>
+                        <p>DFD-діаграма у draw.io, ідентифікація загроз за STRIDE (8&ndash;10), модель порушника, контрзаходи.</p>
+                    </a>
+                </div>
+                <div class="card">
+                    <a href="practicals/02.html">
+                        <span class="tag tag-practical">Практична 2</span>
+                        <h3>Політика безпеки та управління доступом</h3>
+                        <p>Класифікація активів за CIA, базова політика безпеки, RBAC-матриця, правила SoD.</p>
+                    </a>
+                </div>
+                <div class="card">
+                    <a href="practicals/03.html">
+                        <span class="tag tag-practical">Практична 3</span>
+                        <h3>Криптографічні засоби захисту</h3>
+                        <p>CyberChef: AES CBC/GCM. OpenSSL: RSA-ключі, цифровий підпис. Аналіз TLS-з'єднань.</p>
+                    </a>
+                </div>
+                <div class="card">
+                    <a href="practicals/04.html">
+                        <span class="tag tag-practical">Практична 4</span>
+                        <h3>Міжмережевий екран</h3>
+                        <p>ufw: політики за замовчуванням, правила фільтрації, логування, тестування доступу.</p>
+                    </a>
+                </div>
+                <div class="card">
+                    <a href="practicals/05.html">
+                        <span class="tag tag-practical">Практична 5</span>
+                        <h3>VPN та захист каналів зв'язку</h3>
+                        <p>WireGuard: генерація ключів, конфігурація. tcpdump: аналіз захищеного та незахищеного трафіку.</p>
+                    </a>
+                </div>
+                <div class="card">
+                    <a href="practicals/06.html">
+                        <span class="tag tag-practical">Практична 6</span>
+                        <h3>IDS/IPS: виявлення вторгнень</h3>
+                        <p>Suricata: аналіз правил, написання 2 власних правил, тестування та класифікація алертів.</p>
+                    </a>
+                </div>
+                <div class="card">
+                    <a href="practicals/07.html">
+                        <span class="tag tag-practical">Практична 7</span>
+                        <h3>SIEM: збір та аналіз подій</h3>
+                        <p>Системні логи Linux: генерація подій безпеки, пошук у auth.log, імітація SIEM-дашборду.</p>
+                    </a>
+                </div>
+                <div class="card">
+                    <a href="practicals/08.html">
+                        <span class="tag tag-practical">Практична 8</span>
+                        <h3>Проєктування КСЗІ для модельного об'єкта</h3>
+                        <p>Вибір 5 засобів захисту, схема мережі у draw.io, план впровадження у 3 етапи.</p>
+                    </a>
+                </div>
+                <div class="card">
+                    <a href="practicals/09.html">
+                        <span class="tag tag-practical">Практична 9</span>
+                        <h3>Тестування захищеності ІКС</h3>
+                        <p>Nmap: сканування портів та сервісів. HTTP-заголовки безпеки. Lynis: аудит системи.</p>
+                    </a>
+                </div>
+                <div class="card">
+                    <a href="practicals/10.html">
+                        <span class="tag tag-practical">Практична 10</span>
+                        <h3>Захист проєктів</h3>
+                        <p>Презентація 7&ndash;8 слайдів, захист проєкту КСЗІ, відповіді на типові запитання.</p>
+                    </a>
+                </div>
+            </div>
+
+            <h2>Приклади звітів</h2>
+            <p>Для кожної практичної роботи підготовлено приклад звіту (Варіант 1 &mdash; IT-компанія &laquo;TechSoft&raquo;). Звіти доступні у форматі Markdown з можливістю перегляду онлайн.</p>
+            <p><a href="report-viewer.html" style="font-weight:600;">Переглянути приклади звітів &rarr;</a></p>
+
+            <h2>Модульний контроль</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Модуль</th>
+                        <th>Теми</th>
+                        <th>Формат</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Модуль 1</strong></td>
+                        <td>Лекції 1–5: ІКС як об'єкт захисту, моделювання загроз, політика безпеки, криптографія, мережева безпека</td>
+                        <td>Тести + задачі</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Модуль 2</strong></td>
+                        <td>Лекції 6–10: захист кінцевих точок, Zero Trust, SIEM, проєктування КСЗІ, впровадження, експлуатація</td>
+                        <td>Тести + практичне завдання</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Рекомендована література</h2>
+            <ol>
+                <li>Яремчук Ю.Є. та ін. <em>«Комплексні системи захисту інформації»</em> — ВНТУ, 2018</li>
+                <li>Козюра В.Д., Хорошко В.О. та ін. <em>«Комплексні системи захисту інформації в ІТС»</em> — Ніжин, 2019</li>
+                <li>Хорошко В.О. та ін. <em>«Проектування комплексних систем захисту інформації»</em> — Львівська політехніка, 2020</li>
+                <li>Stallings W. <em>«Network Security Essentials»</em> — Pearson</li>
+                <li>Шнаєр Б. <em>«Прикладна криптографія»</em></li>
+            </ol>
+
+            <h2 style="margin-top:2rem;">Корисні ресурси</h2>
+            <ul>
+                <li><a href="https://attack.mitre.org/" target="_blank">MITRE ATT&amp;CK</a> — база знань тактик і технік атак</li>
+                <li><a href="https://owasp.org/" target="_blank">OWASP</a> — проєкт з безпеки веб-додатків</li>
+                <li><a href="https://www.nist.gov/cyberframework" target="_blank">NIST Cybersecurity Framework</a></li>
+                <li><a href="https://www.cisecurity.org/cis-benchmarks" target="_blank">CIS Benchmarks</a> — стандарти харденінгу</li>
+                <li><a href="https://documentation.wazuh.com/" target="_blank">Wazuh Documentation</a></li>
+                <li><a href="https://docs.suricata.io/" target="_blank">Suricata Documentation</a></li>
+            </ul>
+        </article>
+    </main>
+
+    <script>
+        document.getElementById('menuToggle').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('active');
+        });
+        document.getElementById('overlay').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.remove('open');
+            this.classList.remove('active');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Практична 4. Міжмережевий екран — Захист ІКС</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="overlay" id="overlay"></div>
+    <button class="menu-toggle" id="menuToggle">&#9776;</button>
+
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="../index.html">Технології захисту ІКС</a>
+        </div>
+        <div class="nav-section">
+            <h3>Лекції</h3>
+            <ul>
+                <li><a href="../lectures/01.html">1. Вступ. ІКС як об'єкт захисту</a></li>
+                <li><a href="../lectures/02.html">2. Моделювання загроз</a></li>
+                <li><a href="../lectures/03.html">3. Політика безпеки та доступ</a></li>
+                <li><a href="../lectures/04.html">4. Криптографічний захист</a></li>
+                <li><a href="../lectures/05.html">5. Захист мережевої інфраструктури</a></li>
+                <li><a href="../lectures/06.html">6. Захист кінцевих точок</a></li>
+                <li><a href="../lectures/07.html">7. Zero Trust та SIEM</a></li>
+                <li><a href="../lectures/08.html">8. Проєктування КСЗІ</a></li>
+                <li><a href="../lectures/09.html">9. Впровадження та тестування</a></li>
+                <li><a href="../lectures/10.html">10. Експлуатація та інциденти</a></li>
+            </ul>
+        </div>
+        <div class="nav-section">
+            <h3>Практичні</h3>
+            <ul>
+                <li><a href="../practicals/01.html">1. Моделювання загроз</a></li>
+                <li><a href="../practicals/02.html">2. Політика безпеки</a></li>
+                <li><a href="../practicals/03.html">3. Криптографічні засоби</a></li>
+                <li><a href="../practicals/04.html" class="active">4. Міжмережевий екран</a></li>
+                <li><a href="../practicals/05.html">5. VPN та захист каналів</a></li>
+                <li><a href="../practicals/06.html">6. IDS/IPS</a></li>
+                <li><a href="../practicals/07.html">7. SIEM-системи</a></li>
+                <li><a href="../practicals/08.html">8. Проєктування КСЗІ</a></li>
+                <li><a href="../practicals/09.html">9. Тестування захищеності</a></li>
+                <li><a href="../practicals/10.html">10. Захист проєктів</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="content">
+        <article>
+            <h1>Практична робота 4. Міжмережевий екран</h1>
+            <p class="subtitle">Налаштування ufw та створення базових правил фільтрації</p>
+
+            <!-- ===== Мета ===== -->
+            <h2>Мета роботи</h2>
+            <p>Зрозуміти принципи роботи міжмережевого екрану та навчитися створювати базові правила фільтрації мережевого трафіку. Набути практичних навичок роботи з <code>ufw</code> (Uncomplicated Firewall) для захисту сервера: налаштування політик за замовчуванням, дозвіл та блокування з'єднань за портами та IP-адресами, перевірка правил та аналіз логів.</p>
+
+            <!-- ===== Теоретичні відомості ===== -->
+            <h2>Теоретичні відомості</h2>
+
+            <h3>Що таке міжмережевий екран</h3>
+            <p>Міжмережевий екран (firewall) — це програмний або апаратний засіб мережевої безпеки, який контролює вхідний та вихідний мережевий трафік на основі заданих правил. Фаєрвол є першою лінією оборони периметра мережі та одним з базових компонентів будь-якої системи захисту ІКС.</p>
+
+            <h3>Типи міжмережевих екранів</h3>
+            <p>За принципом роботи виділяють кілька типів фаєрволів:</p>
+            <ul>
+                <li><strong>Пакетний фільтр (Packet Filter)</strong> — аналізує заголовки мережевих пакетів (IP-адреси, порти, протокол) та приймає рішення про пропуск або блокування кожного пакета окремо. Працює на рівнях L3-L4 моделі OSI. Приклад: <code>iptables</code>, <code>nftables</code>.</li>
+                <li><strong>Stateful Firewall</strong> — відстежує стан з'єднань (нове, встановлене, пов'язане) та приймає рішення з урахуванням контексту сесії. Дозволяє автоматично пропускати зворотний трафік встановлених з'єднань. Приклад: <code>iptables</code> з модулем <code>conntrack</code>.</li>
+                <li><strong>Проксі-фаєрвол (Application Gateway)</strong> — працює на рівні додатків (L7), аналізує вміст трафіку. Може фільтрувати HTTP-запити, SQL-запити тощо.</li>
+                <li><strong>NGFW (Next-Generation Firewall)</strong> — поєднує пакетний фільтр, stateful inspection, IPS, контроль додатків та інспекцію SSL/TLS. Приклади: Palo Alto, Fortinet FortiGate, Cisco Firepower.</li>
+            </ul>
+
+            <div class="info-box">
+                <strong>Пакетна фільтрація</strong>
+                Основний принцип пакетної фільтрації — перевірка кожного мережевого пакета за набором правил. Кожне правило визначає: протокол (TCP, UDP, ICMP), IP-адресу та порт джерела, IP-адресу та порт призначення, дію (дозволити або заблокувати). Правила перевіряються послідовно зверху вниз, і до пакета застосовується перша відповідність.
+            </div>
+
+            <h3>Політики за замовчуванням</h3>
+            <p>Існують два підходи до побудови правил фаєрвола:</p>
+            <ul>
+                <li><strong>Deny by default (білий список)</strong> — заборонити весь трафік, потім явно дозволити лише потрібний. Це безпечніший підхід, оскільки будь-який непередбачений трафік автоматично блокується.</li>
+                <li><strong>Allow by default (чорний список)</strong> — дозволити весь трафік, потім явно заблокувати небажаний. Менш безпечний, бо потрібно передбачити всі можливі загрози.</li>
+            </ul>
+
+            <div class="info-box">
+                <strong>Принцип мінімальних привілеїв</strong>
+                У контексті міжмережевого екрану принцип мінімальних привілеїв означає: дозволити лише той трафік, який необхідний для роботи системи, і заблокувати все інше. Політика <code>deny incoming</code> за замовчуванням реалізує саме цей принцип.
+            </div>
+
+            <h3>UFW як фронтенд для iptables</h3>
+            <p><code>ufw</code> (Uncomplicated Firewall) — це зручний інтерфейс командного рядка для управління правилами фаєрвола в Ubuntu/Debian. UFW не є самостійним фаєрволом, а працює як спрощена обгортка (фронтенд) для <code>iptables</code>/<code>nftables</code> — потужного, але складного інструмента фільтрації пакетів у ядрі Linux.</p>
+
+            <p>Переваги ufw:</p>
+            <ul>
+                <li>Простий та інтуїтивний синтаксис команд</li>
+                <li>Підтримка профілів додатків (Apache, OpenSSH, Nginx тощо)</li>
+                <li>Автоматичне управління stateful-з'єднаннями</li>
+                <li>Вбудоване логування заблокованих пакетів</li>
+                <li>Встановлений за замовчуванням в Ubuntu</li>
+            </ul>
+
+            <div class="tip-box">
+                <strong>UFW та iptables</strong>
+                Кожна команда ufw транслюється у відповідні правила iptables. Наприклад, <code>sudo ufw allow 80/tcp</code> створює правило, аналогічне <code>iptables -A INPUT -p tcp --dport 80 -j ACCEPT</code>. Переглянути згенеровані правила iptables можна командою <code>sudo iptables -L -n -v</code>.
+            </div>
+
+            <!-- ===== Необхідне ПЗ ===== -->
+            <h2>Необхідне ПЗ та інструменти</h2>
+            <ul>
+                <li><strong>Віртуальна машина з Ubuntu 22.04/24.04</strong> (або WSL з Ubuntu у Windows 10/11)</li>
+                <li><strong>ufw</strong> — встановлений в Ubuntu за замовчуванням. Якщо відсутній: <code>sudo apt install ufw</code></li>
+                <li><strong>net-tools / iproute2</strong> — для команд <code>ss</code>, <code>ip</code> (встановлені за замовчуванням)</li>
+                <li><strong>curl</strong> — для тестування HTTP-з'єднань (встановлений за замовчуванням)</li>
+                <li><strong>Python 3</strong> — для запуску тестового HTTP-сервера (встановлений за замовчуванням)</li>
+            </ul>
+
+            <div class="tip-box">
+                <strong>Робота у WSL</strong>
+                Якщо ви використовуєте WSL (Windows Subsystem for Linux), ufw працюватиме коректно. Проте деякі мережеві тести можуть відрізнятися через особливості мережевого стеку WSL. Рекомендується виконувати роботу у повноцінній ВМ з Ubuntu для найбільш реалістичних результатів.
+            </div>
+
+            <h2>Варіанти завдань</h2>
+            <p>Студент обирає один із варіантів або отримує варіант від викладача. Варіант визначає роль сервера та набір портів і правил, які необхідно налаштувати в ufw. Усі кроки роботи виконуються з урахуванням обраного варіанту.</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Варіант</th>
+                        <th>Роль сервера</th>
+                        <th>Дозволені порти (вхідні)</th>
+                        <th>IP-діапазон для обмеження</th>
+                        <th>Додаткове правило</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Веб-сервер (Apache/Nginx)</td>
+                        <td>22/tcp, 80/tcp, 443/tcp</td>
+                        <td>192.168.1.0/24</td>
+                        <td>Обмежити SSH лише з локальної підмережі</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Сервер бази даних (MySQL)</td>
+                        <td>22/tcp, 3306/tcp</td>
+                        <td>10.0.0.0/24</td>
+                        <td>MySQL доступний лише з IP сервера додатків (10.0.0.10)</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Поштовий сервер (Postfix/Dovecot)</td>
+                        <td>22/tcp, 25/tcp, 143/tcp, 993/tcp</td>
+                        <td>172.16.0.0/16</td>
+                        <td>SMTP (25) лише з внутрішньої мережі, IMAPS (993) — з будь-якої</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>DNS-сервер</td>
+                        <td>22/tcp, 53/tcp, 53/udp</td>
+                        <td>192.168.10.0/24</td>
+                        <td>DNS доступний для всіх, SSH — лише з підмережі адміністраторів</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>Файловий сервер (Samba/NFS)</td>
+                        <td>22/tcp, 139/tcp, 445/tcp, 2049/tcp</td>
+                        <td>192.168.1.0/24</td>
+                        <td>Заблокувати конкретний хост 192.168.1.50 (підозрілий)</td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td>Сервер моніторингу (Zabbix/Grafana)</td>
+                        <td>22/tcp, 80/tcp, 443/tcp, 10051/tcp</td>
+                        <td>10.10.0.0/24</td>
+                        <td>Порт агента Zabbix (10051) лише з підмережі серверів</td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td>Git-сервер (GitLab)</td>
+                        <td>22/tcp, 80/tcp, 443/tcp, 5050/tcp</td>
+                        <td>192.168.5.0/24</td>
+                        <td>Container Registry (5050) лише з CI/CD-сервера (192.168.5.20)</td>
+                    </tr>
+                    <tr>
+                        <td>8</td>
+                        <td>VPN-шлюз (WireGuard)</td>
+                        <td>22/tcp, 51820/udp</td>
+                        <td>10.0.0.0/8</td>
+                        <td>SSH лише з внутрішньої мережі, WireGuard — з будь-якої</td>
+                    </tr>
+                    <tr>
+                        <td>9</td>
+                        <td>Сервер додатків (Node.js/Django)</td>
+                        <td>22/tcp, 443/tcp, 8080/tcp</td>
+                        <td>172.20.0.0/16</td>
+                        <td>Порт 8080 (dev) заблокувати з Інтернету, дозволити лише з LAN</td>
+                    </tr>
+                    <tr>
+                        <td>10</td>
+                        <td>Сервер резервного копіювання (Veeam/Restic)</td>
+                        <td>22/tcp, 9418/tcp, 8200/tcp</td>
+                        <td>192.168.2.0/24</td>
+                        <td>Усі сервісні порти доступні лише з серверної підмережі</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- ===== Хід роботи ===== -->
+            <h2>Хід роботи</h2>
+
+            <h3>Крок 1. Перевірка поточного стану</h3>
+            <p>Перш ніж налаштовувати фаєрвол, необхідно зрозуміти поточний стан системи:</p>
+            <ol>
+                <li>Перевірте статус ufw:
+<pre><code>sudo ufw status</code></pre>
+                    <p>За замовчуванням ufw має бути неактивним (<code>Status: inactive</code>).</p>
+                </li>
+                <li>Перегляньте відкриті порти та сервіси, що слухають:
+<pre><code>ss -tlnp</code></pre>
+                    <p>Ця команда покаже всі TCP-порти, на яких очікують з'єднання процеси. Зверніть увагу на порти 22 (SSH), 80 (HTTP), 443 (HTTPS) та інші.</p>
+                </li>
+            </ol>
+
+            <div class="info-box">
+                <strong>Параметри команди ss</strong>
+                <code>-t</code> — показати TCP-з'єднання, <code>-l</code> — лише ті, що слухають (LISTEN), <code>-n</code> — не перетворювати номери портів на імена сервісів, <code>-p</code> — показати процес, що використовує порт.
+            </div>
+
+            <h3>Крок 2. Базова конфігурація ufw</h3>
+            <p>Налаштуйте основні правила фаєрвола:</p>
+            <ol>
+                <li>Встановіть політику за замовчуванням — заборонити вхідні з'єднання, дозволити вихідні:
+<pre><code>sudo ufw default deny incoming
+sudo ufw default allow outgoing</code></pre>
+                </li>
+                <li>Дозвольте SSH-з'єднання (щоб не втратити доступ до сервера):
+<pre><code>sudo ufw allow ssh</code></pre>
+                </li>
+                <li>Дозвольте HTTP та HTTPS для веб-сервера:
+<pre><code>sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp</code></pre>
+                </li>
+                <li>Увімкніть фаєрвол:
+<pre><code>sudo ufw enable</code></pre>
+                    <p>Система запитає підтвердження. Введіть <code>y</code> для підтвердження.</p>
+                </li>
+                <li>Перегляньте створені правила:
+<pre><code>sudo ufw status verbose</code></pre>
+                </li>
+            </ol>
+
+            <div class="warning-box">
+                <strong>Не заблокуйте собі доступ!</strong>
+                Якщо ви працюєте з сервером через SSH, обов'язково дозвольте SSH-з'єднання (<code>sudo ufw allow ssh</code>) ПЕРЕД увімкненням фаєрвола (<code>sudo ufw enable</code>). Інакше ви втратите доступ до машини.
+            </div>
+
+            <h3>Крок 3. Тестування правил (3 тести)</h3>
+            <p>Перевірте, чи правила працюють коректно:</p>
+
+            <h4>Тест 1. Доступ до дозволеного порту</h4>
+            <p>Запустіть тестовий HTTP-сервер та перевірте доступ:</p>
+<pre><code># В одному терміналі запустіть тестовий сервер:
+python3 -m http.server 80
+
+# В іншому терміналі перевірте доступ:
+curl http://localhost:80</code></pre>
+            <p><strong>Очікуваний результат:</strong> з'єднання успішне, сервер повертає список файлів.</p>
+
+            <h4>Тест 2. Доступ до заблокованого порту</h4>
+            <p>Спробуйте підключитись до порту, який не був дозволений:</p>
+<pre><code># Запустіть сервер на порту 8888:
+python3 -m http.server 8888 &
+
+# Спробуйте підключитись ззовні (або з іншої сесії):
+curl --connect-timeout 5 http://localhost:8888</code></pre>
+            <p><strong>Очікуваний результат:</strong> з localhost з'єднання може пройти (loopback не фільтрується). Але з іншої машини в мережі з'єднання буде заблоковано. Для перевірки блокування використайте <code>sudo ufw reject 8888/tcp</code> та повторіть тест.</p>
+
+            <h4>Тест 3. Перевірка логування</h4>
+            <p>Увімкніть логування та знайдіть записи заблокованих з'єднань:</p>
+<pre><code># Увімкнути логування:
+sudo ufw logging on
+
+# Спробувати заблоковане з'єднання (з іншої машини або після додавання правила reject)
+# Потім переглянути лог:
+sudo grep -i "ufw" /var/log/ufw.log | tail -10</code></pre>
+            <p>Якщо файл <code>/var/log/ufw.log</code> не існує, перевірте <code>/var/log/syslog</code> або <code>/var/log/kern.log</code>:</p>
+<pre><code>sudo grep -i "UFW BLOCK" /var/log/syslog | tail -10</code></pre>
+
+            <h3>Крок 4. Правила за IP-адресою</h3>
+            <p>Створіть правила, що обмежують доступ за IP-адресами:</p>
+            <ol>
+                <li>Дозвольте SSH тільки з конкретної підмережі:
+<pre><code>sudo ufw allow from 192.168.1.0/24 to any port 22</code></pre>
+                </li>
+                <li>Заблокуйте конкретну IP-адресу:
+<pre><code>sudo ufw deny from 10.0.0.100</code></pre>
+                </li>
+                <li>Перегляньте пронумерований список правил:
+<pre><code>sudo ufw status numbered</code></pre>
+                </li>
+            </ol>
+
+            <div class="tip-box">
+                <strong>Порядок правил має значення</strong>
+                UFW перевіряє правила зверху вниз та застосовує першу відповідність. Якщо правило <code>allow from 192.168.1.0/24</code> стоїть перед <code>deny from 192.168.1.50</code>, то хост 192.168.1.50 все одно отримає доступ. Для вставки правила на конкретну позицію використовуйте: <code>sudo ufw insert 1 deny from 192.168.1.50</code>.
+            </div>
+
+            <h3>Крок 5. Заповнення таблиці правил</h3>
+            <p>На основі виводу <code>sudo ufw status numbered</code> заповніть зведену таблицю. Для кожного правила вкажіть:</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>№</th>
+                        <th>Дія</th>
+                        <th>Протокол</th>
+                        <th>Порт</th>
+                        <th>Джерело</th>
+                        <th>Призначення</th>
+                        <th>Обґрунтування</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>ALLOW</td>
+                        <td>TCP</td>
+                        <td>22</td>
+                        <td>Anywhere</td>
+                        <td>Сервер</td>
+                        <td>SSH для віддаленого адміністрування</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>ALLOW</td>
+                        <td>TCP</td>
+                        <td>80</td>
+                        <td>Anywhere</td>
+                        <td>Сервер</td>
+                        <td>HTTP для веб-сервера</td>
+                    </tr>
+                    <tr>
+                        <td>...</td>
+                        <td>...</td>
+                        <td>...</td>
+                        <td>...</td>
+                        <td>...</td>
+                        <td>...</td>
+                        <td>...</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>Для кожного правила обґрунтуйте, навіщо воно потрібне та яку загрозу нейтралізує.</p>
+
+            <!-- ===== Приклад виконання ===== -->
+            <h2>Приклад виконання</h2>
+            <p>Нижче наведено повний приклад виконання роботи на Ubuntu 22.04. Усі команди виконуються з правами sudo.</p>
+
+            <h3>1. Перевірка поточного стану</h3>
+
+            <p>Перевірка статусу ufw:</p>
+<pre><code>student@ubuntu:~$ sudo ufw status
+Status: inactive</code></pre>
+
+            <p>Перегляд відкритих портів:</p>
+<pre><code>student@ubuntu:~$ ss -tlnp
+State    Recv-Q   Send-Q   Local Address:Port   Peer Address:Port   Process
+LISTEN   0        128      0.0.0.0:22            0.0.0.0:*           users:(("sshd",pid=842,fd=3))
+LISTEN   0        511      *:80                  *:*                 users:(("apache2",pid=1205,fd=4))
+LISTEN   0        128      [::]:22               [::]:*              users:(("sshd",pid=842,fd=4))</code></pre>
+
+            <p>На сервері відкриті порти 22 (SSH-сервер sshd) та 80 (веб-сервер Apache2). Фаєрвол наразі вимкнений, тобто жодної фільтрації не відбувається.</p>
+
+            <h3>2. Базова конфігурація ufw</h3>
+
+            <p>Встановлення політик за замовчуванням:</p>
+<pre><code>student@ubuntu:~$ sudo ufw default deny incoming
+Default incoming policy changed to 'deny'
+(be sure to update your rules accordingly)
+
+student@ubuntu:~$ sudo ufw default allow outgoing
+Default outgoing policy changed to 'allow'
+(be sure to update your rules accordingly)</code></pre>
+
+            <p>Дозвіл необхідних сервісів:</p>
+<pre><code>student@ubuntu:~$ sudo ufw allow ssh
+Rules updated
+Rules updated (v6)
+
+student@ubuntu:~$ sudo ufw allow 80/tcp
+Rules updated
+Rules updated (v6)
+
+student@ubuntu:~$ sudo ufw allow 443/tcp
+Rules updated
+Rules updated (v6)</code></pre>
+
+            <p>Увімкнення фаєрвола:</p>
+<pre><code>student@ubuntu:~$ sudo ufw enable
+Command may disrupt existing ssh connections. Proceed with operation (y|n)? y
+Firewall is active and enabled on system startup</code></pre>
+
+            <p>Перегляд правил:</p>
+<pre><code>student@ubuntu:~$ sudo ufw status verbose
+Status: active
+Logging: on (low)
+Default: deny (incoming), allow (outgoing), disabled (routed)
+New profiles: skip
+
+To                         Action      From
+--                         ------      ----
+22/tcp                     ALLOW IN    Anywhere
+80/tcp                     ALLOW IN    Anywhere
+443/tcp                    ALLOW IN    Anywhere
+22/tcp (v6)                ALLOW IN    Anywhere (v6)
+80/tcp (v6)                ALLOW IN    Anywhere (v6)
+443/tcp (v6)               ALLOW IN    Anywhere (v6)</code></pre>
+
+            <div class="info-box">
+                <strong>Аналіз виводу ufw status verbose</strong>
+                <code>Default: deny (incoming)</code> означає, що всі вхідні з'єднання, для яких немає явного дозвільного правила, будуть заблоковані. <code>allow (outgoing)</code> дозволяє серверу вільно ініціювати з'єднання назовні (оновлення, DNS-запити тощо). Кожне правило створене для IPv4 та IPv6 (позначка <code>v6</code>).
+            </div>
+
+            <h3>3. Тестування правил</h3>
+
+            <h4>Тест 1. Доступ до дозволеного порту (HTTP, порт 80)</h4>
+<pre><code>student@ubuntu:~$ curl -s http://localhost:80 | head -5
+&lt;!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"&gt;
+&lt;html xmlns="http://www.w3.org/1999/xhtml"&gt;
+  &lt;head&gt;
+    &lt;title&gt;Apache2 Ubuntu Default Page: It works&lt;/title&gt;</code></pre>
+
+            <p><strong>Результат:</strong> HTTP-запит на порт 80 успішний. Apache2 повертає стандартну сторінку. Правило <code>ALLOW IN 80/tcp</code> працює коректно.</p>
+
+            <h4>Тест 2. Доступ до заблокованого порту</h4>
+<pre><code># Запускаємо тестовий сервер на порту 8888:
+student@ubuntu:~$ python3 -m http.server 8888 &
+[1] 2341
+Serving HTTP on 0.0.0.0 port 8888 (http://0.0.0.0:8888/) ...
+
+# Додаємо явне правило reject для наочності:
+student@ubuntu:~$ sudo ufw reject 8888/tcp
+Rule added
+Rule added (v6)
+
+# Перевіряємо з'єднання:
+student@ubuntu:~$ curl --connect-timeout 5 http://127.0.0.1:8888
+curl: (7) Failed to connect to 127.0.0.1 port 8888 after 0 ms: Connection refused
+
+# Зупиняємо тестовий сервер:
+student@ubuntu:~$ kill %1</code></pre>
+
+            <p><strong>Результат:</strong> з'єднання на порт 8888 відхилено (<code>Connection refused</code>). Правило <code>reject</code> активно відхиляє з'єднання та надсилає RST-пакет клієнту. Різниця між <code>deny</code> та <code>reject</code>: <code>deny</code> мовчки відкидає пакет (клієнт очікує таймаут), <code>reject</code> відповідає пакетом з повідомленням про відмову (швидша відповідь).</p>
+
+            <h4>Тест 3. Перевірка логування</h4>
+<pre><code># Увімкнення логування:
+student@ubuntu:~$ sudo ufw logging on
+Logging enabled
+
+# Генерація заблокованого трафіку (спроба з іншої машини або after reject rule):
+# Перегляд логів:
+student@ubuntu:~$ sudo grep "UFW BLOCK" /var/log/ufw.log | tail -5
+Feb 18 10:42:17 ubuntu kernel: [  823.451267] [UFW BLOCK] IN=enp0s3 OUT= MAC=08:00:27:a3:b1:c2:52:54:00:12:35:02:08:00 SRC=10.0.2.2 DST=10.0.2.15 LEN=52 TOS=0x00 PREC=0x00 TTL=64 ID=41823 DF PROTO=TCP SPT=49832 DPT=3306 WINDOW=65535 RES=0x00 SYN URGP=0
+Feb 18 10:42:19 ubuntu kernel: [  825.672104] [UFW BLOCK] IN=enp0s3 OUT= MAC=08:00:27:a3:b1:c2:52:54:00:12:35:02:08:00 SRC=10.0.2.2 DST=10.0.2.15 LEN=52 TOS=0x00 PREC=0x00 TTL=64 ID=41824 DF PROTO=TCP SPT=51204 DPT=445 WINDOW=65535 RES=0x00 SYN URGP=0
+Feb 18 10:43:05 ubuntu kernel: [  871.891456] [UFW BLOCK] IN=enp0s3 OUT= MAC=08:00:27:a3:b1:c2:52:54:00:12:35:02:08:00 SRC=10.0.2.2 DST=10.0.2.15 LEN=52 TOS=0x00 PREC=0x00 TTL=64 ID=41825 DF PROTO=TCP SPT=52018 DPT=135 WINDOW=65535 RES=0x00 SYN URGP=0
+Feb 18 10:44:12 ubuntu kernel: [  938.334521] [UFW BLOCK] IN=enp0s3 OUT= MAC=08:00:27:a3:b1:c2:52:54:00:12:35:02:08:00 SRC=192.168.1.50 DST=10.0.2.15 LEN=60 TOS=0x00 PREC=0x00 TTL=64 ID=54312 DF PROTO=TCP SPT=55123 DPT=5432 WINDOW=64240 RES=0x00 SYN URGP=0
+Feb 18 10:44:38 ubuntu kernel: [  964.556789] [UFW BLOCK] IN=enp0s3 OUT= MAC=08:00:27:a3:b1:c2:52:54:00:12:35:02:08:00 SRC=192.168.1.50 DST=10.0.2.15 LEN=60 TOS=0x00 PREC=0x00 TTL=64 ID=54313 DF PROTO=TCP SPT=55200 DPT=8080 WINDOW=64240 RES=0x00 SYN URGP=0</code></pre>
+
+            <p><strong>Аналіз фрагмента логу:</strong></p>
+            <ul>
+                <li><strong>Рядок 1:</strong> заблоковано TCP-з'єднання на порт 3306 (MySQL) з 10.0.2.2 — спроба підключитись до бази даних ззовні.</li>
+                <li><strong>Рядок 2:</strong> заблоковано з'єднання на порт 445 (SMB) — типовий фоновий трафік Windows-хосту.</li>
+                <li><strong>Рядок 3:</strong> заблоковано з'єднання на порт 135 (RPC) — автоматичний трафік Windows.</li>
+                <li><strong>Рядок 4:</strong> заблоковано з'єднання на порт 5432 (PostgreSQL) з 192.168.1.50 — спроба доступу до БД.</li>
+                <li><strong>Рядок 5:</strong> заблоковано з'єднання на порт 8080 з 192.168.1.50 — спроба доступу до недозволеного веб-порту.</li>
+            </ul>
+
+            <div class="example-box">
+                <strong>Структура запису логу UFW</strong>
+                Кожний рядок містить: <code>[UFW BLOCK]</code> — дія фаєрвола, <code>IN=enp0s3</code> — вхідний мережевий інтерфейс, <code>SRC</code> — IP-адреса джерела, <code>DST</code> — IP-адреса призначення, <code>PROTO</code> — протокол, <code>SPT</code> — порт джерела, <code>DPT</code> — порт призначення, <code>SYN</code> — прапорець нового TCP-з'єднання.
+            </div>
+
+            <h3>4. Правила за IP-адресою</h3>
+
+<pre><code># Дозволити SSH тільки з локальної підмережі:
+student@ubuntu:~$ sudo ufw allow from 192.168.1.0/24 to any port 22
+Rule added
+
+# Заблокувати конкретну IP-адресу:
+student@ubuntu:~$ sudo ufw deny from 10.0.0.100
+Rule added
+
+# Дозволити доступ до порту 3306 (MySQL) тільки з IP сервера додатків:
+student@ubuntu:~$ sudo ufw allow from 192.168.1.10 to any port 3306
+Rule added
+
+# Перегляд пронумерованих правил:
+student@ubuntu:~$ sudo ufw status numbered
+Status: active
+
+     To                         Action      From
+     --                         ------      ----
+[ 1] 22/tcp                     ALLOW IN    Anywhere
+[ 2] 80/tcp                     ALLOW IN    Anywhere
+[ 3] 443/tcp                    ALLOW IN    Anywhere
+[ 4] 8888/tcp                   REJECT IN   Anywhere
+[ 5] 22                         ALLOW IN    192.168.1.0/24
+[ 6] Anywhere                   DENY IN     10.0.0.100
+[ 7] 3306                       ALLOW IN    192.168.1.10
+[ 8] 22/tcp (v6)                ALLOW IN    Anywhere (v6)
+[ 9] 80/tcp (v6)                ALLOW IN    Anywhere (v6)
+[10] 443/tcp (v6)               ALLOW IN    Anywhere (v6)
+[11] 8888/tcp (v6)              REJECT IN   Anywhere (v6)</code></pre>
+
+            <div class="tip-box">
+                <strong>Видалення правил</strong>
+                Для видалення правила за номером: <code>sudo ufw delete 4</code> (видалить правило REJECT 8888/tcp). Для видалення за описом: <code>sudo ufw delete reject 8888/tcp</code>. Перед видаленням завжди перевіряйте номери правил через <code>sudo ufw status numbered</code>, оскільки номери змінюються після кожного видалення.
+            </div>
+
+            <h3>5. Зведена таблиця правил</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>№</th>
+                        <th>Дія</th>
+                        <th>Протокол</th>
+                        <th>Порт</th>
+                        <th>Джерело</th>
+                        <th>Призначення</th>
+                        <th>Обґрунтування</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>ALLOW</td>
+                        <td>TCP</td>
+                        <td>22</td>
+                        <td>Anywhere</td>
+                        <td>Сервер</td>
+                        <td>SSH для віддаленого адміністрування сервера. Необхідний для управління системою.</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>ALLOW</td>
+                        <td>TCP</td>
+                        <td>80</td>
+                        <td>Anywhere</td>
+                        <td>Сервер</td>
+                        <td>HTTP для веб-сервера Apache2. Необхідний для обслуговування веб-клієнтів.</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>ALLOW</td>
+                        <td>TCP</td>
+                        <td>443</td>
+                        <td>Anywhere</td>
+                        <td>Сервер</td>
+                        <td>HTTPS для захищеного веб-трафіку. Шифрує з'єднання між клієнтом та сервером.</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>REJECT</td>
+                        <td>TCP</td>
+                        <td>8888</td>
+                        <td>Anywhere</td>
+                        <td>Сервер</td>
+                        <td>Тестове правило. Явно відхиляє з'єднання на тестовий порт для демонстрації блокування.</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>ALLOW</td>
+                        <td>TCP/UDP</td>
+                        <td>22</td>
+                        <td>192.168.1.0/24</td>
+                        <td>Сервер</td>
+                        <td>SSH тільки з локальної мережі. Обмежує доступ до адміністрування за IP-діапазоном.</td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td>DENY</td>
+                        <td>Усі</td>
+                        <td>Усі</td>
+                        <td>10.0.0.100</td>
+                        <td>Сервер</td>
+                        <td>Блокування конкретного хосту. Нейтралізує загрозу від підозрілої IP-адреси.</td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td>ALLOW</td>
+                        <td>TCP/UDP</td>
+                        <td>3306</td>
+                        <td>192.168.1.10</td>
+                        <td>Сервер</td>
+                        <td>MySQL тільки з сервера додатків. Захищає БД від несанкціонованого доступу.</td>
+                    </tr>
+                    <tr>
+                        <td>*</td>
+                        <td>DENY</td>
+                        <td>Усі</td>
+                        <td>Усі</td>
+                        <td>Anywhere</td>
+                        <td>Сервер</td>
+                        <td>Політика за замовчуванням (deny incoming). Блокує все, що не дозволено явно.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="warning-box">
+                <strong>Очищення після роботи</strong>
+                Після завершення роботи видаліть тестові правила, щоб залишити лише необхідні: <code>sudo ufw delete reject 8888/tcp</code>. Для повного скидання до початкового стану: <code>sudo ufw reset</code>.
+            </div>
+
+            <!-- ===== Вимоги до звіту ===== -->
+            <h2>Вимоги до звіту</h2>
+            <p>Звіт з практичної роботи (3-4 сторінки) повинен містити:</p>
+            <ol>
+                <li><strong>Список правил ufw</strong> — повний вивід <code>sudo ufw status verbose</code> з коментарями до кожного правила.</li>
+                <li><strong>Результати 3 тестів</strong> зі скріншотами або виводом команд:
+                    <ul>
+                        <li>Успішне з'єднання на дозволений порт</li>
+                        <li>Заблоковане з'єднання на недозволений порт</li>
+                        <li>Запис у логах про заблокований пакет</li>
+                    </ul>
+                </li>
+                <li><strong>Фрагмент логу</strong> з <code>/var/log/ufw.log</code> (або <code>/var/log/syslog</code>) з аналізом заблокованого пакета.</li>
+                <li><strong>Таблиця правил</strong> — для кожного правила: номер, дія, протокол, порт, джерело, призначення, обґрунтування.</li>
+                <li><strong>Відповіді на 5 контрольних питань.</strong></li>
+                <li><strong>Висновки.</strong></li>
+            </ol>
+
+            <!-- ===== Контрольні питання ===== -->
+            <h2>Контрольні питання</h2>
+            <ol>
+                <li>Чому політика <code>deny incoming</code> за замовчуванням є більш безпечною, ніж <code>allow incoming</code>? Який принцип інформаційної безпеки вона реалізує?</li>
+                <li>У чому різниця між <code>deny</code> та <code>reject</code> у правилах фаєрвола? В яких ситуаціях кожен варіант більш доречний?</li>
+                <li>Що таке stateful firewall і як він відстежує стан з'єднань? Чому одного правила <code>allow 80/tcp</code> достатньо для повноцінної роботи веб-сервера (вхідні запити + вихідні відповіді)?</li>
+                <li>Які обмеження має пакетний фільтр (iptables/ufw) порівняно з міжмережевими екранами нового покоління (NGFW)? Назвіть 3 типи загроз, які пакетний фільтр не здатен виявити.</li>
+                <li>Як ufw співвідноситься з iptables? Поясніть, чому ufw називають «фронтендом» для iptables.</li>
+            </ol>
+
+        </article>
+
+        <nav class="page-nav">
+            <a href="03.html">&larr; Криптографічні засоби</a>
+            <a href="05.html">VPN та захист каналів &rarr;</a>
+        </nav>
+    </main>
+
+    <script>
+        document.getElementById('menuToggle').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('active');
+        });
+        document.getElementById('overlay').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.remove('open');
+            this.classList.remove('active');
+        });
+    </script>
+</body>
+</html>

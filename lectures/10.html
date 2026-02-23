@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лекція 10. Експлуатація КСЗІ та реагування на інциденти — Захист ІКС</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="overlay" id="overlay"></div>
+    <button class="menu-toggle" id="menuToggle">☰</button>
+
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="../index.html">Технології захисту ІКС</a>
+        </div>
+        <div class="nav-section">
+            <h3>Лекції</h3>
+            <ul>
+                <li><a href="../lectures/01.html">1. Вступ. ІКС як об'єкт захисту</a></li>
+                <li><a href="../lectures/02.html">2. Моделювання загроз</a></li>
+                <li><a href="../lectures/03.html">3. Політика безпеки та доступ</a></li>
+                <li><a href="../lectures/04.html">4. Криптографічний захист</a></li>
+                <li><a href="../lectures/05.html">5. Захист мережевої інфраструктури</a></li>
+                <li><a href="../lectures/06.html">6. Захист кінцевих точок</a></li>
+                <li><a href="../lectures/07.html">7. Zero Trust та SIEM</a></li>
+                <li><a href="../lectures/08.html">8. Проєктування КСЗІ</a></li>
+                <li><a href="../lectures/09.html">9. Впровадження та тестування</a></li>
+                <li><a href="../lectures/10.html" class="active">10. Експлуатація та інциденти</a></li>
+            </ul>
+        </div>
+        <div class="nav-section">
+            <h3>Практичні</h3>
+            <ul>
+                <li><a href="../practicals/01.html">1. Моделювання загроз</a></li>
+                <li><a href="../practicals/02.html">2. Політика безпеки</a></li>
+                <li><a href="../practicals/03.html">3. Криптографічні засоби</a></li>
+                <li><a href="../practicals/04.html">4. Міжмережевий екран</a></li>
+                <li><a href="../practicals/05.html">5. VPN та захист каналів</a></li>
+                <li><a href="../practicals/06.html">6. IDS/IPS</a></li>
+                <li><a href="../practicals/07.html">7. SIEM-системи</a></li>
+                <li><a href="../practicals/08.html">8. Проєктування КСЗІ</a></li>
+                <li><a href="../practicals/09.html">9. Тестування захищеності</a></li>
+                <li><a href="../practicals/10.html">10. Захист проєктів</a></li>
+            </ul>
+        </div>
+        <div class="nav-section">
+            <h3>Звіти</h3>
+            <ul>
+                <li><a href="../report-viewer.html">Приклади звітів</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="content">
+        <article>
+            <h1>Лекція 10. Експлуатація КСЗІ: супровід, інциденти, модернізація</h1>
+            <p class="subtitle">Управління конфігураціями, SOC, реагування на інциденти та цифрова криміналістика</p>
+
+            <!-- ==================== РОЗДІЛ 1 ==================== -->
+            <h2>1. Експлуатація КСЗІ</h2>
+
+            <p>Після успішного впровадження та приймальних випробувань КСЗІ переходить у фазу постійної експлуатації. Цей етап є найтривалішим у життєвому циклі системи захисту та вимагає систематичного підходу до підтримки працездатності, оновлення компонентів та адаптації до нових загроз. Ефективна експлуатація КСЗІ базується на трьох стовпах: операційні процедури, автоматизація управління конфігураціями та управління оновленнями.</p>
+
+            <h3>1.1. Операційні процедури безпеки</h3>
+
+            <p>Операційні процедури безпеки (Security Operations Procedures) — це задокументовані регламенти повсякденних дій персоналу, що забезпечують безперебійне функціонування КСЗІ. Вони поділяються на щоденні, щотижневі та щомісячні.</p>
+
+            <h4>Щоденні перевірки (Daily Checks)</h4>
+
+            <ul>
+                <li><strong>Моніторинг алертів SIEM:</strong> перегляд критичних та високопріоритетних алертів за минулу добу, класифікація подій (true positive / false positive), ескалація підтверджених інцидентів</li>
+                <li><strong>Перевірка стану компонентів:</strong> моніторинг доступності міжмережевих екранів, IDS/IPS, серверів SIEM, VPN-шлюзів; перевірка завантаженості ресурсів (CPU, RAM, дисковий простір)</li>
+                <li><strong>Аналіз журналів (Log Review):</strong> перегляд логів автентифікації (невдалі спроби входу, блокування облікових записів), журналів міжмережевого екрану (заблоковані з'єднання), логів антивірусу (виявлені загрози)</li>
+                <li><strong>Перевірка резервних копій (Backup Verification):</strong> підтвердження успішного завершення щоденних бекапів, перевірка цілісності резервних копій (checksums), контроль обсягу зайнятого сховища</li>
+                <li><strong>Оновлення сигнатур:</strong> перевірка актуальності баз сигнатур IDS/IPS, антивірусного ПЗ, фідів threat intelligence</li>
+            </ul>
+
+            <h4>Щотижневі перевірки</h4>
+
+            <ul>
+                <li>Огляд звітів про сканування вразливостей (якщо налаштоване регулярне сканування)</li>
+                <li>Перевірка термінів дії сертифікатів SSL/TLS</li>
+                <li>Аналіз трендів: порівняння кількості подій безпеки з попереднім тижнем</li>
+                <li>Перегляд змін у конфігураціях (change review)</li>
+                <li>Тестове відновлення з резервної копії (вибірково)</li>
+            </ul>
+
+            <h4>Щомісячні перевірки</h4>
+
+            <ul>
+                <li>Повний аудит облікових записів: деактивація невикористовуваних, перевірка привілеїв</li>
+                <li>Огляд та оновлення правил міжмережевого екрану (видалення застарілих правил)</li>
+                <li>Перевірка відповідності конфігурацій базовим стандартам (CIS Benchmarks)</li>
+                <li>Підготовка місячного звіту з безпеки для керівництва</li>
+            </ul>
+
+            <div class="tip-box">
+                <strong>Практична порада</strong>
+                Усі операційні процедури повинні бути задокументовані у вигляді чек-листів (runbooks) з чітким визначенням відповідальних осіб, термінів виконання та дій у випадку виявлення аномалій. Це забезпечує наступність при зміні персоналу та стандартизацію процесів.
+            </div>
+
+            <h3>1.2. IaC (Infrastructure as Code) для безпеки</h3>
+
+            <p>Infrastructure as Code (IaC) — підхід до управління ІТ-інфраструктурою, при якому конфігурації описуються у вигляді коду, що зберігається у системі контролю версій (Git). IaC забезпечує повторюваність, документованість та аудит змін конфігурацій, що є критично важливим для безпеки.</p>
+
+            <h4>Ansible: автоматизація налаштування безпеки</h4>
+
+            <p><code>Ansible</code> — система управління конфігураціями з відкритим вихідним кодом, що використовує безагентну архітектуру (підключення через SSH) та описує конфігурації у форматі YAML (playbooks). Ansible дозволяє автоматизувати типові задачі забезпечення безпеки: встановлення оновлень, налаштування файрволу, конфігурацію аудиту.</p>
+
+            <pre><code># security_hardening.yml — Ansible playbook для базового харденінгу Linux
+---
+- name: Security Hardening Playbook
+  hosts: all
+  become: yes   # виконання з правами root
+
+  tasks:
+    # 1. Оновлення всіх пакетів до останніх версій
+    - name: Update all packages to latest version
+      apt:
+        upgrade: dist
+        update_cache: yes
+        cache_valid_time: 3600
+      when: ansible_os_family == "Debian"
+
+    - name: Update all packages (RHEL/CentOS)
+      yum:
+        name: '*'
+        state: latest
+        security: yes
+      when: ansible_os_family == "RedHat"
+
+    # 2. Налаштування файрволу (UFW для Ubuntu/Debian)
+    - name: Install UFW firewall
+      apt:
+        name: ufw
+        state: present
+
+    - name: Set default UFW policy - deny incoming
+      ufw:
+        direction: incoming
+        policy: deny
+
+    - name: Set default UFW policy - allow outgoing
+      ufw:
+        direction: outgoing
+        policy: allow
+
+    - name: Allow SSH (port 22)
+      ufw:
+        rule: allow
+        port: '22'
+        proto: tcp
+
+    - name: Allow HTTPS (port 443)
+      ufw:
+        rule: allow
+        port: '443'
+        proto: tcp
+
+    - name: Enable UFW
+      ufw:
+        state: enabled
+
+    # 3. Налаштування аудиту (auditd)
+    - name: Install auditd
+      apt:
+        name: auditd
+        state: present
+
+    - name: Configure audit rules for sensitive files
+      copy:
+        content: |
+          # Моніторинг змін у файлах автентифікації
+          -w /etc/passwd -p wa -k identity
+          -w /etc/shadow -p wa -k identity
+          -w /etc/group -p wa -k identity
+          -w /etc/gshadow -p wa -k identity
+          -w /etc/sudoers -p wa -k sudoers
+          # Моніторинг завантаження модулів ядра
+          -w /sbin/insmod -p x -k modules
+          -w /sbin/rmmod -p x -k modules
+          -w /sbin/modprobe -p x -k modules
+          # Моніторинг мережевих налаштувань
+          -a always,exit -F arch=b64 -S sethostname -S setdomainname -k system-locale
+          -w /etc/hosts -p wa -k system-locale
+          -w /etc/sysconfig/network -p wa -k system-locale
+        dest: /etc/audit/rules.d/security.rules
+        owner: root
+        group: root
+        mode: '0640'
+      notify: restart auditd
+
+    # 4. Конфігурація SSH (харденінг)
+    - name: Harden SSH configuration
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+      loop:
+        - { regexp: '^#?PermitRootLogin', line: 'PermitRootLogin no' }
+        - { regexp: '^#?PasswordAuthentication', line: 'PasswordAuthentication no' }
+        - { regexp: '^#?X11Forwarding', line: 'X11Forwarding no' }
+        - { regexp: '^#?MaxAuthTries', line: 'MaxAuthTries 3' }
+        - { regexp: '^#?Protocol', line: 'Protocol 2' }
+        - { regexp: '^#?ClientAliveInterval', line: 'ClientAliveInterval 300' }
+        - { regexp: '^#?ClientAliveCountMax', line: 'ClientAliveCountMax 2' }
+      notify: restart sshd
+
+    # 5. Налаштування політики паролів
+    - name: Configure password policy (PAM)
+      apt:
+        name: libpam-pwquality
+        state: present
+
+    - name: Set password complexity requirements
+      lineinfile:
+        path: /etc/security/pwquality.conf
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+      loop:
+        - { regexp: '^#?minlen', line: 'minlen = 12' }
+        - { regexp: '^#?dcredit', line: 'dcredit = -1' }
+        - { regexp: '^#?ucredit', line: 'ucredit = -1' }
+        - { regexp: '^#?lcredit', line: 'lcredit = -1' }
+        - { regexp: '^#?ocredit', line: 'ocredit = -1' }
+
+  handlers:
+    - name: restart auditd
+      service:
+        name: auditd
+        state: restarted
+
+    - name: restart sshd
+      service:
+        name: sshd
+        state: restarted</code></pre>
+
+            <pre><code># Запуск playbook
+ansible-playbook -i inventory.ini security_hardening.yml
+
+# Запуск у режимі перевірки (dry-run) — без реальних змін
+ansible-playbook -i inventory.ini security_hardening.yml --check --diff
+
+# Запуск лише для конкретної групи серверів
+ansible-playbook -i inventory.ini security_hardening.yml --limit webservers</code></pre>
+
+            <h4>Terraform: інфраструктура з безпековими контролями</h4>
+
+            <p><code>Terraform</code> — інструмент від HashiCorp для декларативного опису та автоматичного розгортання хмарної інфраструктури. На відміну від Ansible, який фокусується на конфігурації існуючих серверів, Terraform створює саму інфраструктуру (віртуальні мережі, сервери, бази даних) з вбудованими безпековими контролями.</p>
+
+            <pre><code># main.tf — приклад створення Security Group в AWS з обмеженим доступом
+
+provider "aws" {
+  region = "eu-central-1"    # Франкфурт — найближчий регіон до України
+}
+
+# Security Group для веб-сервера
+resource "aws_security_group" "web_server_sg" {
+  name        = "web-server-security-group"
+  description = "Security group for web server with restricted access"
+  vpc_id      = aws_vpc.main.id
+
+  # Вхідний трафік: дозволити HTTPS з будь-якого джерела
+  ingress {
+    description = "HTTPS from anywhere"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # Вхідний трафік: HTTP перенаправлення (лише для redirect на HTTPS)
+  ingress {
+    description = "HTTP for redirect only"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # Вхідний трафік: SSH лише з IP офісу
+  ingress {
+    description = "SSH from office IP only"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["203.0.113.0/24"]   # IP-діапазон офісу
+  }
+
+  # Вихідний трафік: дозволити все
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name        = "WebServerSG"
+    Environment = "Production"
+    ManagedBy   = "Terraform"
+  }
+}
+
+# Security Group для бази даних — доступ лише з веб-серверів
+resource "aws_security_group" "database_sg" {
+  name        = "database-security-group"
+  description = "Security group for database - access only from web servers"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    description     = "PostgreSQL from web servers only"
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
+    security_groups = [aws_security_group.web_server_sg.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name        = "DatabaseSG"
+    Environment = "Production"
+    ManagedBy   = "Terraform"
+  }
+}
+
+# Шифрування EBS-томів за замовчуванням
+resource "aws_ebs_encryption_by_default" "enabled" {
+  enabled = true
+}</code></pre>
+
+            <pre><code># Робочий процес Terraform
+terraform init      # ініціалізація (завантаження провайдерів)
+terraform plan      # перегляд запланованих змін (dry-run)
+terraform apply     # застосування змін
+terraform destroy   # видалення інфраструктури (обережно!)</code></pre>
+
+            <div class="info-box">
+                <strong>IaC та безпека</strong>
+                Зберігання конфігурацій у Git забезпечує: повний аудит змін (хто, коли, що змінив), можливість код-рев'ю перед застосуванням змін, швидке відновлення після помилкових змін (rollback), автоматичне тестування конфігурацій на відповідність політикам безпеки (policy-as-code, наприклад, Checkov, tfsec).
+            </div>
+
+            <h3>1.3. Управління оновленнями (Patch Management)</h3>
+
+            <p>Управління оновленнями (Patch Management) — це систематичний процес ідентифікації, отримання, тестування та встановлення оновлень програмного забезпечення. За статистикою, понад 60% успішних кібератак експлуатують вразливості, для яких вже існують виправлення, що робить patch management одним із найефективніших заходів захисту.</p>
+
+            <h4>Інструменти управління оновленнями</h4>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Інструмент</th>
+                        <th>Платформа</th>
+                        <th>Можливості</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>WSUS</strong> (Windows Server Update Services)</td>
+                        <td>Windows</td>
+                        <td>Централізоване управління оновленнями Windows, групові політики, звітність, затвердження оновлень</td>
+                    </tr>
+                    <tr>
+                        <td><strong>apt / unattended-upgrades</strong></td>
+                        <td>Debian/Ubuntu</td>
+                        <td>Автоматичне встановлення security-оновлень, конфігурація через <code>/etc/apt/apt.conf.d/50unattended-upgrades</code></td>
+                    </tr>
+                    <tr>
+                        <td><strong>yum-cron / dnf-automatic</strong></td>
+                        <td>RHEL/CentOS/Fedora</td>
+                        <td>Автоматичне застосування оновлень безпеки, email-сповіщення</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Ansible</strong></td>
+                        <td>Кросплатформний</td>
+                        <td>Оркестрація оновлень для гетерогенного середовища, rolling updates з перевіркою стану</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>Цикл Patch Tuesday</h4>
+
+            <p>Microsoft випускає оновлення безпеки кожного другого вівторка місяця (Patch Tuesday). Рекомендований процес:</p>
+
+            <ol>
+                <li><strong>Вівторок (день випуску):</strong> аналіз бюлетенів безпеки, визначення критичності для інфраструктури організації</li>
+                <li><strong>Середа — четвер:</strong> тестування оновлень у тестовому середовищі</li>
+                <li><strong>П'ятниця — понеділок:</strong> розгортання на некритичних системах</li>
+                <li><strong>Наступний тиждень:</strong> розгортання на виробничих системах за графіком вікон обслуговування</li>
+                <li><strong>Верифікація:</strong> перевірка працездатності систем після оновлення</li>
+            </ol>
+
+            <h4>Пріоритизація оновлень на основі ризику</h4>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Пріоритет</th>
+                        <th>Критерії</th>
+                        <th>Термін встановлення</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Екстрений (P0)</strong></td>
+                        <td>Активна експлуатація в реальних атаках (0-day), CVSS 9.0+, зовнішні системи</td>
+                        <td>24-48 годин</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Критичний (P1)</strong></td>
+                        <td>CVSS 7.0+, публічний експлойт, критичні системи</td>
+                        <td>7 днів</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Високий (P2)</strong></td>
+                        <td>CVSS 4.0-6.9, важливі системи</td>
+                        <td>14-30 днів</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Стандартний (P3)</strong></td>
+                        <td>CVSS нижче 4.0, внутрішні системи</td>
+                        <td>30-90 днів</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="warning-box">
+                <strong>Увага</strong>
+                Ніколи не встановлюйте оновлення безпосередньо на виробничих системах без попереднього тестування. Навіть security-патчі можуть спричинити несумісність із прикладним ПЗ або порушити роботу сервісів. Завжди використовуйте тестове середовище та плануйте rollback-процедуру.
+            </div>
+
+            <!-- ==================== РОЗДІЛ 2 ==================== -->
+            <h2>2. Реагування на інциденти (Incident Response)</h2>
+
+            <p>Інцидент інформаційної безпеки — це подія або низка подій, що становлять загрозу конфіденційності, цілісності або доступності інформаційних активів та потребують реагування. Незважаючи на найкращі превентивні заходи, інциденти неминучі, тому здатність організації ефективно реагувати на них є критичним фактором мінімізації збитків.</p>
+
+            <h3>2.1. Фреймворк NIST SP 800-61</h3>
+
+            <p>NIST SP 800-61 (<em>Computer Security Incident Handling Guide</em>) визначає шість фаз процесу реагування на інциденти:</p>
+
+            <h4>Фаза 1: Підготовка (Preparation)</h4>
+
+            <p>Найважливіша фаза, що виконується до виникнення інциденту:</p>
+
+            <ul>
+                <li>Формування команди реагування на інциденти (IRT / CSIRT)</li>
+                <li>Розробка плану реагування на інциденти (Incident Response Plan)</li>
+                <li>Створення playbooks — покрокових інструкцій для типових інцидентів (ransomware, фішинг, витік даних, DDoS)</li>
+                <li>Підготовка інструментарію: forensic workstation, USB з інструментами, засоби для збору доказів</li>
+                <li>Регулярне проведення навчань та табличних вправ (tabletop exercises)</li>
+                <li>Налаштування каналів комунікації (захищений месенджер, альтернативна email-система)</li>
+            </ul>
+
+            <h4>Фаза 2: Виявлення та аналіз (Detection & Analysis)</h4>
+
+            <ul>
+                <li>Джерела виявлення: SIEM-алерти, IDS/IPS, EDR, антивірус, повідомлення користувачів, зовнішні джерела (CERT-UA, партнери)</li>
+                <li>Початкова класифікація: підтвердження інциденту (true/false positive)</li>
+                <li>Визначення масштабу: які системи залучені, які дані скомпрометовані</li>
+                <li>Збір та збереження початкових доказів (volatile data — дамп RAM, мережеві з'єднання)</li>
+                <li>Визначення вектора атаки та ідентифікація тактик за MITRE ATT&CK</li>
+            </ul>
+
+            <h4>Фаза 3: Стримування (Containment)</h4>
+
+            <ul>
+                <li><strong>Короткострокове стримування:</strong> ізоляція скомпрометованих систем від мережі, блокування шкідливих IP/доменів, деактивація скомпрометованих облікових записів</li>
+                <li><strong>Довгострокове стримування:</strong> перебудова скомпрометованих систем із чистих образів, застосування тимчасових обхідних заходів (workarounds), посилення моніторингу</li>
+                <li>Рішення про ізоляцію приймається з урахуванням балансу між зупинкою атаки та впливом на бізнес-процеси</li>
+            </ul>
+
+            <h4>Фаза 4: Ліквідація (Eradication)</h4>
+
+            <ul>
+                <li>Видалення шкідливого ПЗ з усіх уражених систем</li>
+                <li>Закриття вразливості, через яку було здійснено атаку (патчинг, зміна конфігурації)</li>
+                <li>Скидання скомпрометованих облікових даних (паролі, ключі, сертифікати)</li>
+                <li>Перевірка на наявність інших точок присутності зловмисника (persistence mechanisms)</li>
+            </ul>
+
+            <h4>Фаза 5: Відновлення (Recovery)</h4>
+
+            <ul>
+                <li>Поступове повернення систем у виробничий режим</li>
+                <li>Відновлення даних із верифікованих резервних копій</li>
+                <li>Посилений моніторинг відновлених систем протягом визначеного періоду</li>
+                <li>Підтвердження нормальної роботи всіх сервісів</li>
+            </ul>
+
+            <h4>Фаза 6: Засвоєння уроків (Lessons Learned)</h4>
+
+            <ul>
+                <li>Проведення post-incident review (PIR) протягом 1-2 тижнів після закриття інциденту</li>
+                <li>Документування: хронологія подій, вжиті заходи, що спрацювало / не спрацювало</li>
+                <li>Визначення кореневих причин (root cause analysis)</li>
+                <li>Оновлення плану реагування, playbooks, правил SIEM на основі отриманого досвіду</li>
+                <li>Формування звіту про інцидент для керівництва та регуляторів (за необхідності)</li>
+            </ul>
+
+            <h3>2.2. Класифікація інцидентів за критичністю</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Рівень</th>
+                        <th>Назва</th>
+                        <th>Опис</th>
+                        <th>Приклади</th>
+                        <th>Час реагування</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>P1</strong></td>
+                        <td>Критичний</td>
+                        <td>Інцидент, що загрожує існуванню організації або призводить до масштабного витоку даних</td>
+                        <td>Ransomware-атака на виробничі системи, компрометація бази клієнтів, атака на SCADA/ICS</td>
+                        <td>Негайно (15 хв)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>P2</strong></td>
+                        <td>Високий</td>
+                        <td>Значний вплив на бізнес-процеси або безпеку критичних даних</td>
+                        <td>Компрометація сервера, успішний фішинг з витоком облікових даних, DDoS на критичні сервіси</td>
+                        <td>До 1 години</td>
+                    </tr>
+                    <tr>
+                        <td><strong>P3</strong></td>
+                        <td>Середній</td>
+                        <td>Обмежений вплив, без загрози критичним системам</td>
+                        <td>Зараження шкідливим ПЗ окремого ПК, підозріла мережева активність, невдалі спроби brute-force</td>
+                        <td>До 4 годин</td>
+                    </tr>
+                    <tr>
+                        <td><strong>P4</strong></td>
+                        <td>Низький</td>
+                        <td>Мінімальний вплив, переважно інформаційні події</td>
+                        <td>Порушення політики безпеки користувачем, спам-кампанія, сканування портів ззовні</td>
+                        <td>До 24 годин</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>2.3. Ролі в команді реагування на інциденти</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Роль</th>
+                        <th>Відповідальність</th>
+                        <th>Ключові навички</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>IR Manager</strong> (Керівник IRT)</td>
+                        <td>Координація дій команди, прийняття рішень про ескалацію, комунікація з керівництвом, контроль дотримання процедур</td>
+                        <td>Лідерство, комунікація, знання процесів, стресостійкість</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Triage Analyst</strong> (Аналітик початкової оцінки)</td>
+                        <td>Первинна класифікація алертів, визначення пріоритету, збір початкової інформації, маршрутизація інциденту</td>
+                        <td>Аналіз логів, знання SIEM, розуміння типових атак</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Forensics Analyst</strong> (Криміналіст)</td>
+                        <td>Збір та аналіз цифрових доказів, дослідження шкідливого ПЗ, реконструкція дій зловмисника</td>
+                        <td>Memory/disk forensics, malware analysis, chain of custody</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Communications Lead</strong> (Відповідальний за комунікації)</td>
+                        <td>Взаємодія з зовнішніми сторонами (клієнти, ЗМІ, регулятори, правоохоронні органи), внутрішні повідомлення</td>
+                        <td>Комунікація, знання правових вимог, досвід кризових комунікацій</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>2.4. TheHive — платформа управління інцидентами</h3>
+
+            <p><code>TheHive</code> — відкрита платформа для управління інцидентами інформаційної безпеки, що забезпечує колаборативне розслідування, трекінг завдань та інтеграцію з іншими інструментами безпеки. TheHive є стандартом де-факто для SOC з відкритим вихідним кодом.</p>
+
+            <h4>Ключові концепції TheHive</h4>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Концепція</th>
+                        <th>Опис</th>
+                        <th>Приклад</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Cases (Справи)</strong></td>
+                        <td>Основна одиниця роботи — контейнер для всієї інформації про інцидент: опис, учасники, теги, TLP-маркер</td>
+                        <td>Case #2024-0142: "Ransomware infection on file server"</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tasks (Завдання)</strong></td>
+                        <td>Конкретні кроки розслідування, призначені відповідальним з термінами виконання</td>
+                        <td>"Зібрати дамп пам'яті сервера FS01", "Перевірити логи VPN"</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Observables (Спостережувані)</strong></td>
+                        <td>Індикатори, пов'язані з інцидентом: IP-адреси, домени, хеші файлів, email-адреси</td>
+                        <td>IP: 185.220.101.42, Hash: a1b2c3d4..., Domain: malware-c2.xyz</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Alerts (Алерти)</strong></td>
+                        <td>Вхідні повідомлення від SIEM, IDS та інших джерел, що можуть бути перетворені на Cases</td>
+                        <td>Wazuh alert: "Multiple failed SSH login attempts from 185.220.101.42"</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>Інтеграція з Cortex</h4>
+
+            <p><code>Cortex</code> — компаньйон-платформа TheHive, що надає автоматизований аналіз спостережуваних (observables). Cortex підтримує десятки аналізаторів (analyzers):</p>
+
+            <ul>
+                <li><strong>VirusTotal:</strong> перевірка хешів файлів, URL, IP, доменів на шкідливість</li>
+                <li><strong>AbuseIPDB:</strong> перевірка репутації IP-адрес</li>
+                <li><strong>Shodan:</strong> отримання інформації про відкриті порти та сервіси IP-адреси</li>
+                <li><strong>MISP:</strong> пошук збігів з відомими IoC у базах MISP</li>
+                <li><strong>MaxMind GeoIP:</strong> геолокація IP-адрес</li>
+                <li><strong>FileInfo:</strong> аналіз метаданих файлів</li>
+            </ul>
+
+            <h3>2.5. MISP — платформа обміну індикаторами загроз</h3>
+
+            <p><code>MISP</code> (Malware Information Sharing Platform) — відкрита платформа для збору, зберігання, розповсюдження та обміну індикаторами компрометації (IoC) та інформацією про кіберзагрози (Threat Intelligence) між організаціями та спільнотами.</p>
+
+            <h4>Ключові компоненти MISP</h4>
+
+            <ul>
+                <li><strong>Feeds (Фіди):</strong> зовнішні джерела даних про загрози, що автоматично імпортуються в MISP:
+                    <ul>
+                        <li>CIRCL OSINT Feed — загальний фід від CIRCL (Computer Incident Response Center Luxembourg)</li>
+                        <li>Botvrij.eu — IoC від голландської кіберспільноти</li>
+                        <li>Abuse.ch URLhaus — шкідливі URL</li>
+                        <li>CERT-UA фіди — індикатори від української CERT</li>
+                    </ul>
+                </li>
+                <li><strong>Taxonomies (Таксономії):</strong> стандартизовані класифікації для уніфікованого маркування подій:
+                    <ul>
+                        <li>TLP (Traffic Light Protocol) — рівні обмеження поширення (RED, AMBER, GREEN, WHITE)</li>
+                        <li>MISP Taxonomy — класифікація типів загроз</li>
+                        <li>Admiralty Scale — оцінка достовірності джерела та інформації</li>
+                    </ul>
+                </li>
+                <li><strong>Galaxies (Галактики):</strong> розширені контекстні кластери, що пов'язують IoC з групами загроз, інструментами та тактиками:
+                    <ul>
+                        <li>MITRE ATT&CK Galaxy — маппінг подій на тактики та техніки ATT&CK</li>
+                        <li>Threat Actor Galaxy — відомі APT-групи та їхня атрибуція</li>
+                        <li>Tool Galaxy — інструменти, що використовуються зловмисниками</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <div class="tip-box">
+                <strong>Практична інтеграція</strong>
+                Типовий ланцюг: SIEM (Wazuh) генерує алерт → алерт надходить у TheHive → аналітик створює Case → Cortex автоматично аналізує observables → знайдені IoC публікуються у MISP → MISP розповсюджує IoC партнерам → партнери оновлюють правила блокування.
+            </div>
+
+            <!-- ==================== РОЗДІЛ 3 ==================== -->
+            <h2>3. Основи цифрової криміналістики (Digital Forensics)</h2>
+
+            <p>Цифрова криміналістика (Digital Forensics) — це галузь кібербезпеки, що займається збором, збереженням, аналізом та представленням цифрових доказів. Криміналістичний аналіз є ключовим елементом розслідування інцидентів, оскільки дозволяє відновити хронологію подій, ідентифікувати дії зловмисника та зібрати докази для можливого судового переслідування.</p>
+
+            <h3>3.1. Принципи збереження доказів</h3>
+
+            <h4>Chain of Custody (Ланцюг зберігання доказів)</h4>
+
+            <p>Chain of Custody — це задокументований ланцюг відповідальності за докази від моменту їх збору до подання в суді. Кожна передача доказів фіксується із зазначенням:</p>
+
+            <ul>
+                <li>Хто зібрав/отримав/передав докази</li>
+                <li>Коли (точна дата та час)</li>
+                <li>Де зберігалися докази</li>
+                <li>Як забезпечувалась їхня цілісність (хеші, пломби, опечатані контейнери)</li>
+            </ul>
+
+            <h4>Принципи збереження доказів</h4>
+
+            <ul>
+                <li><strong>Порядок збору за волатильністю (Order of Volatility):</strong> спочатку збирати найбільш мінливі дані — вміст RAM → мережеві з'єднання → запущені процеси → тимчасові файли → журнали → дані дисків</li>
+                <li><strong>Незмінність оригіналу:</strong> ніколи не аналізувати оригінальний носій; працювати лише з верифікованими копіями (bit-for-bit images)</li>
+                <li><strong>Верифікація цілісності:</strong> обчислювати та фіксувати хеш-суми (SHA-256) на кожному етапі — при збиранні, копіюванні, перед аналізом</li>
+                <li><strong>Документування:</strong> фіксувати кожну дію із зазначенням часу, виконавця та результату</li>
+            </ul>
+
+            <div class="warning-box">
+                <strong>Критично важливо</strong>
+                Вимкнення скомпрометованого комп'ютера без попереднього збору дампу пам'яті призводить до безповоротної втрати volatile-доказів (запущені процеси, мережеві з'єднання, ключі шифрування в RAM, активність шкідливого ПЗ). Завжди збирайте дамп пам'яті ДО вимкнення системи.
+            </div>
+
+            <h3>3.2. Volatility — криміналістика оперативної пам'яті</h3>
+
+            <p><code>Volatility</code> — провідний фреймворк для криміналістичного аналізу дампів оперативної пам'яті (Memory Forensics) з відкритим вихідним кодом. Volatility підтримує аналіз дампів пам'яті Windows, Linux та macOS.</p>
+
+            <h4>Отримання дампу пам'яті</h4>
+
+            <pre><code># Windows — за допомогою WinPmem
+winpmem_mini_x64.exe memory_dump.raw
+
+# Linux — за допомогою LiME (Linux Memory Extractor)
+sudo insmod lime-$(uname -r).ko "path=/tmp/memory_dump.lime format=lime"
+
+# Або через /proc/kcore (менш надійний метод)
+sudo dd if=/proc/kcore of=/tmp/memory_dump.raw</code></pre>
+
+            <h4>Аналіз дампу пам'яті за допомогою Volatility 3</h4>
+
+            <pre><code># Визначення профілю ОС (Volatility 3 робить це автоматично)
+vol -f memory_dump.raw windows.info
+
+# Список запущених процесів
+vol -f memory_dump.raw windows.pslist
+
+# Дерево процесів (відображає батьківські/дочірні зв'язки)
+vol -f memory_dump.raw windows.pstree
+
+# Приклад виводу pstree (виявлення підозрілого процесу):
+# PID   PPID  Name
+# 4     0     System
+# 380   4     smss.exe
+# 528   380   csrss.exe
+# 612   528   winlogon.exe
+# 660   612   services.exe
+# 1284  660   svchost.exe
+# 3456  1284  powershell.exe    ← ПІДОЗРІЛО: powershell запущено з svchost
+# 3512  3456  cmd.exe           ← ПІДОЗРІЛО: cmd як дочірній процес powershell
+
+# Мережеві з'єднання (аналог netstat)
+vol -f memory_dump.raw windows.netscan
+
+# Приклад виводу netscan:
+# Proto  LocalAddr       LocalPort  ForeignAddr      ForeignPort  State      PID
+# TCPv4  192.168.1.100   49234      185.220.101.42   443          ESTABLISHED 3456
+#                                    ↑ Підозріле з'єднання з зовнішнім IP
+
+# Виявлення прихованих/завершених процесів
+vol -f memory_dump.raw windows.psscan
+
+# Аналіз DLL, завантажених процесом
+vol -f memory_dump.raw windows.dlllist --pid 3456
+
+# Дамп підозрілого процесу для подальшого аналізу
+vol -f memory_dump.raw windows.pslist --pid 3456 --dump
+
+# Пошук рядків у пам'яті процесу
+vol -f memory_dump.raw windows.strings --pid 3456
+
+# Аналіз реєстру
+vol -f memory_dump.raw windows.registry.hivelist</code></pre>
+
+            <h3>3.3. Autopsy / The Sleuth Kit — криміналістика дисків</h3>
+
+            <p><code>The Sleuth Kit (TSK)</code> — набір консольних інструментів для криміналістичного аналізу файлових систем. <code>Autopsy</code> — графічний інтерфейс для TSK, що спрощує аналіз та надає додаткові можливості автоматизації.</p>
+
+            <h4>Можливості Autopsy</h4>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Функція</th>
+                        <th>Опис</th>
+                        <th>Застосування</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Timeline Analysis</strong></td>
+                        <td>Побудова часової лінії подій на основі метаданих файлів (створення, модифікація, доступ) та системних артефактів</td>
+                        <td>Відновлення хронології дій зловмисника</td>
+                    </tr>
+                    <tr>
+                        <td><strong>File Recovery</strong></td>
+                        <td>Відновлення видалених файлів за допомогою аналізу нерозподіленого простору (unallocated space) та файлового карвінгу</td>
+                        <td>Пошук видалених шкідливих файлів, інструментів зловмисника</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Keyword Search</strong></td>
+                        <td>Індексований пошук за ключовими словами у всіх файлах, включаючи нерозподілений простір</td>
+                        <td>Пошук паролів, URL, email-адрес, специфічних рядків</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Hash Lookup</strong></td>
+                        <td>Обчислення хешів файлів та порівняння з відомими базами (NSRL — National Software Reference Library)</td>
+                        <td>Ідентифікація відомого легітимного та шкідливого ПЗ</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Web Artifacts</strong></td>
+                        <td>Аналіз артефактів веб-браузерів: історія, кеш, cookie, завантаження</td>
+                        <td>Відстеження дій користувача, виявлення фішингових сайтів</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Registry Analysis</strong></td>
+                        <td>Аналіз реєстру Windows: автозапуск, встановлене ПЗ, підключені пристрої, останні файли</td>
+                        <td>Виявлення persistence mechanisms, відстеження USB-пристроїв</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <pre><code># Створення образу диска (bit-for-bit copy)
+sudo dd if=/dev/sda of=/evidence/disk_image.dd bs=4M status=progress
+
+# Обчислення хеш-суми образу для верифікації
+sha256sum /evidence/disk_image.dd > /evidence/disk_image.dd.sha256
+
+# Монтування образу для аналізу (read-only!)
+sudo mount -o ro,loop /evidence/disk_image.dd /mnt/evidence
+
+# Використання консольних інструментів TSK
+# Список розділів
+mmls /evidence/disk_image.dd
+
+# Аналіз файлової системи
+fls -r -o 2048 /evidence/disk_image.dd
+
+# Створення timeline
+fls -r -m "/" -o 2048 /evidence/disk_image.dd > body.txt
+mactime -b body.txt -d > timeline.csv</code></pre>
+
+            <!-- ==================== РОЗДІЛ 4 ==================== -->
+            <h2>4. Центр операцій безпеки (SOC)</h2>
+
+            <p>Security Operations Center (SOC) — спеціалізований підрозділ організації, що здійснює безперервний моніторинг, виявлення, аналіз та реагування на інциденти інформаційної безпеки. SOC є «нервовим центром» кібербезпеки організації, що об'єднує людей, процеси та технології.</p>
+
+            <h3>4.1. Структура SOC: рівні аналітиків</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Рівень</th>
+                        <th>Роль</th>
+                        <th>Основні функції</th>
+                        <th>Типові інструменти</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>L1 — Triage / Alert Monitoring</strong></td>
+                        <td>Аналітик першої лінії</td>
+                        <td>Моніторинг алертів SIEM у режимі 24/7, початковий тріаж (true/false positive), ескалація підтверджених інцидентів на L2, документування базових подій</td>
+                        <td>SIEM (дашборди), тикет-система, runbooks</td>
+                    </tr>
+                    <tr>
+                        <td><strong>L2 — Investigation</strong></td>
+                        <td>Аналітик-розслідувач</td>
+                        <td>Глибокий аналіз ескальованих інцидентів, кореляція подій з різних джерел, визначення масштабу та впливу інциденту, координація стримування</td>
+                        <td>SIEM (розширений аналіз), TheHive, EDR, мережевий аналіз</td>
+                    </tr>
+                    <tr>
+                        <td><strong>L3 — Threat Hunting / Advanced Analysis</strong></td>
+                        <td>Старший аналітик / Threat Hunter</td>
+                        <td>Проактивний пошук прихованих загроз (threat hunting), аналіз шкідливого ПЗ, розробка нових правил детектування, участь у розробці стратегії безпеки</td>
+                        <td>Volatility, IDA Pro, YARA, Sigma rules, Jupyter notebooks</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>4.2. Ключові метрики SOC</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Метрика</th>
+                        <th>Визначення</th>
+                        <th>Цільове значення</th>
+                        <th>Як вимірюється</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>MTTD</strong> (Mean Time to Detect)</td>
+                        <td>Середній час від початку інциденту до його виявлення</td>
+                        <td>Менше 24 годин (ідеально — хвилини для критичних)</td>
+                        <td>Різниця між часом першого IoC та часом створення алерту</td>
+                    </tr>
+                    <tr>
+                        <td><strong>MTTR</strong> (Mean Time to Respond)</td>
+                        <td>Середній час від виявлення інциденту до початку активного реагування</td>
+                        <td>P1: 15 хв, P2: 1 год, P3: 4 год</td>
+                        <td>Різниця між часом алерту та часом початку дій з реагування</td>
+                    </tr>
+                    <tr>
+                        <td><strong>False Positive Rate</strong></td>
+                        <td>Відсоток хибних спрацювань серед усіх алертів</td>
+                        <td>Менше 30% (ідеально — менше 10%)</td>
+                        <td>Кількість false positive / загальна кількість алертів</td>
+                    </tr>
+                    <tr>
+                        <td><strong>MTTC</strong> (Mean Time to Contain)</td>
+                        <td>Середній час до стримування інциденту</td>
+                        <td>P1: 1 год, P2: 4 год</td>
+                        <td>Різниця між початком реагування та ізоляцією загрози</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Alert Volume</strong></td>
+                        <td>Кількість алертів за період</td>
+                        <td>Тренд зниження при стабільному покритті</td>
+                        <td>Підрахунок у SIEM по періодах</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>4.3. Робочий процес SOC</h3>
+
+            <p>Типовий робочий процес обробки алерту в SOC:</p>
+
+            <ol>
+                <li><strong>Alert (Алерт):</strong> SIEM/IDS/EDR генерує алерт на основі кореляційного правила або сигнатури</li>
+                <li><strong>Triage (Тріаж):</strong> L1-аналітик отримує алерт, виконує початковий аналіз за runbook:
+                    <ul>
+                        <li>Це відома хибна тривога? → Закрити як False Positive</li>
+                        <li>Це підтверджена подія безпеки? → Створити тикет, ескалювати на L2</li>
+                        <li>Недостатньо інформації? → Зібрати додаткові дані, перекваліфікувати</li>
+                    </ul>
+                </li>
+                <li><strong>Investigate (Розслідування):</strong> L2-аналітик проводить глибокий аналіз:
+                    <ul>
+                        <li>Кореляція з іншими подіями та джерелами</li>
+                        <li>Визначення масштабу (які системи залучені)</li>
+                        <li>Ідентифікація вектора атаки та TTP (MITRE ATT&CK)</li>
+                    </ul>
+                </li>
+                <li><strong>Escalate/Close (Ескалація/Закриття):</strong>
+                    <ul>
+                        <li>Підтверджений інцидент → активація Incident Response процесу</li>
+                        <li>Не є інцидентом → закриття з документуванням причини</li>
+                    </ul>
+                </li>
+                <li><strong>Document (Документування):</strong> усі дії, рішення та результати фіксуються у тикет-системі для аудиту та статистики</li>
+            </ol>
+
+            <div class="example-box">
+                <strong>Приклад роботи SOC: виявлення ransomware</strong>
+                <ol>
+                    <li><strong>10:15</strong> — EDR (Wazuh) генерує алерт: "Suspicious file encryption activity detected on host WS-042"</li>
+                    <li><strong>10:17</strong> — L1 аналітик бачить алерт у дашборді SIEM, відкриває деталі</li>
+                    <li><strong>10:20</strong> — L1 бачить масове перейменування файлів з розширенням .encrypted, класифікує як P1, ескалює на L2</li>
+                    <li><strong>10:22</strong> — L2 аналітик ізолює хост WS-042 від мережі через EDR (network containment)</li>
+                    <li><strong>10:25</strong> — L2 перевіряє інші хости в підмережі — виявлено 3 додаткові заражені системи</li>
+                    <li><strong>10:30</strong> — IR Manager активує Incident Response Plan для ransomware</li>
+                    <li><strong>10:35</strong> — Ізоляція всієї підмережі, блокування C2-домену на файрволі</li>
+                    <li><strong>11:00</strong> — L3 починає аналіз семплу шкідливого ПЗ</li>
+                </ol>
+            </div>
+
+            <!-- ==================== РОЗДІЛ 5 ==================== -->
+            <h2>5. Модернізація КСЗІ</h2>
+
+            <p>КСЗІ не є статичною системою — ландшафт загроз постійно змінюється, з'являються нові вразливості та техніки атак, змінюється інфраструктура організації. Тому модернізація КСЗІ є безперервним процесом, що забезпечує адекватність системи захисту актуальним загрозам.</p>
+
+            <h3>5.1. Періодичний перегляд загроз</h3>
+
+            <ul>
+                <li><strong>Щоквартальний аналіз:</strong> огляд нових загроз та вразливостей, що стосуються технологій організації; перевірка актуальності моделі загроз</li>
+                <li><strong>Щорічний повний перегляд:</strong> оновлення моделі загроз та моделі порушника, переоцінка ризиків, перевірка відповідності нормативним вимогам</li>
+                <li><strong>Позаплановий перегляд:</strong> після серйозного інциденту, після значних змін в інфраструктурі, при появі нових нормативних вимог</li>
+            </ul>
+
+            <h3>5.2. Оновлення технологій (Technology Refresh)</h3>
+
+            <ul>
+                <li>Заміна засобів захисту, що досягли End-of-Life / End-of-Support</li>
+                <li>Оновлення апаратного забезпечення відповідно до зростаючих навантажень</li>
+                <li>Впровадження нових категорій захисту (наприклад, перехід від традиційного антивірусу до EDR/XDR)</li>
+                <li>Оцінка та впровадження нових технологій: контейнеризація, мікросервіси, хмарні платформи з урахуванням безпеки</li>
+            </ul>
+
+            <h3>5.3. Управління змінами (Change Management)</h3>
+
+            <p>Будь-які зміни в КСЗІ повинні проходити через формалізований процес управління змінами:</p>
+
+            <ol>
+                <li><strong>Запит на зміну (RFC):</strong> опис зміни, обґрунтування, оцінка впливу на безпеку</li>
+                <li><strong>Аналіз та затвердження:</strong> розгляд комітетом з управління змінами (CAB), оцінка ризиків</li>
+                <li><strong>Тестування:</strong> перевірка зміни у тестовому середовищі</li>
+                <li><strong>Впровадження:</strong> застосування зміни у визначене вікно обслуговування</li>
+                <li><strong>Верифікація:</strong> підтвердження успішності зміни, моніторинг побічних ефектів</li>
+                <li><strong>Документування:</strong> оновлення документації КСЗІ, конфігураційних записів</li>
+            </ol>
+
+            <!-- ==================== РОЗДІЛ 6 ==================== -->
+            <h2>6. Тренди та перспективи розвитку</h2>
+
+            <p>Кібербезпека — одна з галузей, що найдинамічніше розвивається. Розглянемо ключові тренди, що впливатимуть на розвиток КСЗІ у найближчі роки.</p>
+
+            <h3>6.1. XDR (Extended Detection and Response)</h3>
+
+            <p><code>XDR</code> — еволюція підходу до виявлення та реагування, що об'єднує дані з множини джерел (endpoints, мережа, хмара, email, identity) у єдину платформу з кореляцією та автоматизованим реагуванням.</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Характеристика</th>
+                        <th>EDR</th>
+                        <th>SIEM</th>
+                        <th>XDR</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Джерела даних</strong></td>
+                        <td>Лише кінцеві точки</td>
+                        <td>Логи з різних джерел</td>
+                        <td>Кінцеві точки + мережа + хмара + email + identity</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Кореляція</strong></td>
+                        <td>На рівні endpoint</td>
+                        <td>На рівні логів (правила кореляції)</td>
+                        <td>Крос-рівнева автоматична кореляція</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Реагування</strong></td>
+                        <td>Ізоляція хоста, блокування процесів</td>
+                        <td>Алерти, інтеграція з SOAR</td>
+                        <td>Автоматизоване реагування на всіх рівнях</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Приклади</strong></td>
+                        <td>CrowdStrike Falcon, Wazuh</td>
+                        <td>Splunk, ELK Stack</td>
+                        <td>Microsoft Sentinel, Palo Alto Cortex XDR</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>6.2. AI/ML у кібербезпеці</h3>
+
+            <p>Штучний інтелект та машинне навчання трансформують як атакуючі, так і захисні технології:</p>
+
+            <h4>Застосування AI/ML для захисту</h4>
+
+            <ul>
+                <li><strong>Поведінковий аналіз (UEBA — User and Entity Behavior Analytics):</strong> виявлення аномалій у поведінці користувачів та систем на основі базових моделей (baseline), що дозволяє детектувати інсайдерські загрози та скомпрометовані облікові записи</li>
+                <li><strong>Автоматична класифікація алертів:</strong> ML-моделі, що навчені на історичних даних SOC, автоматично класифікують алерти як true/false positive, знижуючи навантаження на аналітиків L1</li>
+                <li><strong>Виявлення шкідливого ПЗ:</strong> аналіз поведінки файлів у пісочниці з використанням ML для виявлення zero-day загроз, що не детектуються сигнатурами</li>
+                <li><strong>Threat Intelligence:</strong> NLP (Natural Language Processing) для автоматичного аналізу звітів про загрози, виділення IoC, класифікації APT-груп</li>
+            </ul>
+
+            <h4>AI як загроза</h4>
+
+            <ul>
+                <li><strong>Deepfake у соціальній інженерії:</strong> використання генеративного AI для створення переконливих фішингових повідомлень, голосових та відео-підробок</li>
+                <li><strong>Автоматизація атак:</strong> AI-асистенти для генерації експлойтів, обходу засобів захисту, автоматичного pivoting</li>
+                <li><strong>Adversarial ML:</strong> атаки на ML-моделі, що використовуються для захисту (evasion, poisoning)</li>
+            </ul>
+
+            <h3>6.3. Платформи Threat Intelligence</h3>
+
+            <p>Сучасні організації все більше покладаються на структуровану інформацію про кіберзагрози (Cyber Threat Intelligence, CTI) для проактивного захисту:</p>
+
+            <ul>
+                <li><strong>MISP</strong> — розглянутий раніше, відкрита платформа обміну IoC</li>
+                <li><strong>OpenCTI</strong> — відкрита платформа для управління CTI, інтеграція з MITRE ATT&CK, STIX/TAXII</li>
+                <li><strong>STIX/TAXII</strong> — стандарти обміну threat intelligence: STIX (Structured Threat Information eXpression) — формат даних, TAXII (Trusted Automated eXchange of Indicator Information) — протокол обміну</li>
+                <li><strong>Комерційні платформи:</strong> Recorded Future, Mandiant Threat Intelligence, CrowdStrike Falcon Intelligence</li>
+            </ul>
+
+            <div class="info-box">
+                <strong>Контекст України</strong>
+                CERT-UA (Урядова команда реагування на комп'ютерні надзвичайні події) є ключовим джерелом threat intelligence для українських організацій. CERT-UA публікує бюлетені про актуальні загрози, IoC від APT-груп, що атакують українську інфраструктуру, та рекомендації щодо захисту. Інтеграція фідів CERT-UA у MISP/SIEM є рекомендованою практикою для всіх організацій.
+            </div>
+
+            <h2>Контрольні запитання</h2>
+
+            <ol>
+                <li>Опишіть структуру щоденних операційних процедур безпеки для КСЗІ.</li>
+                <li>Поясніть різницю між Ansible та Terraform у контексті забезпечення безпеки. Коли використовується кожен?</li>
+                <li>Назвіть шість фаз реагування на інциденти за NIST SP 800-61 та поясніть кожну.</li>
+                <li>Яка різниця між рівнями аналітиків SOC (L1, L2, L3)? Які функції виконує кожен?</li>
+                <li>Що таке Chain of Custody і чому він важливий у цифровій криміналістиці?</li>
+                <li>Опишіть можливості Volatility для аналізу дампу пам'яті. Які плагіни використовуються для виявлення шкідливого ПЗ?</li>
+                <li>Як TheHive та Cortex взаємодіють у процесі розслідування інцидентів?</li>
+                <li>Що таке MISP і яку роль він відіграє в обміні Threat Intelligence?</li>
+                <li>Поясніть метрики MTTD та MTTR. Чому вони важливі для SOC?</li>
+                <li>Порівняйте EDR, SIEM та XDR. У чому переваги підходу XDR?</li>
+                <li>Опишіть процес управління оновленнями на основі ризику. Які критерії визначають пріоритет встановлення патча?</li>
+                <li>Яку роль відіграє AI/ML у сучасній кібербезпеці — як для захисту, так і для атак?</li>
+            </ol>
+
+            <h2>Рекомендована література</h2>
+
+            <ol>
+                <li>NIST SP 800-61 Rev. 2 — <em>Computer Security Incident Handling Guide</em></li>
+                <li>NIST SP 800-86 — <em>Guide to Integrating Forensic Techniques into Incident Response</em></li>
+                <li>Luttgens J., Pepe M., Mandia K. — <em>Incident Response & Computer Forensics</em>, 3rd Edition</li>
+                <li>Hale Ligh M. et al. — <em>The Art of Memory Forensics</em></li>
+                <li>Muniz J., McIntyre G., AlFardan N. — <em>Security Operations Center: Building, Operating, and Maintaining your SOC</em></li>
+                <li>Sanders C. — <em>Practical Threat Intelligence and Data-Driven Threat Hunting</em></li>
+                <li>Red Hat — <em>Ansible for DevOps</em> — <a href="https://docs.ansible.com/" target="_blank">docs.ansible.com</a></li>
+                <li>HashiCorp — <em>Terraform Documentation</em> — <a href="https://developer.hashicorp.com/terraform" target="_blank">developer.hashicorp.com/terraform</a></li>
+            </ol>
+        </article>
+
+        <nav class="page-nav">
+            <a href="09.html">&larr; Впровадження та тестування</a>
+            <a href="../index.html">Головна &rarr;</a>
+        </nav>
+    </main>
+
+    <script>
+        document.getElementById('menuToggle').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('active');
+        });
+        document.getElementById('overlay').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.remove('open');
+            this.classList.remove('active');
+        });
+    </script>
+</body>
+</html>

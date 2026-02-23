@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Практична 5. VPN та захист каналів зв'язку — Захист ІКС</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="overlay" id="overlay"></div>
+    <button class="menu-toggle" id="menuToggle">&#9776;</button>
+
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="../index.html">Технології захисту ІКС</a>
+        </div>
+        <div class="nav-section">
+            <h3>Лекції</h3>
+            <ul>
+                <li><a href="../lectures/01.html">1. Вступ. ІКС як об'єкт захисту</a></li>
+                <li><a href="../lectures/02.html">2. Моделювання загроз</a></li>
+                <li><a href="../lectures/03.html">3. Політика безпеки та доступ</a></li>
+                <li><a href="../lectures/04.html">4. Криптографічний захист</a></li>
+                <li><a href="../lectures/05.html">5. Захист мережевої інфраструктури</a></li>
+                <li><a href="../lectures/06.html">6. Захист кінцевих точок</a></li>
+                <li><a href="../lectures/07.html">7. Zero Trust та SIEM</a></li>
+                <li><a href="../lectures/08.html">8. Проєктування КСЗІ</a></li>
+                <li><a href="../lectures/09.html">9. Впровадження та тестування</a></li>
+                <li><a href="../lectures/10.html">10. Експлуатація та інциденти</a></li>
+            </ul>
+        </div>
+        <div class="nav-section">
+            <h3>Практичні</h3>
+            <ul>
+                <li><a href="../practicals/01.html">1. Моделювання загроз</a></li>
+                <li><a href="../practicals/02.html">2. Політика безпеки</a></li>
+                <li><a href="../practicals/03.html">3. Криптографічні засоби</a></li>
+                <li><a href="../practicals/04.html">4. Міжмережевий екран</a></li>
+                <li><a href="../practicals/05.html" class="active">5. VPN та захист каналів</a></li>
+                <li><a href="../practicals/06.html">6. IDS/IPS</a></li>
+                <li><a href="../practicals/07.html">7. SIEM-системи</a></li>
+                <li><a href="../practicals/08.html">8. Проєктування КСЗІ</a></li>
+                <li><a href="../practicals/09.html">9. Тестування захищеності</a></li>
+                <li><a href="../practicals/10.html">10. Захист проєктів</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="content">
+        <article>
+            <h1>Практична робота 5. VPN та захист каналів зв'язку</h1>
+            <p class="subtitle">Генерація ключів WireGuard та аналіз захищеного трафіку</p>
+
+            <!-- ===== Мета ===== -->
+            <h2>Мета роботи</h2>
+            <p>Зрозуміти принципи роботи VPN та побачити різницю між захищеним і незахищеним трафіком. Навчитися генерувати криптографічні ключі WireGuard, створювати конфігураційні файли VPN-сервера та клієнта, а також аналізувати мережевий трафік за допомогою <code>tcpdump</code> для порівняння відкритого та зашифрованого каналу зв'язку.</p>
+
+            <!-- ===== Теоретичні відомості ===== -->
+            <h2>Теоретичні відомості</h2>
+
+            <h3>Що таке VPN</h3>
+            <p>VPN (Virtual Private Network) — це технологія, що створює захищений логічний канал зв'язку (тунель) поверх незахищеної мережі, зазвичай Інтернету. VPN забезпечує три ключові властивості безпеки:</p>
+            <ul>
+                <li><strong>Конфіденційність</strong> — шифрування трафіку унеможливлює перехоплення даних зловмисником, який має доступ до каналу передачі</li>
+                <li><strong>Цілісність</strong> — автентифікація пакетів гарантує, що дані не були модифіковані під час передачі (захист від MITM-атак)</li>
+                <li><strong>Автентифікація</strong> — VPN забезпечує взаємну автентифікацію сторін за допомогою криптографічних ключів або сертифікатів</li>
+            </ul>
+
+            <p>Основні типи VPN:</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Тип</th>
+                        <th>Опис</th>
+                        <th>Приклад використання</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Remote-access</strong></td>
+                        <td>Підключення окремого користувача до корпоративної мережі</td>
+                        <td>Працівник з дому підключається до VPN-сервера офісу</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Site-to-site</strong></td>
+                        <td>З'єднання двох або більше мереж через VPN-тунель між шлюзами</td>
+                        <td>Зв'язок головного офісу з філіалом</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Протокол WireGuard</h3>
+            <p>WireGuard — це сучасний VPN-протокол, розроблений як простіша та швидша альтернатива OpenVPN та IPSec. Він працює на рівні ядра Linux та використовує фіксований набір сучасних криптографічних алгоритмів:</p>
+            <ul>
+                <li><strong>Curve25519</strong> — обмін ключами (ECDH), забезпечує 128-бітний рівень безпеки з 32-байтними ключами</li>
+                <li><strong>ChaCha20</strong> — симетричне шифрування даних, стійке до атак за часом (timing attacks)</li>
+                <li><strong>Poly1305</strong> — автентифікація повідомлень (MAC), гарантує цілісність кожного пакета</li>
+                <li><strong>BLAKE2s</strong> — хешування, швидше за SHA-256 при тому ж рівні безпеки</li>
+            </ul>
+
+            <div class="info-box">
+                <strong>Переваги WireGuard</strong>
+                Кодова база WireGuard складає лише ~4000 рядків (порівняно з ~100 000 у OpenVPN), що суттєво спрощує аудит безпеки. WireGuard не дозволяє адміністратору обирати слабкі алгоритми — криптографічний набір фіксований і не може бути змінений.
+            </div>
+
+            <h3>Шифрування трафіку в транзиті</h3>
+            <p>Трафік у мережі може передаватися у двох основних режимах:</p>
+            <ul>
+                <li><strong>Відкритий (незашифрований)</strong> — наприклад, HTTP. Будь-хто з доступом до каналу (провайдер, зловмисник на маршрутизаторі, атака на Wi-Fi) може прочитати вміст пакетів: URL-адреси, заголовки, тіло запитів та відповідей</li>
+                <li><strong>Зашифрований</strong> — наприклад, HTTPS (TLS) або VPN. На фізичному рівні видно лише зашифровані байти. Неможливо визначити вміст передачі без відповідного ключа</li>
+            </ul>
+
+            <div class="warning-box">
+                <strong>Чому HTTP небезпечний</strong>
+                При передачі даних через HTTP (без TLS) зловмисник, який перехоплює трафік на мережевому рівні, бачить усе: логіни, паролі, токени, вміст форм, cookie. Саме тому для будь-якої передачі конфіденційних даних необхідне шифрування — через TLS (HTTPS) або VPN-тунель.
+            </div>
+
+            <h3>Утиліта tcpdump</h3>
+            <p><code>tcpdump</code> — це консольний аналізатор мережевого трафіку (сніфер), який дозволяє перехоплювати та аналізувати пакети, що проходять через мережевий інтерфейс. Основні параметри:</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Параметр</th>
+                        <th>Призначення</th>
+                        <th>Приклад</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>-i &lt;інтерфейс&gt;</code></td>
+                        <td>Вибір мережевого інтерфейсу для захоплення</td>
+                        <td><code>-i lo</code> (loopback), <code>-i eth0</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>-A</code></td>
+                        <td>Виведення вмісту пакетів у текстовому (ASCII) форматі</td>
+                        <td>Зручно для HTTP-трафіку</td>
+                    </tr>
+                    <tr>
+                        <td><code>-X</code></td>
+                        <td>Виведення у hex та ASCII одночасно</td>
+                        <td>Для аналізу зашифрованих даних</td>
+                    </tr>
+                    <tr>
+                        <td><code>-c &lt;N&gt;</code></td>
+                        <td>Захопити лише N пакетів</td>
+                        <td><code>-c 10</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>port &lt;N&gt;</code></td>
+                        <td>Фільтр за номером порту</td>
+                        <td><code>port 8080</code>, <code>port 443</code></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- ===== Необхідне ПЗ ===== -->
+            <h2>Необхідне ПЗ та інструменти</h2>
+            <ul>
+                <li><strong>Ubuntu 22.04+</strong> (або WSL2 на Windows) — одна віртуальна машина або WSL-середовище</li>
+                <li><strong>WireGuard Tools</strong> — пакет <code>wireguard-tools</code> для генерації ключів та роботи з конфігураціями</li>
+                <li><strong>tcpdump</strong> — утиліта для захоплення та аналізу мережевого трафіку</li>
+                <li><strong>Python 3</strong> — для запуску тестового HTTP-сервера (встановлений за замовчуванням в Ubuntu)</li>
+                <li><strong>curl</strong> — для виконання HTTP-запитів (встановлений за замовчуванням)</li>
+            </ul>
+
+            <div class="tip-box">
+                <strong>Порада</strong>
+                У цій роботі використовується одна машина (Ubuntu або WSL). Реальне VPN-з'єднання між двома хостами не встановлюється — ми зосереджуємося на генерації ключів, розумінні конфігурації та порівнянні захищеного і незахищеного трафіку за допомогою tcpdump.
+            </div>
+
+            <h2>Варіанти завдань</h2>
+            <p>Студент обирає один із варіантів або отримує варіант від викладача. Варіант визначає параметри конфігурації WireGuard та сайт для порівняння трафіку.</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Варіант</th>
+                        <th>Підмережа VPN</th>
+                        <th>ListenPort</th>
+                        <th>Сайт для HTTP-тесту</th>
+                        <th>Протокол для порівняння</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>10.0.0.0/24</td>
+                        <td>51820</td>
+                        <td>example.com</td>
+                        <td>HTTP vs HTTPS</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>10.10.0.0/24</td>
+                        <td>51821</td>
+                        <td>httpbin.org</td>
+                        <td>HTTP vs HTTPS</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>172.16.0.0/24</td>
+                        <td>51822</td>
+                        <td>neverssl.com</td>
+                        <td>HTTP vs HTTPS</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>10.20.0.0/24</td>
+                        <td>51823</td>
+                        <td>info.cern.ch</td>
+                        <td>HTTP vs HTTPS</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>192.168.100.0/24</td>
+                        <td>51824</td>
+                        <td>detectportal.firefox.com</td>
+                        <td>HTTP vs HTTPS</td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td>10.30.0.0/24</td>
+                        <td>51825</td>
+                        <td>eu.httpbin.org</td>
+                        <td>HTTP vs HTTPS</td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td>172.20.0.0/24</td>
+                        <td>51826</td>
+                        <td>example.org</td>
+                        <td>HTTP vs HTTPS</td>
+                    </tr>
+                    <tr>
+                        <td>8</td>
+                        <td>10.40.0.0/24</td>
+                        <td>51827</td>
+                        <td>testhtml5.vulnweb.com</td>
+                        <td>HTTP vs HTTPS</td>
+                    </tr>
+                    <tr>
+                        <td>9</td>
+                        <td>192.168.200.0/24</td>
+                        <td>51828</td>
+                        <td>www.example.net</td>
+                        <td>HTTP vs HTTPS</td>
+                    </tr>
+                    <tr>
+                        <td>10</td>
+                        <td>10.50.0.0/24</td>
+                        <td>51829</td>
+                        <td>captive.apple.com</td>
+                        <td>HTTP vs HTTPS</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- ===== Хід роботи ===== -->
+            <h2>Хід роботи</h2>
+
+            <h3>Крок 1. Встановлення WireGuard та генерація ключів</h3>
+            <p>Встановіть пакет <code>wireguard-tools</code> та згенеруйте пару криптографічних ключів:</p>
+<pre><code># Встановлення WireGuard Tools:
+sudo apt update
+sudo apt install -y wireguard-tools</code></pre>
+
+            <p>Згенеруйте ключі:</p>
+<pre><code># Генерація пари ключів:
+wg genkey | tee privatekey | wg pubkey > publickey
+
+# Перегляд приватного ключа:
+cat privatekey
+
+# Перегляд публічного ключа:
+cat publickey</code></pre>
+
+            <p>Поясніть у звіті:</p>
+            <ul>
+                <li>Що таке <strong>приватний ключ</strong> — зберігається тільки на своєму хості, ніколи не передається іншій стороні. Використовується для розшифрування вхідного та шифрування вихідного трафіку.</li>
+                <li>Що таке <strong>публічний ключ</strong> — передається іншій стороні (peer). Використовується для автентифікації та обчислення спільного секрету (ECDH на Curve25519).</li>
+            </ul>
+
+            <div class="info-box">
+                <strong>Криптографія WireGuard</strong>
+                WireGuard використовує асиметричну криптографію на базі еліптичної кривої Curve25519. Кожна сторона (сервер і клієнт) генерує свою пару ключів. Довжина ключа — 32 байти (44 символи у Base64). Приватний ключ генерується командою <code>wg genkey</code>, публічний — обчислюється з приватного командою <code>wg pubkey</code>.
+            </div>
+
+            <h3>Крок 2. Дослідження конфігурації (без реального з'єднання)</h3>
+            <p>Створіть конфігураційний файл <strong>сервера</strong> <code>wg0.conf</code> за наступним шаблоном:</p>
+<pre><code>[Interface]
+PrivateKey = &lt;ПРИВАТНИЙ_КЛЮЧ_СЕРВЕРА&gt;
+Address = 10.0.0.1/24
+ListenPort = 51820
+
+[Peer]
+PublicKey = &lt;ПУБЛІЧНИЙ_КЛЮЧ_КЛІЄНТА&gt;
+AllowedIPs = 10.0.0.2/32</code></pre>
+
+            <p>Створіть конфігураційний файл <strong>клієнта</strong> <code>wg0-client.conf</code>:</p>
+<pre><code>[Interface]
+PrivateKey = &lt;ПРИВАТНИЙ_КЛЮЧ_КЛІЄНТА&gt;
+Address = 10.0.0.2/24
+DNS = 8.8.8.8
+
+[Peer]
+PublicKey = &lt;ПУБЛІЧНИЙ_КЛЮЧ_СЕРВЕРА&gt;
+Endpoint = 192.168.1.1:51820
+AllowedIPs = 10.0.0.0/24
+PersistentKeepalive = 25</code></pre>
+
+            <p>Поясніть у звіті кожний параметр:</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Параметр</th>
+                        <th>Пояснення</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>PrivateKey</code></td>
+                        <td>Приватний ключ цього хосту для шифрування/розшифрування трафіку</td>
+                    </tr>
+                    <tr>
+                        <td><code>Address</code></td>
+                        <td>IP-адреса VPN-інтерфейсу wg0 та маска підмережі VPN-тунелю</td>
+                    </tr>
+                    <tr>
+                        <td><code>ListenPort</code></td>
+                        <td>UDP-порт, на якому сервер очікує вхідні з'єднання від клієнтів</td>
+                    </tr>
+                    <tr>
+                        <td><code>PublicKey</code></td>
+                        <td>Публічний ключ іншої сторони для автентифікації peer</td>
+                    </tr>
+                    <tr>
+                        <td><code>AllowedIPs</code></td>
+                        <td>IP-адреси, з яких дозволено приймати трафік від peer. Також визначає маршрутизацію</td>
+                    </tr>
+                    <tr>
+                        <td><code>Endpoint</code></td>
+                        <td>Фізична IP-адреса та порт VPN-сервера, до якого підключається клієнт</td>
+                    </tr>
+                    <tr>
+                        <td><code>PersistentKeepalive</code></td>
+                        <td>Інтервал keepalive-пакетів (у секундах) для підтримки NAT-сесії</td>
+                    </tr>
+                    <tr>
+                        <td><code>DNS</code></td>
+                        <td>DNS-сервер, що використовується при активному VPN-з'єднанні</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="tip-box">
+                <strong>Split tunnel vs Full tunnel</strong>
+                <strong>Split tunnel</strong> (<code>AllowedIPs = 10.0.0.0/24</code>) — через VPN іде лише трафік до корпоративної мережі, решта — напряму. Менше навантаження на VPN-сервер.
+                <strong>Full tunnel</strong> (<code>AllowedIPs = 0.0.0.0/0</code>) — весь трафік клієнта проходить через VPN. Максимальний захист, але вищі затримки.
+            </div>
+
+            <h3>Крок 3. Демонстрація різниці захищеного та незахищеного трафіку</h3>
+            <p>У цьому кроці ми використаємо <code>tcpdump</code> для порівняння незахищеного HTTP-трафіку та зашифрованого HTTPS-трафіку.</p>
+
+            <h4>3.1. Захоплення незахищеного HTTP-трафіку</h4>
+            <p>Запустіть локальний HTTP-сервер та перехопіть трафік на loopback-інтерфейсі:</p>
+<pre><code># Запустіть простий HTTP-сервер:
+python3 -m http.server 8080
+
+# В іншому терміналі — захоплення трафіку на loopback:
+sudo tcpdump -i lo port 8080 -A -c 10</code></pre>
+
+            <p>В ще одному терміналі виконайте HTTP-запит:</p>
+<pre><code># Звернення до локального сервера:
+curl http://localhost:8080/</code></pre>
+
+            <p>У виводі <code>tcpdump</code> ви побачите весь вміст у відкритому вигляді: HTTP-запит <code>GET /</code>, заголовки та тіло відповіді.</p>
+
+            <div class="warning-box">
+                <strong>Увага</strong>
+                Зверніть увагу: у виводі tcpdump для HTTP-трафіку чітко видно рядки <code>GET /</code>, <code>Host: localhost:8080</code> та повний вміст відповіді. Саме так зловмисник бачить незашифрований трафік у мережі.
+            </div>
+
+            <h4>3.2. Захоплення зашифрованого HTTPS-трафіку</h4>
+            <p>Для порівняння перехопіть HTTPS-трафік до зовнішнього сервера:</p>
+<pre><code># Захопіть HTTPS-трафік (порт 443):
+sudo tcpdump -i eth0 port 443 -c 10
+
+# В іншому терміналі — HTTPS-запит:
+curl -s https://example.com > /dev/null</code></pre>
+
+            <div class="info-box">
+                <strong>Результат</strong>
+                У виводі tcpdump для HTTPS-трафіку ви побачите лише набір випадкових байтів. Неможливо визначити ні URL, ні вміст сторінки, ні HTTP-заголовки. VPN-тунель WireGuard забезпечує аналогічний рівень захисту для будь-якого трафіку.
+            </div>
+
+            <h3>Крок 4. Порівняльна таблиця</h3>
+            <p>На основі проведених спостережень заповніть порівняльну таблицю HTTP vs VPN/TLS за 5 параметрами:</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Характеристика</th>
+                        <th>HTTP (незахищений)</th>
+                        <th>VPN / TLS (захищений)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Конфіденційність</strong></td>
+                        <td>Вміст пакетів читабельний (відкритий текст)</td>
+                        <td>Вміст зашифрований, не піддається читанню</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Цілісність</strong></td>
+                        <td>Пакети можуть бути модифіковані (MITM)</td>
+                        <td>Кожен пакет автентифікований (MAC/Poly1305)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Автентичність</strong></td>
+                        <td>Немає перевірки сторін з'єднання</td>
+                        <td>Взаємна автентифікація ключами/сертифікатами</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Захист від перехоплення</strong></td>
+                        <td>Зловмисник бачить усі дані (логіни, паролі, вміст)</td>
+                        <td>Зловмисник бачить лише зашифровані байти</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Видимість для провайдера</strong></td>
+                        <td>Провайдер бачить URL, заголовки, вміст</td>
+                        <td>Провайдер бачить лише IP-адреси та факт з'єднання</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="example-box">
+                <strong>Висновок зі спостережень</strong>
+                HTTP-трафік на мережевому рівні повністю прозорий — будь-хто з доступом до каналу може прочитати логіни, паролі, токени та інші конфіденційні дані. VPN (WireGuard) та TLS (HTTPS) шифрують трафік, перетворюючи його на набір випадкових байтів, що не піддаються аналізу без відповідного ключа.
+            </div>
+
+            <!-- ===== Приклад виконання ===== -->
+            <h2>Приклад виконання</h2>
+            <p>Нижче наведено повний приклад виконання практичної роботи для IT-компанії "TechSoft" (30 осіб) на Ubuntu 22.04. Адміністратор безпеки налаштовує VPN для захисту каналів зв'язку між офісом та віддаленими працівниками.</p>
+
+            <h3>1. Встановлення WireGuard та генерація ключів</h3>
+
+<pre><code>student@techsoft-srv:~$ sudo apt update && sudo apt install -y wireguard-tools
+Hit:1 http://archive.ubuntu.com/ubuntu jammy InRelease
+...
+Setting up wireguard-tools (1.0.20210914-1ubuntu2) ...
+
+student@techsoft-srv:~$ wg genkey | tee privatekey | wg pubkey > publickey
+
+student@techsoft-srv:~$ cat privatekey
+qWe3V7kR9xL2cF5hJ8wQ0pDy4tGi6uAo1eSf8aZjXnM=
+
+student@techsoft-srv:~$ cat publickey
+kHs9J2mR7xL4cF6hN8wQ0pBv3dYt5iUo1eSf8aZjXnE=
+
+student@techsoft-srv:~$ ls -la privatekey publickey
+-rw------- 1 student student 45 Feb 18 10:15 privatekey
+-rw-r--r-- 1 student student 45 Feb 18 10:15 publickey</code></pre>
+
+            <p><strong>Пояснення ключів:</strong></p>
+            <ul>
+                <li><strong>Приватний ключ</strong> (<code>privatekey</code>) — 32-байтний секретний ключ у форматі Base64. Зберігається тільки на цьому хості, ніколи не передається. Використовується для розшифрування вхідного трафіку та підпису вихідних пакетів.</li>
+                <li><strong>Публічний ключ</strong> (<code>publickey</code>) — обчислюється з приватного за допомогою операції на еліптичній кривій Curve25519. Передається іншій стороні (peer) для автентифікації та обчислення спільного секрету.</li>
+            </ul>
+
+            <p><strong>Таблиця ключів:</strong></p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Тип ключа</th>
+                        <th>Значення</th>
+                        <th>Призначення</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Приватний</td>
+                        <td><code>qWe3V7***ЗАМАСКОВАНО***XnM=</code></td>
+                        <td>Шифрування/розшифрування. Зберігається тільки локально</td>
+                    </tr>
+                    <tr>
+                        <td>Публічний</td>
+                        <td><code>kHs9J2mR7xL4cF6hN8wQ0pBv3dYt5iUo1eSf8aZjXnE=</code></td>
+                        <td>Передається peer для автентифікації</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="warning-box">
+                <strong>Безпека ключів</strong>
+                У звіті приватний ключ обов'язково маскується. У виробничому середовищі IT-компанії "TechSoft" приватні ключі зберігаються з правами <code>600</code> (тільки root) у директорії <code>/etc/wireguard/</code>.
+            </div>
+
+            <h3>2. Конфігураційні файли з поясненнями</h3>
+
+            <h4>Конфігурація сервера (<code>wg0.conf</code>)</h4>
+<pre><code># Конфігурація VPN-сервера TechSoft
+# Сервер: techsoft-srv (192.168.1.1)
+
+[Interface]
+# Приватний ключ сервера — для шифрування/розшифрування трафіку.
+PrivateKey = qWe3V7kR9xL2cF5hJ8wQ0pDy4tGi6uAo1eSf8aZjXnM=
+
+# IP-адреса VPN-інтерфейсу. /24 = до 254 клієнтів.
+Address = 10.0.0.1/24
+
+# UDP-порт для вхідних VPN-з'єднань (стандартний WireGuard).
+ListenPort = 51820
+
+[Peer]
+# === Клієнт: віддалений працівник TechSoft ===
+# Публічний ключ клієнта для автентифікації.
+PublicKey = dMk4L8nT2xW6cR9vP5jQ0pEy3dFi7uAo1aSg8kZlYwC=
+
+# Дозволені IP: тільки адреса цього клієнта.
+AllowedIPs = 10.0.0.2/32</code></pre>
+
+            <h4>Конфігурація клієнта (<code>wg0-client.conf</code>)</h4>
+<pre><code># Конфігурація VPN-клієнта TechSoft
+# Клієнт: віддалений працівник
+
+[Interface]
+# Приватний ключ клієнта.
+PrivateKey = rTx5R8mK2vN7cF3hJ9wL0pDy4tGi6uBo1eSf8aYjXnR=
+
+# IP-адреса VPN-інтерфейсу клієнта.
+Address = 10.0.0.2/24
+
+# DNS через VPN.
+DNS = 8.8.8.8
+
+[Peer]
+# === Сервер TechSoft ===
+# Публічний ключ сервера.
+PublicKey = kHs9J2mR7xL4cF6hN8wQ0pBv3dYt5iUo1eSf8aZjXnE=
+
+# Фізична адреса сервера TechSoft.
+Endpoint = 192.168.1.1:51820
+
+# Split tunnel: тільки корпоративний трафік через VPN.
+AllowedIPs = 10.0.0.0/24
+
+# Keepalive для підтримки NAT-сесії.
+PersistentKeepalive = 25</code></pre>
+
+            <p><strong>Аналіз параметрів:</strong></p>
+            <ol>
+                <li><code>PrivateKey</code> — серце безпеки кожного вузла. Разом із публічним ключем peer обчислюється спільний секрет (ECDH).</li>
+                <li><code>Address</code> — сервер отримує 10.0.0.1, клієнт — 10.0.0.2 у спільній VPN-підмережі.</li>
+                <li><code>ListenPort = 51820</code> — фіксований UDP-порт сервера. Повинен бути відкритий у фаєрволі.</li>
+                <li><code>PublicKey</code> — публічний ключ протилежної сторони для перевірки автентичності пакетів.</li>
+                <li><code>AllowedIPs</code> — на сервері <code>10.0.0.2/32</code> обмежує peer одною адресою; на клієнті <code>10.0.0.0/24</code> направляє корпоративний трафік через VPN.</li>
+                <li><code>Endpoint</code> — фізична адреса сервера, куди клієнт надсилає перший handshake.</li>
+                <li><code>PersistentKeepalive = 25</code> — кожні 25 секунд клієнт надсилає порожній пакет, щоб NAT не закрив UDP-сесію.</li>
+            </ol>
+
+            <h3>3. Результати аналізу трафіку (tcpdump)</h3>
+
+            <h4>Незахищений HTTP-трафік</h4>
+<pre><code>student@techsoft-srv:~$ echo "TechSoft CRM: login=admin password=Ts#2026! api_key=sk-proj-abc123" > /tmp/secret.txt
+student@techsoft-srv:~$ cd /tmp && python3 -m http.server 8080 &
+[1] 4521
+Serving HTTP on 0.0.0.0 port 8080 (http://0.0.0.0:8080/) ...
+
+student@techsoft-srv:~$ sudo tcpdump -i lo port 8080 -A -c 10 &
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on lo, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+
+student@techsoft-srv:~$ curl http://localhost:8080/secret.txt
+TechSoft CRM: login=admin password=Ts#2026! api_key=sk-proj-abc123</code></pre>
+
+            <p><strong>Вивід tcpdump (HTTP):</strong></p>
+<pre><code>10:30:45.678901 IP localhost.54312 > localhost.8080: Flags [P.], seq 1:78, ack 1, length 77
+E..u..@.@.......................P.......
+GET /secret.txt HTTP/1.1
+Host: localhost:8080
+User-Agent: curl/7.81.0
+Accept: */*
+
+10:30:45.679234 IP localhost.8080 > localhost.54312: Flags [P.], seq 1:236, ack 78, length 235
+E.....@.@.......................P.......
+HTTP/1.0 200 OK
+Server: SimpleHTTP/0.6 Python/3.10.12
+Content-type: text/plain
+Content-Length: 68
+
+TechSoft CRM: login=admin password=Ts#2026! api_key=sk-proj-abc123</code></pre>
+
+            <div class="example-box">
+                <strong>Аналіз HTTP-трафіку</strong>
+                У виводі tcpdump чітко видно: HTTP-запит <code>GET /secret.txt</code>, заголовки <code>Host</code> та <code>User-Agent</code>, а також повний вміст файлу з обліковими даними CRM-системи TechSoft. Зловмисник з доступом до мережі отримує логін, пароль та API-ключ у відкритому вигляді.
+            </div>
+
+            <h4>Зашифрований HTTPS-трафік</h4>
+<pre><code>student@techsoft-srv:~$ sudo tcpdump -i eth0 port 443 -X -c 10 &
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on eth0, link-type EN10MB (Ethernet), snapshot length 262144 bytes
+
+student@techsoft-srv:~$ curl -s https://example.com > /dev/null</code></pre>
+
+            <p><strong>Вивід tcpdump (HTTPS):</strong></p>
+<pre><code>10:32:12.345678 IP techsoft-srv.48762 > 93.184.216.34.443: Flags [P.], seq 1:218, ack 1, length 217
+        0x0000:  4500 0101 a3f2 4000 4006 5c8a c0a8 0164  E.....@.@.\....d
+        0x0010:  5db8 d822 be7a 01bb 1a4d 5e91 c6d2 8f3a  ]..".z...M^....:
+        0x0020:  5018 ffff 2c84 0000 1703 0300 d4f7 b23c  P...,..........<
+        0x0030:  8e1a 4d5e 91c6 d28f 3a7e 1b0d 4ca8 2f63  ..M^....:~..L./c
+        0x0040:  94e5 b1d7 289c 0e47 f32a 81b6 d53e 9a1f  ....(..G.*...>..
+        0x0050:  70c4 83d2 e60b 5c8a 17f9 6423 a87d 0be5  p.....\.../d#.}.
+10:32:12.456789 IP 93.184.216.34.443 > techsoft-srv.48762: Flags [P.], seq 1:1389, ack 218, length 1388
+        0x0000:  4500 059c 7b21 4000 3406 c3e1 5db8 d822  E...{!@.4...]..".
+        0x0010:  c0a8 0164 01bb be7a c6d2 8f3a 1a4d 5f6a  ...d...z...:.M_j
+        0x0020:  5018 0100 8c27 0000 1703 0305 6b8c 15a7  P....'......k...
+        0x0030:  e32b 6d91 f0d3 e84c 7b0a 2956 f1b4 7c83  .+m....L{.)V..|.
+        ...</code></pre>
+
+            <div class="example-box">
+                <strong>Аналіз HTTPS-трафіку</strong>
+                У виводі tcpdump видно лише IP-адреси та порт 443, а вміст повністю зашифрований — лише hex-байти. Заголовок <code>1703 03</code> означає TLS Application Data. Неможливо визначити URL, HTTP-заголовки чи вміст сторінки. VPN-тунель WireGuard забезпечує аналогічний рівень захисту.
+            </div>
+
+            <h3>4. Заповнена порівняльна таблиця</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Характеристика</th>
+                        <th>HTTP (незахищений)</th>
+                        <th>VPN / TLS (захищений)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Конфіденційність</strong></td>
+                        <td>Відсутня. У tcpdump видно: <code>GET /secret.txt</code>, <code>password=Ts#2026!</code></td>
+                        <td>Забезпечена. У tcpdump видно лише: <code>0x0030: 8e1a 4d5e 91c6...</code> (шифротекст)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Цілісність</strong></td>
+                        <td>Не гарантована. Пакети можуть бути модифіковані на маршрутизаторі</td>
+                        <td>Гарантована. Poly1305 (WireGuard) або HMAC (TLS) автентифікує кожен пакет</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Автентичність</strong></td>
+                        <td>Відсутня. Немає перевірки, хто надсилає дані</td>
+                        <td>Забезпечена. WireGuard: ключі Curve25519. TLS: сертифікати X.509</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Захист від перехоплення</strong></td>
+                        <td>Немає. Зловмисник з tcpdump бачить усе</td>
+                        <td>Повний. Без приватного ключа розшифрування неможливе</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Видимість для провайдера</strong></td>
+                        <td>Провайдер бачить URL, заголовки, вміст запитів</td>
+                        <td>Провайдер бачить лише IP-адреси та обсяг трафіку</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- ===== Вимоги до звіту ===== -->
+            <h2>Вимоги до звіту</h2>
+            <p>Звіт з практичної роботи (3-4 сторінки) повинен містити:</p>
+            <ol>
+                <li><strong>Згенеровані ключі</strong> — публічний ключ повністю, приватний — замаскований (перші 6 символів + <code>***ЗАМАСКОВАНО***</code> + останні 4 символи)</li>
+                <li><strong>Конфігураційні файли</strong> — файли <code>wg0.conf</code> для сервера та клієнта з поясненням кожного параметра</li>
+                <li><strong>Результати tcpdump</strong> — скріншоти або фрагменти виводу незахищеного HTTP та зашифрованого HTTPS-трафіку</li>
+                <li><strong>Порівняльна таблиця</strong> — HTTP vs VPN/TLS за 5 параметрами (конфіденційність, цілісність, автентичність, захист від перехоплення, видимість для провайдера)</li>
+                <li><strong>Відповіді на 5 контрольних питань</strong></li>
+                <li><strong>Висновки</strong></li>
+            </ol>
+
+            <div class="warning-box">
+                <strong>Важливо</strong>
+                У звіті приватні ключі обов'язково маскуються. Публічні ключі наводяться повністю. Фрагменти виводу tcpdump мають наочно демонструвати відмінність між відкритим та зашифрованим трафіком.
+            </div>
+
+            <!-- ===== Контрольні питання ===== -->
+            <h2>Контрольні питання</h2>
+            <ol>
+                <li>Що таке VPN і які основні задачі він вирішує в контексті захисту каналів зв'язку ІКС?</li>
+                <li>Які криптографічні алгоритми використовує WireGuard? Поясніть призначення кожного з них (Curve25519, ChaCha20, Poly1305, BLAKE2s).</li>
+                <li>Поясніть різницю між split tunnel та full tunnel. У яких випадках доцільно використовувати кожний із них?</li>
+                <li>Що таке параметр <code>AllowedIPs</code> у WireGuard і яку подвійну роль він виконує (маршрутизація та фільтрація)?</li>
+                <li>Чому при аналізі захищеності VPN слід захоплювати трафік саме на фізичному інтерфейсі (<code>eth0</code>), а не на VPN-інтерфейсі (<code>wg0</code>)?</li>
+            </ol>
+
+        </article>
+
+        <nav class="page-nav">
+            <a href="04.html">&larr; Міжмережевий екран</a>
+            <a href="06.html">IDS/IPS &rarr;</a>
+        </nav>
+    </main>
+
+    <script>
+        document.getElementById('menuToggle').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('active');
+        });
+        document.getElementById('overlay').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.remove('open');
+            this.classList.remove('active');
+        });
+    </script>
+</body>
+</html>

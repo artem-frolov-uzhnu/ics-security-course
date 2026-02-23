@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Практична 6. IDS/IPS: виявлення вторгнень — Захист ІКС</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="overlay" id="overlay"></div>
+    <button class="menu-toggle" id="menuToggle">&#9776;</button>
+
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="../index.html">Технології захисту ІКС</a>
+        </div>
+        <div class="nav-section">
+            <h3>Лекції</h3>
+            <ul>
+                <li><a href="../lectures/01.html">1. Вступ. ІКС як об'єкт захисту</a></li>
+                <li><a href="../lectures/02.html">2. Моделювання загроз</a></li>
+                <li><a href="../lectures/03.html">3. Політика безпеки та доступ</a></li>
+                <li><a href="../lectures/04.html">4. Криптографічний захист</a></li>
+                <li><a href="../lectures/05.html">5. Захист мережевої інфраструктури</a></li>
+                <li><a href="../lectures/06.html">6. Захист кінцевих точок</a></li>
+                <li><a href="../lectures/07.html">7. Zero Trust та SIEM</a></li>
+                <li><a href="../lectures/08.html">8. Проєктування КСЗІ</a></li>
+                <li><a href="../lectures/09.html">9. Впровадження та тестування</a></li>
+                <li><a href="../lectures/10.html">10. Експлуатація та інциденти</a></li>
+            </ul>
+        </div>
+        <div class="nav-section">
+            <h3>Практичні</h3>
+            <ul>
+                <li><a href="../practicals/01.html">1. Моделювання загроз</a></li>
+                <li><a href="../practicals/02.html">2. Політика безпеки</a></li>
+                <li><a href="../practicals/03.html">3. Криптографічні засоби</a></li>
+                <li><a href="../practicals/04.html">4. Міжмережевий екран</a></li>
+                <li><a href="../practicals/05.html">5. VPN та захист каналів</a></li>
+                <li><a href="../practicals/06.html" class="active">6. IDS/IPS</a></li>
+                <li><a href="../practicals/07.html">7. SIEM-системи</a></li>
+                <li><a href="../practicals/08.html">8. Проєктування КСЗІ</a></li>
+                <li><a href="../practicals/09.html">9. Тестування захищеності</a></li>
+                <li><a href="../practicals/10.html">10. Захист проєктів</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="content">
+        <article>
+            <h1>Практична робота 6. IDS/IPS: виявлення вторгнень</h1>
+            <p class="subtitle">Аналіз правил Suricata та виявлення мережевих атак</p>
+
+            <h2>Мета роботи</h2>
+            <p>Зрозуміти принципи виявлення вторгнень та навчитися читати й створювати правила IDS. Ознайомитися зі структурою правил Suricata, проаналізувати стандартні правила, написати власні правила для виявлення ICMP-трафіку та HTTP-запитів, протестувати їх роботу та класифікувати отримані алерти.</p>
+
+            <h2>Теоретичні відомості</h2>
+
+            <h3>IDS vs IPS: основні концепції</h3>
+            <p><strong>IDS (Intrusion Detection System)</strong> — система виявлення вторгнень, яка працює у пасивному режимі: аналізує копію мережевого трафіку, генерує алерти при виявленні підозрілої активності, але не блокує трафік. IDS зазвичай підключається до SPAN-порту комутатора або мережевого TAP-пристрою.</p>
+            <p><strong>IPS (Intrusion Prevention System)</strong> — система запобігання вторгненням, яка працює в режимі inline: стоїть безпосередньо на шляху трафіку та може активно блокувати шкідливі пакети в реальному часі (дії <code>drop</code> або <code>reject</code>).</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Характеристика</th>
+                        <th>IDS</th>
+                        <th>IPS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Режим роботи</td>
+                        <td>Пасивний (копія трафіку)</td>
+                        <td>Активний (inline, на шляху трафіку)</td>
+                    </tr>
+                    <tr>
+                        <td>Реакція на загрозу</td>
+                        <td>Алерт (повідомлення)</td>
+                        <td>Блокування пакета</td>
+                    </tr>
+                    <tr>
+                        <td>Вплив на мережу</td>
+                        <td>Не впливає на трафік</td>
+                        <td>Може блокувати легітимний трафік (False Positive)</td>
+                    </tr>
+                    <tr>
+                        <td>Точка відмови</td>
+                        <td>Ні (мережа працює без IDS)</td>
+                        <td>Так (потребує fail-open/fail-close)</td>
+                    </tr>
+                    <tr>
+                        <td>Затримка</td>
+                        <td>Не додає латентності</td>
+                        <td>Додає затримку обробки</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="info-box">
+                <strong>NIDS vs HIDS</strong>
+                <strong>NIDS (Network-based IDS)</strong> аналізує мережевий трафік на рівні сегмента мережі (приклади: Suricata, Snort, Zeek). <strong>HIDS (Host-based IDS)</strong> аналізує системні журнали, файлову систему та процеси на конкретному хості (приклади: OSSEC, Wazuh, AIDE). Для повноцінного захисту рекомендується поєднувати обидва типи.
+            </div>
+
+            <h3>Сигнатурний метод виявлення</h3>
+            <p>Suricata використовує <strong>сигнатурний (signature-based)</strong> метод виявлення: кожне правило описує конкретний шаблон (сигнатуру) атаки або підозрілої активності. Система порівнює мережевий трафік із базою правил та генерує алерт при збігу.</p>
+            <p><strong>Переваги:</strong> висока точність для відомих атак, низький рівень хибних спрацювань, швидка обробка.</p>
+            <p><strong>Недоліки:</strong> не виявляє невідомі атаки (zero-day), потребує постійного оновлення бази правил.</p>
+
+            <h3>Анатомія правила Suricata</h3>
+            <p>Кожне правило Suricata складається з двох частин: <strong>заголовка</strong> та <strong>опцій</strong>.</p>
+
+<pre><code>alert http $EXTERNAL_NET any -&gt; $HOME_NET any (msg:"Example rule"; flow:to_server,established; content:"/admin"; sid:1000001; rev:1;)</code></pre>
+
+            <p><strong>Заголовок (header):</strong></p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Поле</th>
+                        <th>Приклад</th>
+                        <th>Опис</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Дія (action)</td>
+                        <td><code>alert</code></td>
+                        <td>Що робити при збігу: <code>alert</code> (алерт), <code>drop</code> (заблокувати, IPS), <code>pass</code> (пропустити), <code>reject</code> (заблокувати + TCP RST)</td>
+                    </tr>
+                    <tr>
+                        <td>Протокол</td>
+                        <td><code>http</code></td>
+                        <td>Протокол для аналізу: <code>tcp</code>, <code>udp</code>, <code>icmp</code>, <code>http</code>, <code>dns</code>, <code>tls</code>, <code>ssh</code> тощо</td>
+                    </tr>
+                    <tr>
+                        <td>Джерело (IP порт)</td>
+                        <td><code>$EXTERNAL_NET any</code></td>
+                        <td>IP-адреса та порт джерела. Змінні: <code>$HOME_NET</code>, <code>$EXTERNAL_NET</code></td>
+                    </tr>
+                    <tr>
+                        <td>Напрямок</td>
+                        <td><code>-&gt;</code></td>
+                        <td>Односторонній (<code>-&gt;</code>) або двосторонній (<code>&lt;&gt;</code>)</td>
+                    </tr>
+                    <tr>
+                        <td>Призначення (IP порт)</td>
+                        <td><code>$HOME_NET any</code></td>
+                        <td>IP-адреса та порт призначення</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p><strong>Опції (options):</strong></p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Опція</th>
+                        <th>Призначення</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>msg:"..."</code></td>
+                        <td>Текст повідомлення алерту</td>
+                    </tr>
+                    <tr>
+                        <td><code>flow:to_server,established</code></td>
+                        <td>Фільтр за станом TCP-потоку та напрямком</td>
+                    </tr>
+                    <tr>
+                        <td><code>content:"..."</code></td>
+                        <td>Шаблон для пошуку в пакеті (рядок або hex)</td>
+                    </tr>
+                    <tr>
+                        <td><code>nocase</code></td>
+                        <td>Пошук без урахування регістру</td>
+                    </tr>
+                    <tr>
+                        <td><code>http.uri</code></td>
+                        <td>Sticky buffer: шукати в URI HTTP-запиту</td>
+                    </tr>
+                    <tr>
+                        <td><code>http.user_agent</code></td>
+                        <td>Sticky buffer: шукати в полі User-Agent</td>
+                    </tr>
+                    <tr>
+                        <td><code>classtype:...</code></td>
+                        <td>Категорія загрози (web-application-attack, misc-activity тощо)</td>
+                    </tr>
+                    <tr>
+                        <td><code>sid:...</code></td>
+                        <td>Унікальний ідентифікатор правила (Signature ID)</td>
+                    </tr>
+                    <tr>
+                        <td><code>rev:...</code></td>
+                        <td>Номер ревізії (версії) правила</td>
+                    </tr>
+                    <tr>
+                        <td><code>priority:...</code></td>
+                        <td>Пріоритет: 1 (найвищий) — 4 (найнижчий)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="tip-box">
+                <strong>Діапазони SID</strong>
+                SID 1-999999 зарезервовані для стандартних наборів правил (ET Open, ET Pro, Snort). SID 1000000-1999999 — для локальних (власних) правил. Завжди використовуйте цей діапазон для своїх правил.
+            </div>
+
+            <h2>Необхідне ПЗ та інструменти</h2>
+            <ul>
+                <li><strong>Ubuntu 22.04+</strong> (або WSL2 з Ubuntu на Windows)</li>
+                <li><strong><a href="https://suricata.io/" target="_blank">Suricata</a></strong> — відкрита система IDS/IPS з підтримкою багатопотокової обробки та глибокого аналізу протоколів</li>
+                <li><strong>suricata-update</strong> — утиліта для оновлення правил (встановлюється разом із Suricata)</li>
+                <li>Текстовий редактор (<code>nano</code>, <code>vim</code> або <code>code</code>)</li>
+            </ul>
+
+            <div class="info-box">
+                <strong>Два варіанти виконання</strong>
+                <strong>Варіант А (рекомендовано):</strong> встановлення Suricata на одній ВМ або WSL, написання та тестування правил на живому трафіку. <strong>Варіант Б (без встановлення):</strong> аналіз наданих викладачем файлів із правилами Suricata та прикладами fast.log. Завдання: проаналізувати правила, пояснити кожне поле, класифікувати алерти з логу.
+            </div>
+
+            <h2>Варіанти завдань</h2>
+            <p>Студент обирає один із варіантів або отримує варіант від викладача. Варіант визначає, яке стандартне правило аналізувати та які два власних правила написати.</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Варіант</th>
+                        <th>Стандартне правило для аналізу</th>
+                        <th>Власне правило №1 (опис)</th>
+                        <th>Власне правило №2 (опис)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>ET SCAN Nmap SYN Scan</td>
+                        <td>Виявлення ICMP Echo Request (ping)</td>
+                        <td>Виявлення HTTP-запиту до /admin</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>ET SCAN Suspicious User-Agent (sqlmap)</td>
+                        <td>Виявлення ICMP Echo Reply</td>
+                        <td>Виявлення HTTP-запиту до /login</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>ET SCAN Potential SSH Brute Force</td>
+                        <td>Виявлення DNS-запиту до підозрілого домену (.xyz)</td>
+                        <td>Виявлення HTTP-запиту до /wp-admin</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>ET POLICY Outgoing HTTP POST Request</td>
+                        <td>Виявлення ICMP Destination Unreachable</td>
+                        <td>Виявлення HTTP-запиту до /phpmyadmin</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>ET SCAN Nmap OS Detection</td>
+                        <td>Виявлення TCP-з'єднання на порт 23 (Telnet)</td>
+                        <td>Виявлення HTTP-запиту з User-Agent &laquo;Nikto&raquo;</td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td>ET POLICY DNS Query to .onion Domain</td>
+                        <td>Виявлення TCP-з'єднання на порт 3389 (RDP)</td>
+                        <td>Виявлення HTTP-запиту до /api/v1/users</td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td>ET SCAN Rapid SSH Connection Attempts</td>
+                        <td>Виявлення ICMP Timestamp Request</td>
+                        <td>Виявлення HTTP-запиту до /config або /env</td>
+                    </tr>
+                    <tr>
+                        <td>8</td>
+                        <td>ET POLICY Outgoing Basic Auth Base64 HTTP Password</td>
+                        <td>Виявлення TCP-з'єднання на порт 21 (FTP)</td>
+                        <td>Виявлення HTTP-запиту до /.git/config</td>
+                    </tr>
+                    <tr>
+                        <td>9</td>
+                        <td>ET SCAN Potential VNC Brute Force</td>
+                        <td>Виявлення TCP-з'єднання на порт 445 (SMB)</td>
+                        <td>Виявлення HTTP-запиту з User-Agent &laquo;DirBuster&raquo;</td>
+                    </tr>
+                    <tr>
+                        <td>10</td>
+                        <td>ET POLICY Cleartext WordPress Login</td>
+                        <td>Виявлення TCP-з'єднання на порт 1433 (MSSQL)</td>
+                        <td>Виявлення HTTP-запиту до /shell або /cmd</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Хід роботи (Варіант А)</h2>
+
+            <h3>Крок 1. Встановлення Suricata</h3>
+            <p>Встановіть Suricata, перевірте версію та оновіть правила:</p>
+<pre><code>sudo apt update
+sudo apt install -y suricata
+suricata --build-info | head -5
+sudo suricata-update</code></pre>
+            <p>Переконайтеся, що правила завантажено у <code>/var/lib/suricata/rules/suricata.rules</code>.</p>
+
+            <div class="tip-box">
+                <strong>Порада</strong>
+                У WSL Suricata може не мати доступу до мережевих інтерфейсів через обмеження ядра. У такому разі використовуйте режим обробки PCAP-файлу замість моніторингу інтерфейсу (див. крок 4).
+            </div>
+
+            <h3>Крок 2. Аналіз 3 стандартних правил</h3>
+            <p>Відкрийте файл правил та знайдіть 3 правила різних типів. Для кожного правила поясніть кожне поле: дію, протокол, адреси, порти, опції (<code>msg</code>, <code>sid</code>, <code>content</code>, <code>flow</code>).</p>
+<pre><code># Переглянути перші правила з файлу
+head -100 /var/lib/suricata/rules/suricata.rules
+
+# Знайти правило для виявлення Nmap
+grep -i "nmap" /var/lib/suricata/rules/suricata.rules | head -3
+
+# Знайти правило з дією drop
+grep "^drop " /var/lib/suricata/rules/suricata.rules | head -3</code></pre>
+            <p>Скопіюйте 3 правила та розберіть кожне поле у вигляді таблиці.</p>
+
+            <h3>Крок 3. Написання 2 власних правил</h3>
+            <p>Створіть файл для локальних правил та додайте 2 правила:</p>
+<pre><code>sudo mkdir -p /etc/suricata/rules
+sudo nano /etc/suricata/rules/local.rules</code></pre>
+
+            <p><strong>Правило 1 — виявлення ICMP (ping):</strong></p>
+<pre><code>alert icmp any any -&gt; $HOME_NET any (msg:"LOCAL - ICMP Ping detected"; itype:8; sid:1000001; rev:1; classtype:misc-activity; priority:3;)</code></pre>
+
+            <p><strong>Правило 2 — виявлення HTTP-запиту до конкретного шляху:</strong></p>
+<pre><code>alert http $EXTERNAL_NET any -&gt; $HOME_NET any (msg:"LOCAL - Access to /admin detected"; flow:to_server,established; http.uri; content:"/admin"; nocase; sid:1000002; rev:1; classtype:web-application-attack; priority:2;)</code></pre>
+
+            <p>Переконайтеся, що файл <code>local.rules</code> підключений у конфігурації <code>/etc/suricata/suricata.yaml</code>:</p>
+<pre><code># У секції rule-files додайте:
+rule-files:
+  - suricata.rules
+  - /etc/suricata/rules/local.rules</code></pre>
+
+            <div class="warning-box">
+                <strong>Увага</strong>
+                SID кожного правила повинен бути унікальним. Для локальних правил використовуйте діапазон 1000000-1999999. Перевірте валідність правил перед запуском: <code>sudo suricata -T -c /etc/suricata/suricata.yaml</code>.
+            </div>
+
+            <h3>Крок 4. Тестування та перевірка fast.log</h3>
+            <p>Запустіть Suricata та протестуйте правила:</p>
+<pre><code># Перезапустити Suricata для завантаження нових правил
+sudo systemctl restart suricata
+
+# Тест правила 1: ICMP ping
+ping -c 3 127.0.0.1
+
+# Тест правила 2: HTTP-запит до /admin
+# Спочатку запустіть тестовий HTTP-сервер (в іншому терміналі):
+python3 -m http.server 80
+# Потім виконайте запит:
+curl http://localhost/admin
+
+# Перевірити алерти
+sudo cat /var/log/suricata/fast.log</code></pre>
+
+            <div class="tip-box">
+                <strong>Альтернатива: тестування на PCAP-файлі</strong>
+                Якщо Suricata не може моніторити інтерфейс (наприклад, у WSL), використовуйте режим обробки PCAP: <code>sudo suricata -r /path/to/test.pcap -c /etc/suricata/suricata.yaml -l /var/log/suricata/</code>. Тестовий PCAP можна створити командою <code>sudo tcpdump -i lo -w test.pcap -c 50</code> під час виконання ping та curl.
+            </div>
+
+            <h3>Крок 5. Заповнення таблиці класифікації алертів</h3>
+            <p>Для кожного алерту з <code>fast.log</code> заповніть таблицю:</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Час</th>
+                        <th>SID</th>
+                        <th>Опис алерту</th>
+                        <th>IP-джерело</th>
+                        <th>IP-ціль</th>
+                        <th>Класифікація (TP/FP)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><em>з fast.log</em></td>
+                        <td><em>SID правила</em></td>
+                        <td><em>msg з правила</em></td>
+                        <td><em>src IP</em></td>
+                        <td><em>dst IP</em></td>
+                        <td><em>True/False Positive</em></td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>Для кожного алерту обґрунтуйте, чому він є True Positive (справжня підозріла активність) або False Positive (хибне спрацювання на легітимний трафік).</p>
+
+            <h2>Приклад виконання</h2>
+            <p>Нижче наведено повний приклад виконання для <strong>Варіанту А</strong> — IT-компанія "TechSoft" з Ubuntu/WSL.</p>
+
+            <div class="info-box">
+                <strong>Зверніть увагу</strong>
+                Цей приклад є орієнтовним. У вашій роботі SID стандартних правил, IP-адреси та часові мітки будуть відрізнятися залежно від вашого середовища.
+            </div>
+
+            <h3>1. Встановлення Suricata</h3>
+
+<pre><code>student@ubuntu:~$ sudo apt update && sudo apt install -y suricata
+...
+student@ubuntu:~$ suricata --build-info | head -5
+This is Suricata version 7.0.5 RELEASE
+Features: PCAP_SET_BUFF AF_PACKET HAVE_PACKET_FANOUT LIBCAP_NG LIBNET1.1
+HAVE_HTP_URI_NORMALIZE_HOOK PCRE2 HAVE_NSS HAVE_LUA HAVE_LUAJIT
+
+student@ubuntu:~$ sudo suricata-update
+18/2/2026 -- 09:10:15 - &lt;Info&gt; -- Loaded 47128 rules.
+18/2/2026 -- 09:10:16 - &lt;Info&gt; -- Enabled 35892 rules.
+18/2/2026 -- 09:10:17 - &lt;Info&gt; -- Writing rules to /var/lib/suricata/rules/suricata.rules</code></pre>
+
+            <h3>2. Аналіз 3 стандартних правил</h3>
+
+            <h4>Правило 1 — Виявлення Nmap SYN Scan (SID 2010937)</h4>
+<pre><code>alert tcp $EXTERNAL_NET any -&gt; $HOME_NET any (msg:"ET SCAN Nmap SYN Scan"; flow:stateless; flags:S,12; window:1024; threshold:type threshold, track by_src, count 5, seconds 10; classtype:attempted-recon; sid:2010937; rev:3; metadata:created_at 2010_07_30, updated_at 2020_08_06;)</code></pre>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Поле</th>
+                        <th>Значення</th>
+                        <th>Пояснення</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Дія</td>
+                        <td><code>alert</code></td>
+                        <td>Згенерувати алерт (режим IDS)</td>
+                    </tr>
+                    <tr>
+                        <td>Протокол</td>
+                        <td><code>tcp</code></td>
+                        <td>Аналізує TCP-пакети</td>
+                    </tr>
+                    <tr>
+                        <td>Джерело</td>
+                        <td><code>$EXTERNAL_NET any</code></td>
+                        <td>Будь-яка зовнішня IP, будь-який порт</td>
+                    </tr>
+                    <tr>
+                        <td>Призначення</td>
+                        <td><code>$HOME_NET any</code></td>
+                        <td>Будь-яка внутрішня IP, будь-який порт</td>
+                    </tr>
+                    <tr>
+                        <td><code>flags:S,12</code></td>
+                        <td>SYN-прапорець</td>
+                        <td>Тільки пакети з прапорцем SYN (початок з'єднання)</td>
+                    </tr>
+                    <tr>
+                        <td><code>window:1024</code></td>
+                        <td>TCP window size</td>
+                        <td>Nmap за замовчуванням встановлює window=1024 для SYN-сканування</td>
+                    </tr>
+                    <tr>
+                        <td><code>threshold</code></td>
+                        <td>5 за 10 сек</td>
+                        <td>Спрацьовує при 5+ SYN-пакетах від одного джерела за 10 секунд</td>
+                    </tr>
+                    <tr>
+                        <td><code>sid:2010937</code></td>
+                        <td>Signature ID</td>
+                        <td>Унікальний ідентифікатор правила ET Open</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>Правило 2 — Виявлення User-Agent sqlmap (SID 2024364)</h4>
+<pre><code>alert http $EXTERNAL_NET any -&gt; $HOME_NET any (msg:"ET SCAN Suspicious User-Agent (sqlmap)"; flow:to_server,established; http.user_agent; content:"sqlmap"; nocase; classtype:web-application-attack; sid:2024364; rev:4;)</code></pre>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Поле</th>
+                        <th>Значення</th>
+                        <th>Пояснення</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Дія</td>
+                        <td><code>alert</code></td>
+                        <td>Згенерувати алерт</td>
+                    </tr>
+                    <tr>
+                        <td>Протокол</td>
+                        <td><code>http</code></td>
+                        <td>Аналіз на прикладному рівні (HTTP)</td>
+                    </tr>
+                    <tr>
+                        <td><code>flow:to_server,established</code></td>
+                        <td>Стан потоку</td>
+                        <td>Тільки встановлені TCP-з'єднання у напрямку до сервера</td>
+                    </tr>
+                    <tr>
+                        <td><code>http.user_agent</code></td>
+                        <td>Sticky buffer</td>
+                        <td>Пошук ведеться у полі User-Agent HTTP-заголовка</td>
+                    </tr>
+                    <tr>
+                        <td><code>content:"sqlmap"; nocase</code></td>
+                        <td>Шаблон</td>
+                        <td>Шукає рядок "sqlmap" без урахування регістру. sqlmap — інструмент для автоматизації SQL-ін'єкцій</td>
+                    </tr>
+                    <tr>
+                        <td><code>classtype</code></td>
+                        <td>web-application-attack</td>
+                        <td>Категорія: атака на веб-застосунок</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>Правило 3 — Блокування SSH brute-force (приклад drop-правила)</h4>
+<pre><code>drop ssh $EXTERNAL_NET any -&gt; $HOME_NET 22 (msg:"ET SCAN Potential SSH Brute Force"; flow:to_server; threshold:type threshold, track by_src, count 10, seconds 60; classtype:attempted-admin; sid:2001219; rev:20;)</code></pre>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Поле</th>
+                        <th>Значення</th>
+                        <th>Пояснення</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Дія</td>
+                        <td><code>drop</code></td>
+                        <td>Заблокувати пакет (працює тільки в IPS-режимі, в IDS-режимі діє як alert)</td>
+                    </tr>
+                    <tr>
+                        <td>Протокол</td>
+                        <td><code>ssh</code></td>
+                        <td>Аналіз SSH-трафіку на прикладному рівні</td>
+                    </tr>
+                    <tr>
+                        <td>Призначення</td>
+                        <td><code>$HOME_NET 22</code></td>
+                        <td>Внутрішня мережа, порт 22 (SSH)</td>
+                    </tr>
+                    <tr>
+                        <td><code>threshold</code></td>
+                        <td>10 за 60 сек</td>
+                        <td>Спрацьовує при 10+ з'єднаннях від одного джерела за 60 секунд</td>
+                    </tr>
+                    <tr>
+                        <td><code>classtype</code></td>
+                        <td>attempted-admin</td>
+                        <td>Категорія: спроба несанкціонованого адміністративного доступу</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>3. Власні правила (local.rules)</h3>
+
+<pre><code>student@ubuntu:~$ sudo nano /etc/suricata/rules/local.rules</code></pre>
+
+            <h4>Правило 1 — Виявлення ICMP Ping</h4>
+<pre><code># Правило для виявлення ICMP Echo Request (ping)
+alert icmp any any -&gt; $HOME_NET any (msg:"LOCAL - ICMP Echo Request (ping) detected"; itype:8; sid:1000001; rev:1; classtype:misc-activity; priority:3;)</code></pre>
+
+            <div class="example-box">
+                <strong>Пояснення полів правила ICMP</strong>
+                <br><br>
+                <code>alert</code> — дія: згенерувати алерт.<br>
+                <code>icmp</code> — протокол ICMP (Internet Control Message Protocol).<br>
+                <code>any any</code> — будь-яке джерело (IP та порт).<br>
+                <code>-&gt;</code> — односторонній напрямок.<br>
+                <code>$HOME_NET any</code> — призначення: наша захищена мережа.<br>
+                <code>itype:8</code> — тип ICMP-повідомлення 8 = Echo Request (ping).<br>
+                <code>sid:1000001</code> — локальний SID.<br>
+                <code>classtype:misc-activity</code> — категорія: різна активність.<br>
+                <code>priority:3</code> — низький пріоритет (ping зазвичай не є атакою).
+            </div>
+
+            <h4>Правило 2 — Виявлення HTTP-запиту до /admin</h4>
+<pre><code># Правило для виявлення спроб доступу до адміністративної панелі
+alert http any any -&gt; $HOME_NET any (msg:"LOCAL - HTTP request to /admin path detected"; flow:to_server,established; http.uri; content:"/admin"; nocase; sid:1000002; rev:1; classtype:web-application-attack; priority:2;)</code></pre>
+
+            <div class="example-box">
+                <strong>Пояснення полів правила HTTP</strong>
+                <br><br>
+                <code>alert</code> — дія: згенерувати алерт.<br>
+                <code>http</code> — аналіз HTTP-трафіку на прикладному рівні.<br>
+                <code>any any -&gt; $HOME_NET any</code> — з будь-якого джерела на нашу мережу.<br>
+                <code>flow:to_server,established</code> — тільки встановлені TCP-з'єднання у напрямку до сервера.<br>
+                <code>http.uri</code> — sticky buffer: наступний <code>content</code> шукається в URI запиту.<br>
+                <code>content:"/admin"; nocase</code> — шукати рядок "/admin" у URI без урахування регістру.<br>
+                <code>classtype:web-application-attack</code> — категорія: атака на веб-застосунок.<br>
+                <code>priority:2</code> — середній пріоритет.
+            </div>
+
+            <p>Валідація правил:</p>
+<pre><code>student@ubuntu:~$ sudo suricata -T -c /etc/suricata/suricata.yaml -v 2&gt;&amp;1 | tail -3
+18/2/2026 -- 09:25:10 - &lt;Info&gt; -- 2 rule files processed. 35894 rules successfully loaded, 0 rules failed
+18/2/2026 -- 09:25:11 - &lt;Notice&gt; -- Configuration provided was successfully loaded. Exiting.</code></pre>
+
+            <h3>4. Тестування та результати fast.log</h3>
+
+<pre><code># Перезапуск Suricata
+student@ubuntu:~$ sudo systemctl restart suricata
+
+# Тест 1: ICMP ping
+student@ubuntu:~$ ping -c 3 127.0.0.1
+PING 127.0.0.1 (127.0.0.1) 56(84) bytes of data.
+64 bytes from 127.0.0.1: icmp_seq=1 ttl=64 time=0.028 ms
+64 bytes from 127.0.0.1: icmp_seq=2 ttl=64 time=0.031 ms
+64 bytes from 127.0.0.1: icmp_seq=3 ttl=64 time=0.029 ms
+
+# Тест 2: HTTP-запит до /admin (запустити http-сервер в іншому терміналі)
+student@ubuntu:~$ curl http://localhost/admin
+&lt;!DOCTYPE HTML PUBLIC&gt;...404 Not Found...
+
+# Перевірка алертів
+student@ubuntu:~$ sudo cat /var/log/suricata/fast.log</code></pre>
+
+            <p><strong>Вміст fast.log:</strong></p>
+<pre><code>02/18/2026-09:30:15.234567  [**] [1:1000001:1] LOCAL - ICMP Echo Request (ping) detected [**] [Classification: Misc activity] [Priority: 3] {ICMP} 127.0.0.1:8 -&gt; 127.0.0.1:0
+02/18/2026-09:30:15.234890  [**] [1:1000001:1] LOCAL - ICMP Echo Request (ping) detected [**] [Classification: Misc activity] [Priority: 3] {ICMP} 127.0.0.1:8 -&gt; 127.0.0.1:0
+02/18/2026-09:30:16.235123  [**] [1:1000001:1] LOCAL - ICMP Echo Request (ping) detected [**] [Classification: Misc activity] [Priority: 3] {ICMP} 127.0.0.1:8 -&gt; 127.0.0.1:0
+02/18/2026-09:31:02.456789  [**] [1:1000002:1] LOCAL - HTTP request to /admin path detected [**] [Classification: Web Application Attack] [Priority: 2] {TCP} 127.0.0.1:45678 -&gt; 127.0.0.1:80</code></pre>
+
+            <div class="example-box">
+                <strong>Розбір рядка fast.log</strong>
+                <br><br>
+                <code>02/18/2026-09:30:15.234567</code> — дата та час спрацювання.<br>
+                <code>[1:1000001:1]</code> — формат [GID:SID:Rev]: GID=1 (загальні правила), SID=1000001, Rev=1.<br>
+                <code>LOCAL - ICMP Echo Request (ping) detected</code> — текст msg з правила.<br>
+                <code>[Classification: Misc activity]</code> — classtype з правила.<br>
+                <code>[Priority: 3]</code> — пріоритет алерту.<br>
+                <code>{ICMP}</code> — протокол пакета.<br>
+                <code>127.0.0.1:8 -&gt; 127.0.0.1:0</code> — джерело (IP:type) та призначення (IP:code) для ICMP.
+            </div>
+
+            <h3>5. Таблиця класифікації алертів</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Час</th>
+                        <th>SID</th>
+                        <th>Опис алерту</th>
+                        <th>IP-джерело</th>
+                        <th>IP-ціль</th>
+                        <th>TP/FP</th>
+                        <th>Обґрунтування</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>09:30:15</td>
+                        <td>1000001</td>
+                        <td>ICMP Echo Request (ping)</td>
+                        <td>127.0.0.1</td>
+                        <td>127.0.0.1</td>
+                        <td>TP</td>
+                        <td>Правило спрацювало коректно: виявлено ICMP Echo Request. У виробничому середовищі ping з невідомої адреси може бути розвідкою перед атакою.</td>
+                    </tr>
+                    <tr>
+                        <td>09:30:15</td>
+                        <td>1000001</td>
+                        <td>ICMP Echo Request (ping)</td>
+                        <td>127.0.0.1</td>
+                        <td>127.0.0.1</td>
+                        <td>TP</td>
+                        <td>Другий ICMP-пакет із серії ping -c 3.</td>
+                    </tr>
+                    <tr>
+                        <td>09:30:16</td>
+                        <td>1000001</td>
+                        <td>ICMP Echo Request (ping)</td>
+                        <td>127.0.0.1</td>
+                        <td>127.0.0.1</td>
+                        <td>TP</td>
+                        <td>Третій ICMP-пакет. У реальному середовищі множинний ping від одного хоста може сигналізувати про ICMP-sweep.</td>
+                    </tr>
+                    <tr>
+                        <td>09:31:02</td>
+                        <td>1000002</td>
+                        <td>HTTP request to /admin</td>
+                        <td>127.0.0.1</td>
+                        <td>127.0.0.1</td>
+                        <td>TP</td>
+                        <td>Запит до /admin виявлено. У виробничому середовищі це може бути спробою несанкціонованого доступу до панелі адміністрування.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="warning-box">
+                <strong>Про False Positives</strong>
+                У лабораторному середовищі всі алерти є True Positive, оскільки ми цілеспрямовано генерували тестовий трафік. У виробничому середовищі правило для ICMP (SID 1000001) може давати велику кількість False Positive, оскільки ping широко використовується для легітимної діагностики мережі. Тому на практиці таке правило зазвичай доповнюють threshold-опцією або використовують лише для зовнішнього трафіку.
+            </div>
+
+            <h2>Вимоги до звіту</h2>
+            <p>Звіт має містити такі розділи (3-4 сторінки):</p>
+            <ol>
+                <li><strong>Титульна сторінка</strong> — назва дисципліни, номер та назва практичної роботи, ПІБ студента, група, дата</li>
+                <li><strong>Мета роботи</strong></li>
+                <li><strong>3 проаналізованих стандартних правила</strong> — текст правила та таблиця з поясненням кожного поля</li>
+                <li><strong>2 власних правила</strong> — текст правила, пояснення кожного поля, обґрунтування вибору (яку активність виявляє та чому це важливо)</li>
+                <li><strong>Результати тестування</strong> — фрагменти fast.log зі спрацюваннями</li>
+                <li><strong>Таблиця класифікації алертів</strong> — для кожного алерту: час, SID, опис, IP-адреси, класифікація TP/FP з обґрунтуванням</li>
+                <li><strong>Відповіді на контрольні питання</strong></li>
+                <li><strong>Висновки</strong></li>
+            </ol>
+
+            <h2>Контрольні питання</h2>
+            <ol>
+                <li>Поясніть різницю між IDS та IPS. Які переваги та ризики має використання IPS у режимі inline?</li>
+                <li>Що таке False Positive та False Negative у контексті IDS? Чому обидва типи помилок є проблемою і як їх мінімізувати?</li>
+                <li>Опишіть структуру правила Suricata: яку роль відіграють заголовок (action, protocol, addresses) та опції (msg, content, sid, flow)?</li>
+                <li>Яку роль відіграє змінна HOME_NET у конфігурації Suricata? Що станеться, якщо вона налаштована неправильно?</li>
+                <li>Порівняйте сигнатурний та аномальний (поведінковий) методи виявлення вторгнень. Які переваги та недоліки кожного?</li>
+            </ol>
+
+        </article>
+
+        <nav class="page-nav">
+            <a href="05.html">&larr; VPN та захист каналів</a>
+            <a href="07.html">SIEM-системи &rarr;</a>
+        </nav>
+    </main>
+
+    <script>
+        document.getElementById('menuToggle').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('active');
+        });
+        document.getElementById('overlay').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.remove('open');
+            this.classList.remove('active');
+        });
+    </script>
+</body>
+</html>

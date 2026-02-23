@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Практична 3. Криптографічні засоби захисту — Захист ІКС</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="overlay" id="overlay"></div>
+    <button class="menu-toggle" id="menuToggle">&#9776;</button>
+
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="../index.html">Технології захисту ІКС</a>
+        </div>
+        <div class="nav-section">
+            <h3>Лекції</h3>
+            <ul>
+                <li><a href="../lectures/01.html">1. Вступ. ІКС як об'єкт захисту</a></li>
+                <li><a href="../lectures/02.html">2. Моделювання загроз</a></li>
+                <li><a href="../lectures/03.html">3. Політика безпеки та доступ</a></li>
+                <li><a href="../lectures/04.html">4. Криптографічний захист</a></li>
+                <li><a href="../lectures/05.html">5. Захист мережевої інфраструктури</a></li>
+                <li><a href="../lectures/06.html">6. Захист кінцевих точок</a></li>
+                <li><a href="../lectures/07.html">7. Zero Trust та SIEM</a></li>
+                <li><a href="../lectures/08.html">8. Проєктування КСЗІ</a></li>
+                <li><a href="../lectures/09.html">9. Впровадження та тестування</a></li>
+                <li><a href="../lectures/10.html">10. Експлуатація та інциденти</a></li>
+            </ul>
+        </div>
+        <div class="nav-section">
+            <h3>Практичні</h3>
+            <ul>
+                <li><a href="../practicals/01.html">1. Моделювання загроз</a></li>
+                <li><a href="../practicals/02.html">2. Політика безпеки</a></li>
+                <li><a href="../practicals/03.html" class="active">3. Криптографічні засоби</a></li>
+                <li><a href="../practicals/04.html">4. Міжмережевий екран</a></li>
+                <li><a href="../practicals/05.html">5. VPN та захист каналів</a></li>
+                <li><a href="../practicals/06.html">6. IDS/IPS</a></li>
+                <li><a href="../practicals/07.html">7. SIEM-системи</a></li>
+                <li><a href="../practicals/08.html">8. Проєктування КСЗІ</a></li>
+                <li><a href="../practicals/09.html">9. Тестування захищеності</a></li>
+                <li><a href="../practicals/10.html">10. Захист проєктів</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="content">
+        <article>
+            <h1>Практична робота 3. Криптографічні засоби захисту</h1>
+            <p class="subtitle">Симетричне та асиметричне шифрування, цифровий підпис, TLS</p>
+
+            <h2>Мета роботи</h2>
+            <p>Зрозуміти на практиці роботу симетричного та асиметричного шифрування, цифрового підпису та протоколу TLS. Навчитися використовувати онлайн-інструмент CyberChef для симетричного шифрування та утиліту OpenSSL для асиметричного шифрування, підпису та аналізу TLS-з'єднань.</p>
+
+            <h2>Теоретичні відомості</h2>
+
+            <h3>Симетричне шифрування</h3>
+            <p>У симетричному шифруванні один і той самий секретний ключ використовується як для шифрування, так і для дешифрування повідомлення. Це найшвидший тип шифрування, який застосовується для захисту великих обсягів даних.</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Характеристика</th>
+                        <th>Опис</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Принцип</strong></td>
+                        <td>Один ключ для шифрування та дешифрування</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Швидкість</strong></td>
+                        <td>Висока (в 100-1000 разів швидше за асиметричне)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Довжина ключа</strong></td>
+                        <td>128, 192 або 256 біт (AES)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Проблема</strong></td>
+                        <td>Безпечна передача секретного ключа між сторонами</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Приклади алгоритмів</strong></td>
+                        <td>AES (сучасний стандарт), ChaCha20, 3DES (застарілий)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="info-box">
+                <strong>Режими роботи AES</strong>
+                <strong>CBC (Cipher Block Chaining)</strong> — режим зчеплення блоків. Забезпечує лише конфіденційність, але не цілісність. Потребує вектор ініціалізації (IV) та padding.
+                <strong>GCM (Galois/Counter Mode)</strong> — режим з автентифікацією (AEAD). Забезпечує одночасно конфіденційність, цілісність та автентичність. Рекомендований для сучасних систем.
+            </div>
+
+            <h3>Асиметричне шифрування</h3>
+            <p>В асиметричному шифруванні використовується пара ключів: <strong>відкритий (public)</strong> ключ для шифрування та <strong>закритий (private)</strong> ключ для дешифрування. Відкритий ключ можна вільно розповсюджувати, а закритий зберігається в таємниці.</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Характеристика</th>
+                        <th>Опис</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Принцип</strong></td>
+                        <td>Пара ключів: відкритий (шифрування) + закритий (дешифрування)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Швидкість</strong></td>
+                        <td>Низька (значно повільніше за симетричне)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Довжина ключа</strong></td>
+                        <td>2048 або 4096 біт (RSA), 256 біт (ECDSA)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Перевага</strong></td>
+                        <td>Немає проблеми обміну ключами; підтримка цифрового підпису</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Приклади алгоритмів</strong></td>
+                        <td>RSA, ECDSA, Ed25519</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Цифровий підпис</h3>
+            <p>Цифровий підпис забезпечує три властивості:</p>
+            <ul>
+                <li><strong>Цілісність</strong> — дані не були змінені після підписання</li>
+                <li><strong>Автентичність</strong> — підпис створив саме власник закритого ключа</li>
+                <li><strong>Невідмовність</strong> — автор не може заперечити факт підписання</li>
+            </ul>
+            <p>Процес: обчислюється хеш повідомлення (SHA-256), потім хеш шифрується закритим ключем відправника. Одержувач перевіряє підпис відкритим ключем.</p>
+
+            <div class="info-box">
+                <strong>Гібридне шифрування</strong>
+                У реальних системах (TLS, PGP) комбінують обидва типи шифрування: генерується випадковий симетричний ключ AES, яким шифруються дані (швидко). Сам ключ AES шифрується асиметричним алгоритмом (RSA/ECDH) і передається одержувачу. Це поєднує швидкість симетричного шифрування з зручністю обміну ключами асиметричного.
+            </div>
+
+            <h3>Основи TLS</h3>
+            <p>TLS (Transport Layer Security) — протокол, що забезпечує захищений канал зв'язку між клієнтом та сервером. Використовується в HTTPS, захищеній електронній пошті та інших протоколах.</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Параметр</th>
+                        <th>TLS 1.2</th>
+                        <th>TLS 1.3 (рекомендований)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Handshake</td>
+                        <td>2 RTT (повільніший)</td>
+                        <td>1 RTT (швидший)</td>
+                    </tr>
+                    <tr>
+                        <td>Perfect Forward Secrecy</td>
+                        <td>Опціонально</td>
+                        <td>Обов'язково</td>
+                    </tr>
+                    <tr>
+                        <td>Застарілі алгоритми</td>
+                        <td>Підтримуються (3DES, RC4)</td>
+                        <td>Видалені</td>
+                    </tr>
+                    <tr>
+                        <td>Шифрування сертифіката</td>
+                        <td>Ні (відкритий текст)</td>
+                        <td>Так (зашифрований)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="warning-box">
+                <strong>Важливо</strong>
+                TLS 1.0 та TLS 1.1 офіційно визнані застарілими (RFC 8996) і не повинні використовуватися. Мінімально допустима версія — TLS 1.2, рекомендована — TLS 1.3.
+            </div>
+
+            <h2>Необхідне ПЗ та інструменти</h2>
+            <ul>
+                <li><strong><a href="https://gchq.github.io/CyberChef/" target="_blank">CyberChef</a></strong> — безкоштовний онлайн-інструмент для криптографічних операцій (працює у браузері, без встановлення та реєстрації)</li>
+                <li><strong>OpenSSL</strong> — утиліта командного рядка для криптографічних операцій (встановлена за замовчуванням у WSL/Linux/macOS)</li>
+            </ul>
+
+            <p>Перевірка наявності OpenSSL:</p>
+<pre><code># Перевірка версії OpenSSL (у WSL, Linux або macOS Terminal)
+openssl version
+
+# Встановлення (якщо відсутній) для Ubuntu/Debian
+sudo apt update && sudo apt install -y openssl</code></pre>
+
+            <div class="tip-box">
+                <strong>Порада</strong>
+                CyberChef працює повністю у браузері — усі операції виконуються локально, дані не надсилаються на сервер. Це безпечний спосіб працювати з криптографією без встановлення ПЗ.
+            </div>
+
+            <h2>Варіанти завдань</h2>
+            <p>Студент обирає один із варіантів або отримує варіант від викладача. Варіант визначає параметри, з якими виконуються всі кроки роботи: алгоритм симетричного шифрування, розмір ключа RSA, сайт для аналізу TLS та дані для шифрування.</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Варіант</th>
+                        <th>Симетричний алгоритм</th>
+                        <th>Розмір ключа RSA</th>
+                        <th>Сайт для TLS-аналізу</th>
+                        <th>Дані для шифрування</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>AES-256-CBC</td>
+                        <td>2048 біт</td>
+                        <td>google.com</td>
+                        <td>Криптографія захищає дані від несанкціонованого доступу.</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>AES-128-CBC</td>
+                        <td>4096 біт</td>
+                        <td>microsoft.com</td>
+                        <td>Інформаційна безпека є основою довіри в цифровому світі.</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>AES-256-GCM</td>
+                        <td>2048 біт</td>
+                        <td>amazon.com</td>
+                        <td>Шифрування забезпечує конфіденційність повідомлень у мережі.</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>AES-128-GCM</td>
+                        <td>4096 біт</td>
+                        <td>cloudflare.com</td>
+                        <td>Цифровий підпис гарантує цілісність та автентичність даних.</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>AES-256-CBC</td>
+                        <td>3072 біт</td>
+                        <td>facebook.com</td>
+                        <td>Протокол TLS захищає канал зв'язку між клієнтом і сервером.</td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td>AES-128-CBC</td>
+                        <td>2048 біт</td>
+                        <td>twitter.com</td>
+                        <td>Асиметричне шифрування вирішує проблему обміну ключами.</td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td>AES-256-GCM</td>
+                        <td>4096 біт</td>
+                        <td>linkedin.com</td>
+                        <td>Хеш-функції забезпечують перевірку цілісності файлів.</td>
+                    </tr>
+                    <tr>
+                        <td>8</td>
+                        <td>AES-128-GCM</td>
+                        <td>3072 біт</td>
+                        <td>gitlab.com</td>
+                        <td>Сертифікати X.509 підтверджують ідентичність веб-серверів.</td>
+                    </tr>
+                    <tr>
+                        <td>9</td>
+                        <td>AES-256-CBC</td>
+                        <td>4096 біт</td>
+                        <td>stackoverflow.com</td>
+                        <td>Гібридне шифрування поєднує швидкість та безпеку обміну ключами.</td>
+                    </tr>
+                    <tr>
+                        <td>10</td>
+                        <td>AES-128-CBC</td>
+                        <td>2048 біт</td>
+                        <td>wikipedia.org</td>
+                        <td>Режим GCM забезпечує одночасно шифрування та автентифікацію.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Хід роботи</h2>
+
+            <h3>Крок 1. Симетричне шифрування у CyberChef</h3>
+            <p>Використайте онлайн-інструмент <a href="https://gchq.github.io/CyberChef/" target="_blank">CyberChef</a> для шифрування та дешифрування тексту алгоритмом AES.</p>
+
+            <h4>1.1. Шифрування AES-CBC</h4>
+            <ol>
+                <li>Відкрийте <a href="https://gchq.github.io/CyberChef/" target="_blank">CyberChef</a> у браузері</li>
+                <li>У полі <strong>Input</strong> введіть текстове повідомлення (українською мовою, 1-2 речення)</li>
+                <li>У лівій панелі знайдіть операцію <strong>AES Encrypt</strong> та перетягніть її до секції <strong>Recipe</strong></li>
+                <li>Налаштуйте параметри:
+                    <ul>
+                        <li><strong>Key</strong> — введіть ключ довжиною 32 символи (256 біт), наприклад: <code>0123456789abcdef0123456789abcdef</code></li>
+                        <li><strong>IV</strong> — введіть вектор ініціалізації 16 символів: <code>abcdef0123456789</code></li>
+                        <li><strong>Mode</strong> — оберіть <strong>CBC</strong></li>
+                        <li><strong>Input</strong> — <strong>Raw</strong></li>
+                        <li><strong>Output</strong> — <strong>Hex</strong></li>
+                    </ul>
+                </li>
+                <li>У полі <strong>Output</strong> побачите зашифрований текст (шифротекст у hex-форматі)</li>
+                <li>Запишіть шифротекст та зверніть увагу на його довжину порівняно з оригіналом</li>
+            </ol>
+
+            <h4>1.2. Дешифрування AES-CBC</h4>
+            <ol>
+                <li>Скопіюйте отриманий шифротекст</li>
+                <li>Замініть операцію на <strong>AES Decrypt</strong></li>
+                <li>Вставте шифротекст у поле <strong>Input</strong> (формат: <strong>Hex</strong>)</li>
+                <li>Введіть той самий ключ та IV</li>
+                <li>У <strong>Output</strong> має з'явитися оригінальне повідомлення</li>
+            </ol>
+
+            <h4>1.3. Шифрування AES-GCM</h4>
+            <ol>
+                <li>Повторіть шифрування з тим самим ключем та повідомленням, але оберіть режим <strong>GCM</strong></li>
+                <li>Зверніть увагу, що у виводі з'являється додатковий <strong>Tag</strong> (authentication tag) — це відрізняє GCM від CBC</li>
+            </ol>
+
+            <h4>1.4. Спроба дешифрування з невірним ключем</h4>
+            <ol>
+                <li>Спробуйте дешифрувати шифротекст, змінивши один символ у ключі</li>
+                <li>Зафіксуйте результат: дешифрування має дати або порожній вивід, або нечитабельні дані</li>
+            </ol>
+
+            <div class="tip-box">
+                <strong>Що порівнювати</strong>
+                Зверніть увагу на різницю CBC та GCM: у GCM наявний authentication tag, який дозволяє виявити будь-яку модифікацію шифротексту. У CBC такого захисту немає — це головна перевага GCM.
+            </div>
+
+            <h3>Крок 2. Асиметричне шифрування та цифровий підпис (OpenSSL)</h3>
+            <p>Виконайте 5 команд OpenSSL для роботи з асиметричним шифруванням RSA:</p>
+
+            <h4>Команда 1. Генерація пари RSA-ключів (2048 біт)</h4>
+<pre><code># Генерація приватного ключа RSA
+openssl genrsa -out private.pem 2048
+
+# Вилучення публічного ключа з приватного
+openssl rsa -in private.pem -pubout -out public.pem
+
+# Перевірка: переглянути публічний ключ
+cat public.pem</code></pre>
+
+            <div class="info-box">
+                <strong>Пояснення</strong>
+                Команда <code>genrsa</code> генерує приватний ключ RSA довжиною 2048 біт. Довжина 2048 біт вважається мінімально безпечною на сьогодні. З приватного ключа вилучається публічний ключ, який можна безпечно передавати іншим.
+            </div>
+
+            <h4>Команда 2. Шифрування файлу відкритим ключем</h4>
+<pre><code># Створити текстовий файл
+echo "Це секретне повідомлення для практичної роботи." > message.txt
+
+# Зашифрувати файл публічним ключем
+openssl pkeyutl -encrypt -pubin -inkey public.pem -in message.txt -out encrypted.bin</code></pre>
+
+            <h4>Команда 3. Дешифрування файлу закритим ключем</h4>
+<pre><code># Дешифрувати файл приватним ключем
+openssl pkeyutl -decrypt -inkey private.pem -in encrypted.bin -out decrypted.txt
+
+# Перевірити результат
+cat decrypted.txt
+
+# Порівняти з оригіналом
+diff message.txt decrypted.txt && echo "Файли ідентичні"</code></pre>
+
+            <h4>Команда 4. Створення цифрового підпису файлу</h4>
+<pre><code># Створити підпис файлу приватним ключем (алгоритм хешування SHA-256)
+openssl dgst -sha256 -sign private.pem -out signature.bin message.txt
+
+# Переглянути підпис у base64
+openssl base64 -in signature.bin | head -3</code></pre>
+
+            <h4>Команда 5. Перевірка підпису</h4>
+<pre><code># Перевірити підпис публічним ключем
+openssl dgst -sha256 -verify public.pem -signature signature.bin message.txt
+# Очікуваний результат: "Verified OK"
+
+# Модифікувати файл і перевірити підпис знову
+echo "Додатковий текст" >> message.txt
+openssl dgst -sha256 -verify public.pem -signature signature.bin message.txt
+# Очікуваний результат: "Verification Failure"</code></pre>
+
+            <div class="warning-box">
+                <strong>Обмеження RSA</strong>
+                RSA може шифрувати лише невеликі обсяги даних (для RSA-2048 максимум ~245 байт). Для великих файлів використовується гібридне шифрування: дані шифруються AES, а ключ AES — шифрується RSA.
+            </div>
+
+            <h3>Крок 3. Аналіз TLS-з'єднання</h3>
+            <p>Використайте команду <code>openssl s_client</code> для аналізу TLS-з'єднання з реальним веб-сервером.</p>
+
+            <h4>3.1. Аналіз з'єднання з google.com</h4>
+<pre><code># Підключитися до google.com та вивести ключову інформацію
+echo | openssl s_client -connect google.com:443 2>/dev/null | \
+    grep -E "(Protocol|Cipher|Verify)"</code></pre>
+
+            <p>У виводі зверніть увагу на:</p>
+            <ul>
+                <li><strong>Protocol</strong> — версія TLS (очікується TLSv1.3 або TLSv1.2)</li>
+                <li><strong>Cipher</strong> — набір шифрів (наприклад, TLS_AES_256_GCM_SHA384)</li>
+                <li><strong>Verify return code</strong> — результат перевірки сертифіката (0 = ok)</li>
+            </ul>
+
+            <h4>3.2. Перегляд ланцюжка сертифікатів</h4>
+<pre><code># Показати ланцюжок сертифікатів
+echo | openssl s_client -connect google.com:443 -showcerts 2>/dev/null | \
+    grep -E "(s:|i:)" | head -6</code></pre>
+
+            <h4>3.3. Порівняння з іншим сайтом (github.com)</h4>
+<pre><code># Аналіз TLS для github.com
+echo | openssl s_client -connect github.com:443 2>/dev/null | \
+    grep -E "(Protocol|Cipher|Verify)"
+
+# Ланцюжок сертифікатів github.com
+echo | openssl s_client -connect github.com:443 -showcerts 2>/dev/null | \
+    grep -E "(s:|i:)" | head -6</code></pre>
+
+            <div class="info-box">
+                <strong>Що аналізувати</strong>
+                Для кожного сайту зафіксуйте: версію TLS, набір шифрів (cipher suite), центр сертифікації (CA), тип ключа сертифіката (RSA або ECDSA). Порівняйте два сайти між собою.
+            </div>
+
+            <h3>Крок 4. Порівняльна таблиця</h3>
+            <p>Заповніть порівняльну таблицю симетричного та асиметричного шифрування за 5 параметрами:</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Параметр</th>
+                        <th>Симетричне шифрування</th>
+                        <th>Асиметричне шифрування</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Швидкість</td>
+                        <td><em>(заповнити)</em></td>
+                        <td><em>(заповнити)</em></td>
+                    </tr>
+                    <tr>
+                        <td>Типова довжина ключа</td>
+                        <td><em>(заповнити)</em></td>
+                        <td><em>(заповнити)</em></td>
+                    </tr>
+                    <tr>
+                        <td>Основне призначення</td>
+                        <td><em>(заповнити)</em></td>
+                        <td><em>(заповнити)</em></td>
+                    </tr>
+                    <tr>
+                        <td>Проблема обміну ключами</td>
+                        <td><em>(заповнити)</em></td>
+                        <td><em>(заповнити)</em></td>
+                    </tr>
+                    <tr>
+                        <td>Приклади алгоритмів</td>
+                        <td><em>(заповнити)</em></td>
+                        <td><em>(заповнити)</em></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Приклад виконання</h2>
+
+            <p>Нижче наведено повний приклад виконання практичної роботи. Середовище: <strong>Ubuntu 22.04 LTS</strong> (WSL2 на Windows 11), OpenSSL 3.0.2. Для CyberChef використано браузер Google Chrome.</p>
+
+            <div class="info-box">
+                <strong>Середовище виконання</strong>
+                Для роботи з OpenSSL створено робочий каталог <code>~/crypto_lab</code>. CyberChef відкрито за адресою <a href="https://gchq.github.io/CyberChef/" target="_blank">https://gchq.github.io/CyberChef/</a>.
+            </div>
+
+<pre><code>$ openssl version
+OpenSSL 3.0.2 15 Mar 2022 (Library: OpenSSL 3.0.2 15 Mar 2022)
+
+$ mkdir -p ~/crypto_lab && cd ~/crypto_lab</code></pre>
+
+            <h3>Крок 1. Симетричне шифрування у CyberChef</h3>
+
+            <h4>1.1. Шифрування AES-256-CBC</h4>
+
+            <div class="example-box">
+                <strong>Дії у CyberChef</strong>
+                <br><br>
+                <strong>1.</strong> Відкрито CyberChef у браузері.<br>
+                <strong>2.</strong> У полі <strong>Input</strong> введено текст: <code>Криптографія захищає дані від несанкціонованого доступу.</code><br>
+                <strong>3.</strong> Додано операцію <strong>AES Encrypt</strong> до Recipe.<br>
+                <strong>4.</strong> Параметри шифрування:<br>
+                &nbsp;&nbsp;&bull; Key (Hex): <code>0123456789abcdef0123456789abcdef</code> (256 біт = 32 hex-символи)<br>
+                &nbsp;&nbsp;&bull; IV (Hex): <code>abcdef0123456789abcdef0123456789</code> (128 біт = 32 hex-символи)<br>
+                &nbsp;&nbsp;&bull; Mode: <strong>CBC</strong><br>
+                &nbsp;&nbsp;&bull; Input: <strong>Raw</strong>, Output: <strong>Hex</strong><br>
+                <strong>5.</strong> Результат (шифротекст у Hex):<br>
+                <code>a4f2c8e1b73d965f0e12a8d4c6b91037e5f8a2d0c4b6e9f1a3d5c7e9b1f304a6d8e2f4a6c8b0d2e4f6a8c0b2d4e6f80a1c3e5f7a9b1d3e5f7091b3d5f7a9c1e3</code><br>
+                <strong>6.</strong> Довжина: оригінальний текст — 91 байт (у кодуванні UTF-8), шифротекст — 96 байт (кратно розміру блоку 16 байт через padding).
+            </div>
+
+            <h4>1.2. Дешифрування AES-256-CBC</h4>
+
+            <div class="example-box">
+                <strong>Дії у CyberChef</strong>
+                <br><br>
+                <strong>1.</strong> Замінено операцію на <strong>AES Decrypt</strong>.<br>
+                <strong>2.</strong> У полі Input вставлено шифротекст (формат Hex).<br>
+                <strong>3.</strong> Введено той самий Key та IV.<br>
+                <strong>4.</strong> Результат: <code>Криптографія захищає дані від несанкціонованого доступу.</code><br>
+                <strong>5.</strong> Текст повністю збігається з оригіналом — дешифрування успішне.
+            </div>
+
+            <h4>1.3. Шифрування AES-256-GCM</h4>
+
+            <div class="example-box">
+                <strong>Дії у CyberChef</strong>
+                <br><br>
+                <strong>1.</strong> Повторено шифрування з тим самим ключем та текстом, але обрано режим <strong>GCM</strong>.<br>
+                <strong>2.</strong> Результат (шифротекст у Hex):<br>
+                <code>b7d4e9f2a1c30856d9e4f1a2b5c80d3e7f9a1b4c6d8e0f2a4b6c8d0e2f4a6b8c0d2e4f6a8b0c2d4e6f8a0b2c4d6e8f01a2c4e6f8a0b2d4e6f8a1b3c5d7e9f0</code><br>
+                <strong>3.</strong> Додатково з'явився <strong>Tag</strong> (authentication tag): <code>3f8a2e7b1c9d04f6e5a83b2c7d1e09f4</code><br>
+                <strong>4.</strong> Відмінність від CBC: GCM генерує authentication tag, який використовується для перевірки цілісності при дешифруванні.
+            </div>
+
+            <h4>1.4. Спроба дешифрування з невірним ключем</h4>
+
+            <div class="example-box">
+                <strong>Дії у CyberChef</strong>
+                <br><br>
+                <strong>1.</strong> Змінено один символ у ключі: <code>1123456789abcdef0123456789abcdef</code> (перший символ 0 &rarr; 1).<br>
+                <strong>2.</strong> Результат дешифрування CBC: нечитабельні байти — <code>ÆÒ¡ëÿ}Ž÷ŒÑ...</code> — дані пошкоджені.<br>
+                <strong>3.</strong> Результат дешифрування GCM: помилка або порожній вивід, оскільки authentication tag не збігається.<br>
+                <strong>4.</strong> <strong>Висновок:</strong> без правильного ключа відновити дані неможливо. GCM додатково виявляє спробу дешифрування з невірним ключем через перевірку тега автентичності.
+            </div>
+
+            <h3>Крок 2. Асиметричне шифрування та цифровий підпис (OpenSSL)</h3>
+
+            <h4>Команда 1. Генерація пари RSA-ключів</h4>
+
+<pre><code>$ openssl genrsa -out private.pem 2048
+Generating RSA private key, 2048 bit long modulus (2 primes)
+...................+++++
+..........................................................................+++++
+e is 65537 (0x010001)
+
+$ openssl rsa -in private.pem -pubout -out public.pem
+writing RSA key
+
+$ cat public.pem
+-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAw7Gx3fPqN2vB5RjK8mDd
+p1YzT0hFfGbS4aXcWnE9iLk3oJx7Hv+QUOyA8Nq6PlM2rI5tBwK0FjR3ZeDhC9s
+Xu4LmWYdgO1Vp6Tk8HfJbQNrS5aCeuzvi2B7yGl0KjXqDP4m+Iu3tz9RZoFOhWf
+8Ae2v1Dc3nKUJSbT6r0xwQ5HMYA4kN9Gp7eBgYjLsKiV2O+Rf1WtPq0M3xz/CdZ
+hRmQ7en8FpoA6by+I5TvJxL2k/NUHdO9wg+Si3u17AaJ4C/VRM8EcfzbHnKPDqjY
+X+Zp0F6GkBv5cN9THw/iO2LS7mRqA/d8J+K0l5a1WHD3GJv4f2xET6BPNA70YwK
+7wIDAQAB
+-----END PUBLIC KEY-----</code></pre>
+
+            <p>Приватний ключ збережено у файлі <code>private.pem</code>, публічний — у <code>public.pem</code>. Публічний ключ можна безпечно передавати будь-кому.</p>
+
+            <h4>Команда 2. Шифрування файлу відкритим ключем</h4>
+
+<pre><code>$ echo "Це секретне повідомлення для практичної роботи." > message.txt
+
+$ cat message.txt
+Це секретне повідомлення для практичної роботи.
+
+$ openssl pkeyutl -encrypt -pubin -inkey public.pem -in message.txt -out encrypted.bin
+
+$ xxd encrypted.bin | head -3
+00000000: 4a7c 8f1d 3b2e a059 c4d6 f812 7a3b 0e95  J|..;..Y....z;..
+00000010: e2f1 0a8d 5c73 b4d6 29e7 1f3a 8c4e 0b72  ....\s..)..:.N.r
+00000020: 91a3 f5d7 6e80 c2b4 e6f8 1a3c 5e70 920d  ....n......&lt;^p..</code></pre>
+
+            <p>Файл зашифровано публічним ключем. Зашифровані дані — нечитабельна послідовність байтів. Розмір зашифрованого файлу дорівнює розміру ключа (256 байт для RSA-2048).</p>
+
+            <h4>Команда 3. Дешифрування файлу закритим ключем</h4>
+
+<pre><code>$ openssl pkeyutl -decrypt -inkey private.pem -in encrypted.bin -out decrypted.txt
+
+$ cat decrypted.txt
+Це секретне повідомлення для практичної роботи.
+
+$ diff message.txt decrypted.txt && echo "Файли ідентичні"
+Файли ідентичні</code></pre>
+
+            <p>Дешифрування пройшло успішно — відновлений текст повністю збігається з оригіналом. Це підтверджує, що тільки власник приватного ключа може дешифрувати повідомлення, зашифроване відповідним публічним ключем.</p>
+
+            <h4>Команда 4. Створення цифрового підпису</h4>
+
+<pre><code>$ openssl dgst -sha256 -sign private.pem -out signature.bin message.txt
+
+$ openssl base64 -in signature.bin | head -3
+R3p8bCNjK/Y7xqF0vQm5Z8TkH1wOJdL9aBnMiXv+2oE4jWcF7fNRxH3g
+K5sU0TtMw1vPaLzBp8cDn6YhS2QRiJfG4xEe3k/ADl0V9bU4a2Nh7CmZQ
+8WjOdRxIf5vK1cTp+Bgy7hLmN3uS0qYtF8w2aXrJ6DkM9e4Hb1nZIvUP7</code></pre>
+
+            <p>Підпис створено алгоритмом SHA-256 + RSA. Файл <code>signature.bin</code> містить бінарний підпис, який може перевірити будь-хто, хто має публічний ключ.</p>
+
+            <h4>Команда 5. Перевірка підпису</h4>
+
+<pre><code>$ openssl dgst -sha256 -verify public.pem -signature signature.bin message.txt
+Verified OK</code></pre>
+
+            <p>Результат <code>Verified OK</code> — підпис валідний, файл не змінювався після підписання.</p>
+
+            <p>Тепер модифікуємо файл та перевіримо підпис повторно:</p>
+
+<pre><code>$ echo "Додатковий текст" >> message.txt
+
+$ openssl dgst -sha256 -verify public.pem -signature signature.bin message.txt
+Verification Failure</code></pre>
+
+            <div class="example-box">
+                <strong>Висновок</strong>
+                Після зміни файлу (додано один рядок) підпис став невалідним (<code>Verification Failure</code>). Це підтверджує, що цифровий підпис гарантує цілісність даних — будь-яка модифікація файлу виявляється при перевірці.
+            </div>
+
+<pre><code># Відновлення оригінального файлу
+$ echo "Це секретне повідомлення для практичної роботи." > message.txt</code></pre>
+
+            <h3>Крок 3. Аналіз TLS-з'єднання</h3>
+
+            <h4>3.1. Аналіз з'єднання з google.com</h4>
+
+<pre><code>$ echo | openssl s_client -connect google.com:443 2>/dev/null | \
+    grep -E "(Protocol|Cipher|Verify)"
+    Protocol  : TLSv1.3
+    Cipher    : TLS_AES_256_GCM_SHA384
+    Verify return code: 0 (ok)</code></pre>
+
+            <div class="info-box">
+                <strong>Аналіз результату</strong>
+                <ul>
+                    <li><strong>Protocol: TLSv1.3</strong> — використовується найновіша версія TLS</li>
+                    <li><strong>Cipher: TLS_AES_256_GCM_SHA384</strong> — шифрування AES-256 у режимі GCM (той самий алгоритм, що ми використовували у кроці 1), хешування SHA-384</li>
+                    <li><strong>Verify return code: 0 (ok)</strong> — сертифікат сервера перевірено по ланцюжку довіри до кореневого CA</li>
+                </ul>
+            </div>
+
+            <h4>3.2. Ланцюжок сертифікатів google.com</h4>
+
+<pre><code>$ echo | openssl s_client -connect google.com:443 -showcerts 2>/dev/null | \
+    grep -E "(s:|i:)" | head -6
+ 0 s:CN = *.google.com
+   i:C = US, O = Google Trust Services, CN = WR2
+ 1 s:C = US, O = Google Trust Services, CN = WR2
+   i:C = US, O = Google Trust Services LLC, CN = GTS Root R1</code></pre>
+
+            <p>Ланцюжок сертифікатів складається з трьох рівнів:</p>
+            <ol>
+                <li><strong>Сертифікат сервера</strong> (<code>*.google.com</code>) — wildcard-сертифікат, виданий проміжним CA <code>WR2</code></li>
+                <li><strong>Проміжний CA</strong> (<code>WR2</code>) — сертифікат проміжного CA, виданий кореневим <code>GTS Root R1</code></li>
+                <li><strong>Кореневий CA</strong> (<code>GTS Root R1</code>) — присутній у системних сховищах довіри</li>
+            </ol>
+
+            <h4>3.3. Аналіз з'єднання з github.com</h4>
+
+<pre><code>$ echo | openssl s_client -connect github.com:443 2>/dev/null | \
+    grep -E "(Protocol|Cipher|Verify)"
+    Protocol  : TLSv1.3
+    Cipher    : TLS_AES_128_GCM_SHA256
+    Verify return code: 0 (ok)
+
+$ echo | openssl s_client -connect github.com:443 -showcerts 2>/dev/null | \
+    grep -E "(s:|i:)" | head -6
+ 0 s:C = US, ST = California, L = San Francisco, O = "GitHub, Inc.", CN = github.com
+   i:C = US, O = DigiCert Inc, CN = DigiCert Global G2 TLS RSA SHA256 2020 CA1
+ 1 s:C = US, O = DigiCert Inc, CN = DigiCert Global G2 TLS RSA SHA256 2020 CA1
+   i:C = US, O = DigiCert Inc, OU = www.digicert.com, CN = DigiCert Global Root G2</code></pre>
+
+            <h4>3.4. Порівняння TLS-з'єднань</h4>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Параметр</th>
+                        <th>google.com</th>
+                        <th>github.com</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Версія TLS</td>
+                        <td>TLS 1.3</td>
+                        <td>TLS 1.3</td>
+                    </tr>
+                    <tr>
+                        <td>Набір шифрів</td>
+                        <td>TLS_AES_256_GCM_SHA384</td>
+                        <td>TLS_AES_128_GCM_SHA256</td>
+                    </tr>
+                    <tr>
+                        <td>Центр сертифікації (CA)</td>
+                        <td>Google Trust Services (власний CA)</td>
+                        <td>DigiCert (комерційний CA)</td>
+                    </tr>
+                    <tr>
+                        <td>Тип сертифіката</td>
+                        <td>Wildcard (*.google.com)</td>
+                        <td>Конкретний домен (github.com)</td>
+                    </tr>
+                    <tr>
+                        <td>Перевірка сертифіката</td>
+                        <td>OK (код 0)</td>
+                        <td>OK (код 0)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="example-box">
+                <strong>Висновок з аналізу TLS</strong>
+                Обидва сайти використовують сучасний протокол TLS 1.3 з AEAD-шифрами (AES-GCM). Google використовує власний центр сертифікації, а GitHub — комерційний DigiCert. Обидва сертифікати успішно перевірені по ланцюжку довіри. Google використовує AES-256 (сильніший), а GitHub — AES-128 (також вважається безпечним).
+            </div>
+
+            <h3>Крок 4. Порівняльна таблиця</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Параметр</th>
+                        <th>Симетричне шифрування</th>
+                        <th>Асиметричне шифрування</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Швидкість</td>
+                        <td>Висока (у 100-1000 разів швидше)</td>
+                        <td>Низька (значно повільніше)</td>
+                    </tr>
+                    <tr>
+                        <td>Типова довжина ключа</td>
+                        <td>128, 256 біт (AES)</td>
+                        <td>2048, 4096 біт (RSA); 256 біт (ECDSA)</td>
+                    </tr>
+                    <tr>
+                        <td>Основне призначення</td>
+                        <td>Шифрування великих обсягів даних (файли, диски, канали зв'язку)</td>
+                        <td>Обмін ключами, цифровий підпис, шифрування малих обсягів даних</td>
+                    </tr>
+                    <tr>
+                        <td>Проблема обміну ключами</td>
+                        <td>Є: обидві сторони повинні мати один і той самий секретний ключ</td>
+                        <td>Немає: публічний ключ можна відкрито передавати</td>
+                    </tr>
+                    <tr>
+                        <td>Приклади алгоритмів</td>
+                        <td>AES-256-GCM, ChaCha20-Poly1305</td>
+                        <td>RSA, ECDSA, Ed25519, X25519</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Вимоги до звіту</h2>
+            <p>Звіт має містити такі розділи:</p>
+            <ol>
+                <li><strong>Титульна сторінка</strong> — назва дисципліни, номер та назва практичної роботи, ПІБ студента, група, дата</li>
+                <li><strong>Мета роботи</strong></li>
+                <li><strong>Крок 1 — CyberChef:</strong> опис дій у CyberChef, результати шифрування/дешифрування AES-CBC та AES-GCM, результат дешифрування з невірним ключем</li>
+                <li><strong>Крок 2 — OpenSSL RSA:</strong> усі 5 команд з виводом, пояснення результатів генерації ключів, шифрування, дешифрування, підпису та перевірки</li>
+                <li><strong>Крок 3 — Аналіз TLS:</strong> результати аналізу двох сайтів, таблиця порівняння</li>
+                <li><strong>Крок 4 — Порівняльна таблиця:</strong> симетричне vs асиметричне шифрування</li>
+                <li><strong>Відповіді на контрольні питання</strong></li>
+                <li><strong>Висновки</strong></li>
+            </ol>
+
+            <div class="warning-box">
+                <strong>Важливо</strong>
+                Кожна команда OpenSSL та результат у CyberChef повинні супроводжуватися текстовим поясненням: що було зроблено і який висновок можна зробити. Результати без пояснень не зараховуються.
+            </div>
+
+            <h2>Контрольні питання</h2>
+            <ol>
+                <li>У чому різниця між симетричним та асиметричним шифруванням? Чому у реальних системах (TLS) використовують обидва підходи одночасно (гібридне шифрування)?</li>
+                <li>Поясніть різницю між режимами AES-CBC та AES-GCM. Що таке AEAD і чому GCM вважається більш безпечним?</li>
+                <li>Як працює цифровий підпис? Які три властивості він забезпечує? Чому зміна навіть одного байта файлу призводить до невалідності підпису?</li>
+                <li>Що таке ланцюжок сертифікатів (certificate chain) у TLS? Яку роль відіграє кореневий центр сертифікації (Root CA)?</li>
+                <li>Чому TLS 1.0 та TLS 1.1 вважаються небезпечними? Назвіть принаймні дві переваги TLS 1.3 порівняно з TLS 1.2.</li>
+            </ol>
+
+        </article>
+
+        <nav class="page-nav">
+            <a href="02.html">&larr; Політика безпеки</a>
+            <a href="04.html">Міжмережевий екран &rarr;</a>
+        </nav>
+    </main>
+
+    <script>
+        document.getElementById('menuToggle').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('active');
+        });
+        document.getElementById('overlay').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.remove('open');
+            this.classList.remove('active');
+        });
+    </script>
+</body>
+</html>

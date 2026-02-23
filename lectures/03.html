@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лекція 3. Політика безпеки та управління доступом — Захист ІКС</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="overlay" id="overlay"></div>
+    <button class="menu-toggle" id="menuToggle">☰</button>
+
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="../index.html">Технології захисту ІКС</a>
+        </div>
+        <div class="nav-section">
+            <h3>Лекції</h3>
+            <ul>
+                <li><a href="../lectures/01.html">1. Вступ. ІКС як об'єкт захисту</a></li>
+                <li><a href="../lectures/02.html">2. Моделювання загроз</a></li>
+                <li><a href="../lectures/03.html" class="active">3. Політика безпеки та доступ</a></li>
+                <li><a href="../lectures/04.html">4. Криптографічний захист</a></li>
+                <li><a href="../lectures/05.html">5. Захист мережевої інфраструктури</a></li>
+                <li><a href="../lectures/06.html">6. Захист кінцевих точок</a></li>
+                <li><a href="../lectures/07.html">7. Zero Trust та SIEM</a></li>
+                <li><a href="../lectures/08.html">8. Проєктування КСЗІ</a></li>
+                <li><a href="../lectures/09.html">9. Впровадження та тестування</a></li>
+                <li><a href="../lectures/10.html">10. Експлуатація та інциденти</a></li>
+            </ul>
+        </div>
+        <div class="nav-section">
+            <h3>Практичні</h3>
+            <ul>
+                <li><a href="../practicals/01.html">1. Моделювання загроз</a></li>
+                <li><a href="../practicals/02.html">2. Політика безпеки</a></li>
+                <li><a href="../practicals/03.html">3. Криптографічні засоби</a></li>
+                <li><a href="../practicals/04.html">4. Міжмережевий екран</a></li>
+                <li><a href="../practicals/05.html">5. VPN та захист каналів</a></li>
+                <li><a href="../practicals/06.html">6. IDS/IPS</a></li>
+                <li><a href="../practicals/07.html">7. SIEM-системи</a></li>
+                <li><a href="../practicals/08.html">8. Проєктування КСЗІ</a></li>
+                <li><a href="../practicals/09.html">9. Тестування захищеності</a></li>
+                <li><a href="../practicals/10.html">10. Захист проєктів</a></li>
+            </ul>
+        </div>
+        <div class="nav-section">
+            <h3>Звіти</h3>
+            <ul>
+                <li><a href="../report-viewer.html">Приклади звітів</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="content">
+        <article>
+            <h1>Лекція 3. Політика безпеки та управління доступом</h1>
+            <p class="subtitle">Моделі доступу DAC, MAC, RBAC, ABAC та технології автентифікації</p>
+
+            <!-- ===== 1. Структура політики безпеки ===== -->
+            <h2>1. Структура політики безпеки ІКС</h2>
+
+            <p>Політика безпеки інформаційно-комунікаційної системи (ІКС) — це формалізований документ (або сукупність документів), що визначає правила, процедури, обов'язки та механізми захисту інформаційних ресурсів організації. Вона є основою побудови комплексної системи захисту інформації (КСЗІ) і має бути затверджена керівництвом організації.</p>
+
+            <div class="info-box">
+                <strong>Навіщо потрібна політика безпеки?</strong>
+                Без формалізованої політики безпеки захист ІКС будується хаотично: різні адміністратори застосовують різні підходи, немає єдиних стандартів конфігурування, а реагування на інциденти відбувається ситуативно. Політика безпеки забезпечує системний підхід до захисту та є обов'язковою вимогою стандартів ISO 27001, НД ТЗІ та NIST CSF.
+            </div>
+
+            <h3>1.1. Основні розділи політики безпеки</h3>
+
+            <p>Типова політика безпеки ІКС містить такі ключові розділи:</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Розділ</th>
+                        <th>Зміст</th>
+                        <th>Приклад</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Мета</strong></td>
+                        <td>Визначення загальної мети документа та його призначення</td>
+                        <td>Забезпечити конфіденційність, цілісність та доступність інформаційних ресурсів підприємства</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Сфера дії</strong></td>
+                        <td>Визначення систем, підрозділів та процесів, на які поширюється політика</td>
+                        <td>Поширюється на всі інформаційні системи, мережеву інфраструктуру та кінцеві пристрої</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Терміни та визначення</strong></td>
+                        <td>Глосарій ключових термінів</td>
+                        <td>ІКС, КСЗІ, інцидент безпеки, суб'єкт доступу, об'єкт доступу</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Ролі та відповідальність</strong></td>
+                        <td>Хто відповідає за реалізацію та контроль політики</td>
+                        <td>CISO, адміністратори безпеки, власники інформаційних ресурсів, користувачі</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Правила доступу</strong></td>
+                        <td>Конкретні правила та обмеження для суб'єктів доступу</td>
+                        <td>Доступ надається за принципом мінімальних привілеїв; заборонено використання спільних облікових записів</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Процедури</strong></td>
+                        <td>Покрокові інструкції для виконання операцій безпеки</td>
+                        <td>Процедура створення облікового запису, процедура відкликання доступу при звільненні</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Санкції</strong></td>
+                        <td>Наслідки порушення політики безпеки</td>
+                        <td>Від попередження до дисциплінарного стягнення або кримінальної відповідальності</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>1.2. Ієрархія документів безпеки</h3>
+
+            <p>В організації документи безпеки зазвичай мають ієрархічну структуру:</p>
+
+            <ul>
+                <li><strong>Політика (Policy)</strong> — високорівневий документ, що визначає принципи та цілі безпеки. Затверджується керівництвом. Приклад: "Усі співробітники повинні використовувати багатофакторну автентифікацію".</li>
+                <li><strong>Стандарти (Standards)</strong> — конкретні вимоги до реалізації політики. Приклад: "Паролі повинні мати довжину не менше 12 символів, містити великі та малі літери, цифри та спецсимволи".</li>
+                <li><strong>Процедури (Procedures)</strong> — покрокові інструкції для виконання стандартів. Приклад: "Покрокова інструкція налаштування TOTP для облікового запису".</li>
+                <li><strong>Настанови (Guidelines)</strong> — рекомендації та найкращі практики, що не є обов'язковими. Приклад: "Рекомендується використовувати менеджер паролів для зберігання облікових даних".</li>
+            </ul>
+
+            <h3>1.3. Принципи побудови політики безпеки</h3>
+
+            <ul>
+                <li><strong>Принцип мінімальних привілеїв (Least Privilege)</strong> — кожен суб'єкт отримує лише ті права, які необхідні для виконання його функцій.</li>
+                <li><strong>Принцип розділення обов'язків (Separation of Duties, SoD)</strong> — критичні операції вимагають участі кількох осіб, що запобігає зловживанням.</li>
+                <li><strong>Принцип "need-to-know"</strong> — доступ до інформації надається лише тим, кому вона необхідна для виконання службових обов'язків.</li>
+                <li><strong>Принцип замовчування (Default Deny)</strong> — все, що явно не дозволено, є забороненим.</li>
+                <li><strong>Принцип підзвітності (Accountability)</strong> — кожна дія в системі повинна бути пов'язана з конкретним суб'єктом і зафіксована в журналі.</li>
+            </ul>
+
+            <div class="example-box">
+                <strong>Приклад: фрагмент політики доступу</strong>
+                "5.3. Управління обліковими записами. 5.3.1. Облікові записи створюються виключно на підставі заявки, підписаної керівником підрозділу та погодженої з адміністратором безпеки. 5.3.2. При звільненні працівника його обліковий запис деактивується протягом 1 робочої години після отримання відповідного повідомлення від HR-відділу. 5.3.3. Привілейовані облікові записи (адміністраторів) підлягають обов'язковому аудиту раз на квартал."
+            </div>
+
+            <!-- ===== 2. Моделі управління доступом ===== -->
+            <h2>2. Моделі управління доступом</h2>
+
+            <p>Управління доступом (Access Control) — це процес визначення того, які суб'єкти (користувачі, процеси, пристрої) можуть звертатися до яких об'єктів (файли, бази даних, мережеві ресурси) та які операції над ними виконувати. Існують чотири основні моделі управління доступом.</p>
+
+            <!-- DAC -->
+            <h3>2.1. DAC — Discretionary Access Control (дискреційне управління доступом)</h3>
+
+            <p>У моделі DAC власник об'єкта (ресурсу) самостійно визначає, хто має до нього доступ. Це найбільш поширена модель у традиційних операційних системах.</p>
+
+            <h4>Принципи DAC</h4>
+            <ul>
+                <li>Кожен об'єкт має власника, який контролює доступ до нього.</li>
+                <li>Власник може надавати та відкликати права доступу іншим суб'єктам.</li>
+                <li>Права можуть передаватися іншим користувачам (делегування).</li>
+            </ul>
+
+            <h4>Матриця доступу</h4>
+            <p>Формально DAC описується матрицею доступу, де рядки — суб'єкти, стовпці — об'єкти, а комірки — набори дозволених операцій:</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Суб'єкт / Об'єкт</th>
+                        <th>Файл A</th>
+                        <th>Файл B</th>
+                        <th>Принтер</th>
+                        <th>БД Клієнтів</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Користувач 1</td>
+                        <td>read, write</td>
+                        <td>read</td>
+                        <td>print</td>
+                        <td>—</td>
+                    </tr>
+                    <tr>
+                        <td>Користувач 2</td>
+                        <td>read</td>
+                        <td>read, write</td>
+                        <td>print</td>
+                        <td>read</td>
+                    </tr>
+                    <tr>
+                        <td>Адміністратор</td>
+                        <td>read, write, execute</td>
+                        <td>read, write, execute</td>
+                        <td>print, manage</td>
+                        <td>read, write, admin</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>Реалізація DAC: списки контролю доступу (ACL)</h4>
+
+            <p>На практиці матриця доступу реалізується через <strong>ACL (Access Control List)</strong> — список, прив'язаний до об'єкта, що перелічує суб'єктів та їхні права.</p>
+
+            <p><strong>Linux (POSIX permissions та ACL):</strong></p>
+
+            <pre><code># Базові POSIX-права: власник / група / інші
+# r = read (4), w = write (2), x = execute (1)
+chmod 750 /srv/project/data       # власник: rwx, група: r-x, інші: ---
+chown admin:developers /srv/project/data
+
+# Перегляд прав
+ls -la /srv/project/data
+
+# Розширені ACL (POSIX ACL) — дозволяють гранулярний доступ
+# Надати користувачу auditor право на читання
+setfacl -m u:auditor:r /srv/project/data
+# Надати групі analysts права read/execute
+setfacl -m g:analysts:rx /srv/project/data
+# Перегляд ACL
+getfacl /srv/project/data</code></pre>
+
+            <p><strong>Windows (NTFS permissions):</strong></p>
+
+            <pre><code># PowerShell: перегляд ACL файлу
+Get-Acl C:\Projects\Data | Format-List
+
+# Надання права Read для користувача
+$acl = Get-Acl C:\Projects\Data
+$rule = New-Object System.Security.AccessControl.FileSystemAccessRule(
+    "DOMAIN\auditor", "Read", "Allow"
+)
+$acl.SetAccessRule($rule)
+Set-Acl C:\Projects\Data $acl
+
+# icacls — командний рядок
+icacls C:\Projects\Data /grant "DOMAIN\auditor:(OI)(CI)R"</code></pre>
+
+            <div class="warning-box">
+                <strong>Недолік DAC</strong>
+                Головна проблема DAC — відсутність контролю за подальшим поширенням інформації. Користувач, отримавши доступ до файлу, може скопіювати його вміст та передати іншим. Це робить DAC непридатним для середовищ з високими вимогами до конфіденційності (наприклад, військові або державні системи).
+            </div>
+
+            <!-- MAC -->
+            <h3>2.2. MAC — Mandatory Access Control (мандатне управління доступом)</h3>
+
+            <p>У моделі MAC рішення про доступ приймає система на основі міток безпеки (security labels), присвоєних суб'єктам та об'єктам. Користувач не може змінити ці мітки самостійно — це прерогатива адміністратора безпеки.</p>
+
+            <h4>Мітки конфіденційності</h4>
+            <p>Кожному суб'єкту присвоюється <strong>рівень допуску (clearance)</strong>, а кожному об'єкту — <strong>рівень секретності (classification)</strong>. Типова ієрархія:</p>
+
+            <ul>
+                <li><strong>Несекретно (Unclassified)</strong></li>
+                <li><strong>Для службового користування (Restricted / ДСК)</strong></li>
+                <li><strong>Конфіденційно (Confidential)</strong></li>
+                <li><strong>Таємно (Secret)</strong></li>
+                <li><strong>Цілком таємно (Top Secret)</strong></li>
+            </ul>
+
+            <h4>Модель Bell-LaPadula (BLP)</h4>
+            <p>Класична модель MAC, орієнтована на захист <strong>конфіденційності</strong>. Має два ключових правила:</p>
+            <ul>
+                <li><strong>Simple Security Property (No Read Up)</strong> — суб'єкт з рівнем допуску L може читати лише об'єкти з рівнем секретності <= L. Тобто не можна читати документи з вищим грифом.</li>
+                <li><strong>Star Property (No Write Down)</strong> — суб'єкт з рівнем допуску L може записувати лише в об'єкти з рівнем секретності >= L. Тобто не можна скинути секретну інформацію у несекретний файл.</li>
+            </ul>
+
+            <div class="example-box">
+                <strong>Приклад Bell-LaPadula</strong>
+                Офіцер з допуском "Таємно" може читати документи "Несекретно", "ДСК", "Конфіденційно" та "Таємно", але не може читати "Цілком таємно". Він може записувати лише в документи "Таємно" або "Цілком таємно", але не в "Конфіденційно" або нижче — це запобігає витоку секретної інформації.
+            </div>
+
+            <h4>Модель Biba</h4>
+            <p>Модель Biba — дзеркальне відображення Bell-LaPadula, орієнтоване на захист <strong>цілісності</strong>:</p>
+            <ul>
+                <li><strong>Simple Integrity Axiom (No Read Down)</strong> — суб'єкт не може читати об'єкти з нижчим рівнем цілісності (щоб не "забруднити" свої рішення недостовірними даними).</li>
+                <li><strong>Star Integrity Axiom (No Write Up)</strong> — суб'єкт не може записувати в об'єкти з вищим рівнем цілісності (щоб не "забруднити" достовірні дані).</li>
+            </ul>
+
+            <h4>Реалізація MAC: SELinux та AppArmor</h4>
+
+            <p><strong>SELinux (Security-Enhanced Linux)</strong> — модуль ядра Linux, розроблений NSA, що реалізує MAC. Кожен процес та файл має контекст безпеки (мітку):</p>
+
+            <pre><code># Перевірка статусу SELinux
+sestatus
+# Режими: Enforcing (примусовий), Permissive (логування), Disabled
+
+# Перегляд контексту безпеки файлу
+ls -Z /var/www/html/index.html
+# -rw-r--r--. root root system_u:object_r:httpd_sys_content_t:s0 index.html
+
+# Контекст складається з: user:role:type:level
+# Тип (type) — основний елемент для прийняття рішень
+
+# Зміна контексту файлу
+chcon -t httpd_sys_content_t /var/www/html/newfile.html
+
+# Відновлення контексту за замовчуванням
+restorecon -Rv /var/www/html/
+
+# Перегляд поточних булевих перемикачів
+getsebool -a | grep httpd
+# Дозволити Apache підключатися до мережі
+setsebool -P httpd_can_network_connect on
+
+# Аналіз відмов SELinux
+ausearch -m avc -ts recent
+sealert -a /var/log/audit/audit.log</code></pre>
+
+            <p><strong>AppArmor</strong> — альтернатива SELinux, поширена в Ubuntu/Debian. Використовує профілі, прив'язані до шляхів файлів:</p>
+
+            <pre><code># Перевірка статусу AppArmor
+sudo apparmor_status
+
+# Перегляд профілю програми
+cat /etc/apparmor.d/usr.sbin.nginx
+
+# Приклад профілю для nginx:
+# /usr/sbin/nginx {
+#   /var/www/html/** r,      # read access to web content
+#   /var/log/nginx/** w,      # write access to logs
+#   /run/nginx.pid rw,        # read/write PID file
+#   network inet stream,      # allow TCP connections
+#   deny /etc/shadow r,       # explicitly deny shadow file
+# }
+
+# Перевести профіль у режим скарг (навчання)
+aa-complain /usr/sbin/nginx
+
+# Перевести профіль у примусовий режим
+aa-enforce /usr/sbin/nginx</code></pre>
+
+            <!-- RBAC -->
+            <h3>2.3. RBAC — Role-Based Access Control (рольове управління доступом)</h3>
+
+            <p>Модель RBAC, стандартизована в NIST INCITS 359-2004, є найпоширенішою у корпоративних середовищах. Замість прямого призначення прав користувачам, права групуються в <strong>ролі</strong>, а ролі призначаються користувачам.</p>
+
+            <h4>Компоненти RBAC</h4>
+            <ul>
+                <li><strong>Користувачі (Users)</strong> — суб'єкти, що працюють у системі.</li>
+                <li><strong>Ролі (Roles)</strong> — іменовані набори дозволів, що відповідають функціональним обов'язкам. Наприклад: "Бухгалтер", "Мережевий адміністратор", "Аудитор".</li>
+                <li><strong>Дозволи (Permissions)</strong> — конкретні права на виконання операцій над об'єктами.</li>
+                <li><strong>Сесії (Sessions)</strong> — контекст, у якому користувач активує певні ролі.</li>
+            </ul>
+
+            <h4>Ієрархія ролей</h4>
+            <p>RBAC підтримує ієрархію ролей, де вищі ролі успадковують дозволи нижчих. Наприклад:</p>
+            <ul>
+                <li><strong>Працівник</strong> (базові права: доступ до корпоративного порталу, електронної пошти)</li>
+                <li><strong>Менеджер</strong> (успадковує права Працівника + доступ до звітів підрозділу)</li>
+                <li><strong>Директор</strong> (успадковує права Менеджера + доступ до фінансових даних)</li>
+            </ul>
+
+            <h4>Розділення обов'язків (Separation of Duties, SoD)</h4>
+            <p>SoD — механізм запобігання конфліктам інтересів. Існують два типи:</p>
+            <ul>
+                <li><strong>Статичне SoD (Static SoD)</strong> — певні ролі не можуть бути одночасно призначені одному користувачу. Наприклад, роль "Розробник" та "Тестувальник" є взаємовиключними.</li>
+                <li><strong>Динамічне SoD (Dynamic SoD)</strong> — користувач може мати кілька ролей, але не може активувати конфліктуючі ролі в одній сесії. Наприклад, користувач може бути і "Заявником", і "Затверджувачем", але не може затверджувати власні заявки.</li>
+            </ul>
+
+            <div class="example-box">
+                <strong>Приклад RBAC: банківська система</strong>
+                <ul>
+                    <li>Роль <strong>"Касир"</strong>: перегляд рахунків клієнтів, виконання транзакцій до 50 000 грн.</li>
+                    <li>Роль <strong>"Старший касир"</strong>: усі права касира + транзакції до 500 000 грн + відміна транзакцій.</li>
+                    <li>Роль <strong>"Аудитор"</strong>: перегляд усіх транзакцій та журналів (read-only), без можливості змін.</li>
+                    <li>SoD: одна особа не може одночасно мати ролі "Касир" та "Аудитор".</li>
+                </ul>
+            </div>
+
+            <!-- ABAC -->
+            <h3>2.4. ABAC — Attribute-Based Access Control (атрибутне управління доступом)</h3>
+
+            <p>ABAC — це найбільш гнучка модель управління доступом, де рішення про доступ базується на <strong>атрибутах</strong> суб'єктів, об'єктів та середовища. ABAC дозволяє створювати складні, контекстно-залежні правила доступу без необхідності визначати велику кількість ролей.</p>
+
+            <h4>Типи атрибутів</h4>
+            <ul>
+                <li><strong>Атрибути суб'єкта:</strong> посада, відділ, рівень допуску, місцезнаходження, статус працівника (штатний/позаштатний).</li>
+                <li><strong>Атрибути об'єкта:</strong> тип даних, рівень конфіденційності, власник, дата створення, формат файлу.</li>
+                <li><strong>Атрибути середовища:</strong> час доби, IP-адреса, тип пристрою, рівень загрози в мережі, геолокація.</li>
+                <li><strong>Атрибути дії:</strong> тип операції (read, write, delete, approve), обсяг запитуваних даних.</li>
+            </ul>
+
+            <h4>XACML — мова опису політик ABAC</h4>
+            <p><code>XACML</code> (eXtensible Access Control Markup Language) — стандарт OASIS для опису політик ABAC. Архітектура XACML включає:</p>
+            <ul>
+                <li><strong>PEP (Policy Enforcement Point)</strong> — перехоплює запити доступу та надсилає їх до PDP.</li>
+                <li><strong>PDP (Policy Decision Point)</strong> — обчислює рішення (Permit/Deny) на основі політик.</li>
+                <li><strong>PAP (Policy Administration Point)</strong> — інтерфейс для створення та управління політиками.</li>
+                <li><strong>PIP (Policy Information Point)</strong> — надає значення атрибутів (з LDAP, БД, API).</li>
+            </ul>
+
+            <div class="example-box">
+                <strong>Приклад правила ABAC (у псевдокоді)</strong>
+                <pre><code>IF   subject.department == "Фінансовий відділ"
+AND  subject.clearance >= object.classification
+AND  action == "read"
+AND  environment.time BETWEEN "09:00" AND "18:00"
+AND  environment.ip_network == "10.0.5.0/24"
+AND  environment.device_compliance == true
+THEN PERMIT
+ELSE DENY</code></pre>
+                Це правило дозволяє читання лише співробітникам фінансового відділу, з достатнім рівнем допуску, у робочий час, з корпоративної мережі, на сертифікованому пристрої.
+            </div>
+
+            <h3>2.5. Порівняння моделей управління доступом</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Характеристика</th>
+                        <th>DAC</th>
+                        <th>MAC</th>
+                        <th>RBAC</th>
+                        <th>ABAC</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Хто визначає доступ</strong></td>
+                        <td>Власник об'єкта</td>
+                        <td>Система / адміністратор безпеки</td>
+                        <td>Адміністратор (через ролі)</td>
+                        <td>Політика (на основі атрибутів)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Гранулярність</strong></td>
+                        <td>Середня</td>
+                        <td>Висока</td>
+                        <td>Середня</td>
+                        <td>Дуже висока</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Гнучкість</strong></td>
+                        <td>Висока</td>
+                        <td>Низька</td>
+                        <td>Середня</td>
+                        <td>Дуже висока</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Складність адміністрування</strong></td>
+                        <td>Низька</td>
+                        <td>Висока</td>
+                        <td>Середня</td>
+                        <td>Висока</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Масштабованість</strong></td>
+                        <td>Погана</td>
+                        <td>Добра</td>
+                        <td>Добра</td>
+                        <td>Відмінна</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Контекстна залежність</strong></td>
+                        <td>Ні</td>
+                        <td>Ні</td>
+                        <td>Обмежено</td>
+                        <td>Так</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Типове застосування</strong></td>
+                        <td>Файлові системи (Linux, Windows)</td>
+                        <td>Військові, державні системи</td>
+                        <td>Корпоративні середовища, ERP</td>
+                        <td>Хмарні сервіси, Zero Trust</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Приклади реалізації</strong></td>
+                        <td>chmod, NTFS ACL</td>
+                        <td>SELinux, AppArmor</td>
+                        <td>Active Directory, AWS IAM</td>
+                        <td>Azure ABAC, AWS IAM Conditions</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- ===== 3. Реалізація в реальних системах ===== -->
+            <h2>3. Реалізація управління доступом у реальних системах</h2>
+
+            <h3>3.1. Active Directory (AD)</h3>
+
+            <p><strong>Active Directory</strong> — служба каталогів Microsoft, що є стандартом де-факто для управління ідентифікацією та доступом у корпоративних середовищах Windows. AD реалізує комбінацію DAC (через ACL) та RBAC (через групи безпеки).</p>
+
+            <h4>Архітектура Active Directory</h4>
+            <ul>
+                <li><strong>Домен (Domain)</strong> — базова одиниця адміністрування. Всі об'єкти (користувачі, комп'ютери, групи) належать до домену.</li>
+                <li><strong>Організаційні одиниці (OU, Organizational Units)</strong> — контейнери для логічного групування об'єктів. До OU можна прив'язувати групові політики (GPO).</li>
+                <li><strong>Групи безпеки (Security Groups)</strong> — реалізують RBAC: користувачі додаються до груп, а групам надаються права доступу до ресурсів.</li>
+                <li><strong>Групові політики (GPO, Group Policy Objects)</strong> — механізм централізованого налаштування конфігурацій безпеки для комп'ютерів та користувачів.</li>
+                <li><strong>Delegation</strong> — делегування адміністративних прав на рівні OU.</li>
+            </ul>
+
+            <h4>Практичні команди PowerShell для AD</h4>
+
+            <pre><code># Модуль Active Directory для PowerShell
+Import-Module ActiveDirectory
+
+# === Управління користувачами ===
+
+# Створення нового користувача
+New-ADUser -Name "Іванов Петро" `
+    -SamAccountName "p.ivanov" `
+    -UserPrincipalName "p.ivanov@company.local" `
+    -Path "OU=Users,OU=Kyiv,DC=company,DC=local" `
+    -AccountPassword (ConvertTo-SecureString "P@ssw0rd2024!" -AsPlainText -Force) `
+    -Enabled $true `
+    -Department "IT Security" `
+    -Title "Спеціаліст з кібербезпеки"
+
+# Пошук користувача за ім'ям
+Get-ADUser -Filter "Name -like '*Іванов*'" -Properties Department,Title
+
+# Перегляд усіх властивостей користувача
+Get-ADUser -Identity "p.ivanov" -Properties *
+
+# Деактивація облікового запису (при звільненні)
+Disable-ADAccount -Identity "p.ivanov"
+
+# === Управління групами ===
+
+# Створення групи безпеки
+New-ADGroup -Name "SEC-FirewallAdmins" `
+    -GroupScope Global `
+    -GroupCategory Security `
+    -Path "OU=Security Groups,DC=company,DC=local" `
+    -Description "Адміністратори міжмережевих екранів"
+
+# Додавання користувача до групи
+Add-ADGroupMember -Identity "SEC-FirewallAdmins" -Members "p.ivanov"
+
+# Перегляд членів групи
+Get-ADGroupMember -Identity "SEC-FirewallAdmins"
+
+# Перегляд груп, до яких належить користувач
+Get-ADPrincipalGroupMembership -Identity "p.ivanov" | Select Name
+
+# === Групові політики ===
+# Перегляд усіх GPO
+Get-GPO -All | Select DisplayName, GpoStatus
+
+# Створення звіту по GPO
+Get-GPOReport -Name "Password Policy" -ReportType Html -Path "C:\Reports\gpo.html"</code></pre>
+
+            <div class="tip-box">
+                <strong>Найкраща практика AD</strong>
+                Використовуйте стратегію AGDLP (Account -> Global Group -> Domain Local Group -> Permission): облікові записи додаються до глобальних груп, глобальні групи — до доменних локальних груп, а доменним локальним групам призначаються дозволи на ресурси. Це забезпечує масштабованість і зручність адміністрування.
+            </div>
+
+            <h3>3.2. FreeIPA / LDAP</h3>
+
+            <p><strong>FreeIPA</strong> — відкрита платформа для централізованого управління ідентифікацією, автентифікацією та авторизацією в Linux-середовищах. Вона об'єднує LDAP-каталог (389 Directory Server), Kerberos-автентифікацію, DNS та центр сертифікації (Dogtag CA) у єдине рішення.</p>
+
+            <h4>Основні можливості FreeIPA</h4>
+            <ul>
+                <li>Централізоване управління користувачами та групами для Linux-серверів</li>
+                <li>Kerberos-автентифікація (Single Sign-On для Linux)</li>
+                <li>HBAC (Host-Based Access Control) — контроль, які користувачі можуть входити на які сервери</li>
+                <li>Sudo-правила — централізоване управління sudo-доступом</li>
+                <li>Інтеграція з Active Directory (Cross-Realm Trust)</li>
+            </ul>
+
+            <pre><code># Встановлення клієнта FreeIPA
+sudo apt install freeipa-client
+sudo ipa-client-install --domain=ics.local --server=ipa.ics.local
+
+# Пошук користувачів через LDAP
+ldapsearch -x -H ldap://ipa.ics.local \
+    -b "cn=users,cn=accounts,dc=ics,dc=local" \
+    "(uid=p.ivanov)" cn mail department
+
+# Створення користувача через IPA CLI
+ipa user-add p.ivanov \
+    --first=Петро --last=Іванов \
+    --email=p.ivanov@ics.local \
+    --department="IT Security"
+
+# Створення групи та додавання користувача
+ipa group-add sec-admins --desc="Адміністратори безпеки"
+ipa group-add-member sec-admins --users=p.ivanov
+
+# HBAC: дозволити групі sec-admins вхід на сервери firewalls
+ipa hbacrule-add allow_sec_admins_firewalls
+ipa hbacrule-add-user allow_sec_admins_firewalls --groups=sec-admins
+ipa hbacrule-add-host allow_sec_admins_firewalls --hostgroups=firewalls
+ipa hbacrule-add-service allow_sec_admins_firewalls --hbacsvcs=sshd
+
+# Централізоване sudo-правило
+ipa sudorule-add sec_admins_iptables
+ipa sudorule-add-user sec_admins_iptables --groups=sec-admins
+ipa sudorule-add-host sec_admins_iptables --hostgroups=firewalls
+ipa sudorule-add-allow-command sec_admins_iptables --sudocmds="/usr/sbin/iptables"</code></pre>
+
+            <h3>3.3. PAM (Privileged Access Management)</h3>
+
+            <p><strong>Privileged Access Management (PAM)</strong> — набір технологій та процесів для контролю, моніторингу та аудиту привілейованого доступу. Привілейовані облікові записи (root, Administrator, service accounts) є головною ціллю атакуючих, оскільки компрометація одного такого акаунту може дати повний контроль над системою.</p>
+
+            <h4>Ключові компоненти PAM-рішень</h4>
+            <ul>
+                <li><strong>Password Vault (Сховище паролів)</strong> — безпечне зберігання привілейованих облікових даних. Паролі ротуються автоматично.</li>
+                <li><strong>Session Manager</strong> — проксіювання та запис привілейованих сесій (SSH, RDP) для аудиту.</li>
+                <li><strong>Just-In-Time (JIT) Access</strong> — привілейований доступ надається лише на обмежений час за запитом.</li>
+                <li><strong>Secrets Management</strong> — безпечне зберігання та ротація API-ключів, токенів, сертифікатів для додатків.</li>
+            </ul>
+
+            <h4>HashiCorp Vault</h4>
+
+            <p><code>HashiCorp Vault</code> — відкрите рішення для управління секретами (secrets management). Vault зберігає, генерує та контролює доступ до токенів, паролів, сертифікатів та ключів шифрування.</p>
+
+            <pre><code># Ініціалізація Vault (перший запуск)
+vault operator init -key-shares=5 -key-threshold=3
+
+# Розпечатування Vault (потрібно 3 з 5 ключів)
+vault operator unseal &lt;key-1&gt;
+vault operator unseal &lt;key-2&gt;
+vault operator unseal &lt;key-3&gt;
+
+# Автентифікація
+vault login &lt;root-token&gt;
+
+# === KV Secrets Engine — зберігання пар ключ/значення ===
+# Увімкнення KV engine v2
+vault secrets enable -path=secret kv-v2
+
+# Збереження секрету
+vault kv put secret/database/prod \
+    username="db_admin" \
+    password="S3cur3P@ss!" \
+    host="db.internal.ics.local"
+
+# Читання секрету
+vault kv get secret/database/prod
+
+# === Політики доступу до секретів ===
+# Створення політики (файл db-readonly.hcl):
+# path "secret/data/database/*" {
+#   capabilities = ["read", "list"]
+# }
+vault policy write db-readonly db-readonly.hcl
+
+# Створення токена з прив'язкою до політики
+vault token create -policy=db-readonly -ttl=1h
+
+# === Dynamic Secrets — динамічні облікові записи БД ===
+vault secrets enable database
+
+vault write database/config/postgres \
+    plugin_name=postgresql-database-plugin \
+    connection_url="postgresql://{{username}}:{{password}}@db.internal:5432/app" \
+    allowed_roles="app-readonly" \
+    username="vault_admin" \
+    password="VaultAdmin123"
+
+vault write database/roles/app-readonly \
+    db_name=postgres \
+    creation_statements="CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' \
+    VALID UNTIL '{{expiration}}'; GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"{{name}}\";" \
+    default_ttl="1h" max_ttl="24h"
+
+# Отримання тимчасових облікових даних (автоматично ротуються)
+vault read database/creds/app-readonly</code></pre>
+
+            <div class="info-box">
+                <strong>CyberArk</strong>
+                CyberArk — провідне комерційне PAM-рішення. Воно забезпечує: автоматичну ротацію паролів привілейованих акаунтів, запис та аналіз привілейованих сесій (відео, кейлогінг), інтеграцію з SIEM-системами для виявлення аномальної поведінки привілейованих користувачів.
+            </div>
+
+            <!-- ===== 4. Багатофакторна автентифікація ===== -->
+            <h2>4. Багатофакторна автентифікація (MFA)</h2>
+
+            <p>Автентифікація — це процес підтвердження ідентичності суб'єкта. Багатофакторна автентифікація (MFA) вимагає надання доказів з двох або більше категорій (факторів), що значно підвищує стійкість до компрометації.</p>
+
+            <h3>4.1. Фактори автентифікації</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Фактор</th>
+                        <th>Опис</th>
+                        <th>Приклади</th>
+                        <th>Вразливості</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Знання (Knowledge)</strong></td>
+                        <td>Щось, що користувач знає</td>
+                        <td>Пароль, PIN-код, секретне питання</td>
+                        <td>Фішинг, brute force, social engineering</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Володіння (Possession)</strong></td>
+                        <td>Щось, що користувач має</td>
+                        <td>Смартфон (TOTP), апаратний токен, смарт-карта</td>
+                        <td>Крадіжка, клонування SIM (для SMS)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Притаманність (Inherence)</strong></td>
+                        <td>Щось, чим користувач є</td>
+                        <td>Відбиток пальця, розпізнавання обличчя, сканування райдужки</td>
+                        <td>Спуфінг біометрії, неможливість зміни</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Місцезнаходження</strong></td>
+                        <td>Де знаходиться користувач</td>
+                        <td>GPS, IP-геолокація, Bluetooth proximity</td>
+                        <td>VPN/проксі обхід, GPS-спуфінг</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Поведінка</strong></td>
+                        <td>Як користувач діє</td>
+                        <td>Динаміка натискання клавіш, патерн руху миші</td>
+                        <td>Нестабільність, потреба навчання моделі</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>4.2. TOTP — Time-Based One-Time Password (RFC 6238)</h3>
+
+            <p><code>TOTP</code> — алгоритм генерації одноразових паролів на основі часу. Використовується у більшості MFA-додатків (Google Authenticator, Microsoft Authenticator, Authy).</p>
+
+            <h4>Принцип роботи TOTP</h4>
+            <ol>
+                <li><strong>Реєстрація:</strong> сервер генерує секретний ключ (зазвичай 160 біт, Base32-кодований) та передає його клієнту (через QR-код).</li>
+                <li><strong>Генерація коду:</strong> клієнт обчислює HMAC-SHA1 від поєднання секретного ключа та поточного часу (поділеного на інтервал, зазвичай 30 секунд). Результат усікається до 6-значного числа.</li>
+                <li><strong>Верифікація:</strong> сервер виконує ту ж операцію і порівнює результат. Допускається невелике вікно (зазвичай +/- 1 інтервал) для компенсації розсинхронізації годинників.</li>
+            </ol>
+
+            <pre><code># Формула TOTP:
+# TOTP = Truncate(HMAC-SHA1(SecretKey, Floor(UnixTime / TimeStep)))
+# TimeStep = 30 секунд (за замовчуванням)
+# Результат = 6-значний код
+
+# Python-приклад генерації TOTP:
+import hmac, hashlib, struct, time
+
+def generate_totp(secret_key_hex, time_step=30, digits=6):
+    # Поточний лічильник часу
+    counter = int(time.time()) // time_step
+    # HMAC-SHA1
+    counter_bytes = struct.pack(">Q", counter)
+    hmac_hash = hmac.new(bytes.fromhex(secret_key_hex),
+                         counter_bytes, hashlib.sha1).digest()
+    # Dynamic truncation
+    offset = hmac_hash[-1] & 0x0F
+    code = struct.unpack(">I", hmac_hash[offset:offset+4])[0]
+    code = (code & 0x7FFFFFFF) % (10 ** digits)
+    return str(code).zfill(digits)</code></pre>
+
+            <h3>4.3. FIDO2 / WebAuthn</h3>
+
+            <p><strong>FIDO2</strong> — відкритий стандарт безпарольної автентифікації, розроблений альянсом FIDO та W3C. Він складається з двох компонентів: <strong>WebAuthn</strong> (API для веб-браузерів) та <strong>CTAP2</strong> (протокол для комунікації з зовнішніми автентифікаторами).</p>
+
+            <h4>Потік автентифікації FIDO2/WebAuthn</h4>
+            <ol>
+                <li><strong>Реєстрація (Registration):</strong>
+                    <ul>
+                        <li>Сервер (Relying Party) надсилає challenge (випадкові байти) та параметри (RP ID, User ID).</li>
+                        <li>Браузер передає запит автентифікатору (вбудованому — біометрія, або зовнішньому — USB-ключ типу YubiKey).</li>
+                        <li>Автентифікатор генерує пару ключів (приватний + публічний), прив'язану до конкретного RP ID.</li>
+                        <li>Приватний ключ залишається в автентифікаторі (ніколи не покидає пристрій).</li>
+                        <li>Публічний ключ та credential ID відправляються на сервер.</li>
+                    </ul>
+                </li>
+                <li><strong>Автентифікація (Authentication):</strong>
+                    <ul>
+                        <li>Сервер надсилає challenge та credential ID.</li>
+                        <li>Автентифікатор підписує challenge приватним ключем (після верифікації користувача: PIN або біометрія).</li>
+                        <li>Сервер перевіряє підпис публічним ключем, збереженим при реєстрації.</li>
+                    </ul>
+                </li>
+            </ol>
+
+            <div class="tip-box">
+                <strong>Переваги FIDO2 над TOTP</strong>
+                FIDO2 стійкий до фішингу (автентифікатор перевіряє RP ID / origin домену), не вимагає введення кодів (зручність), приватний ключ ніколи не передається мережею (стійкість до перехоплення). Рекомендація NIST SP 800-63B: FIDO2 — це "Verifier Impersonation Resistant", тобто найвищий рівень захисту від MFA-обходу.
+            </div>
+
+            <h3>4.4. Смарт-карти та PKI-автентифікація</h3>
+
+            <p>Смарт-карта — фізичний пристрій з вбудованим мікропроцесором, що зберігає приватний ключ та сертифікат X.509. Використовується для автентифікації у корпоративних середовищах, підпису документів та шифрування електронної пошти (S/MIME).</p>
+
+            <ul>
+                <li><strong>Процес автентифікації:</strong> сервер надсилає challenge, смарт-карта підписує його приватним ключем (після введення PIN), сервер перевіряє підпис за допомогою сертифіката.</li>
+                <li><strong>Приклади:</strong> PIV (Personal Identity Verification) — стандарт уряду США; КЕП (Кваліфікований Електронний Підпис) — в Україні, на базі ДСТУ 4145-2002.</li>
+                <li><strong>Інтеграція:</strong> Active Directory Certificate Services (AD CS), Windows Hello for Business, OpenSC (Linux).</li>
+            </ul>
+
+            <!-- ===== 5. SSO ===== -->
+            <h2>5. SSO — Single Sign-On (єдиний вхід)</h2>
+
+            <p>SSO — технологія, що дозволяє користувачу автентифікуватися один раз та отримати доступ до множини додатків без повторного введення облікових даних. SSO підвищує зручність, знижує кількість паролів та спрощує управління доступом.</p>
+
+            <h3>5.1. SAML 2.0 (Security Assertion Markup Language)</h3>
+
+            <p><code>SAML 2.0</code> — XML-based стандарт для обміну даними автентифікації та авторизації між Identity Provider (IdP) та Service Provider (SP). Широко використовується у корпоративних середовищах.</p>
+
+            <h4>Потік автентифікації SAML 2.0 (SP-Initiated)</h4>
+            <ol>
+                <li>Користувач звертається до Service Provider (наприклад, корпоративний Jira).</li>
+                <li>SP виявляє, що користувач не автентифікований, та перенаправляє його до IdP (наприклад, Okta, Azure AD) з <strong>AuthnRequest</strong>.</li>
+                <li>IdP автентифікує користувача (логін/пароль + MFA).</li>
+                <li>IdP формує <strong>SAML Assertion</strong> — XML-документ, що містить:
+                    <ul>
+                        <li><strong>Subject</strong> — ідентифікатор користувача (NameID)</li>
+                        <li><strong>Conditions</strong> — термін дії, обмеження аудиторії</li>
+                        <li><strong>AuthnStatement</strong> — факт автентифікації, метод, час</li>
+                        <li><strong>AttributeStatement</strong> — атрибути користувача (email, групи, ролі)</li>
+                    </ul>
+                </li>
+                <li>IdP підписує Assertion цифровим підписом та надсилає до SP (через браузер користувача, POST Binding).</li>
+                <li>SP перевіряє підпис, валідує Conditions та створює локальну сесію для користувача.</li>
+            </ol>
+
+            <h3>5.2. OAuth 2.0</h3>
+
+            <p><code>OAuth 2.0</code> — фреймворк авторизації (не автентифікації!), що дозволяє стороннім додаткам отримувати обмежений доступ до ресурсів користувача без передачі його облікових даних. Описаний у RFC 6749.</p>
+
+            <h4>Ролі в OAuth 2.0</h4>
+            <ul>
+                <li><strong>Resource Owner</strong> — користувач, який володіє ресурсами.</li>
+                <li><strong>Client</strong> — додаток, що запитує доступ.</li>
+                <li><strong>Authorization Server</strong> — сервер, що видає токени доступу.</li>
+                <li><strong>Resource Server</strong> — сервер, що зберігає ресурси та перевіряє токени.</li>
+            </ul>
+
+            <h4>Authorization Code Flow (найбезпечніший)</h4>
+            <ol>
+                <li>Client перенаправляє користувача до Authorization Server з параметрами:
+                    <code>response_type=code</code>, <code>client_id</code>, <code>redirect_uri</code>, <code>scope</code>, <code>state</code>.</li>
+                <li>Користувач автентифікується та надає згоду (consent) на запитувані дозволи.</li>
+                <li>Authorization Server перенаправляє користувача назад до Client з <strong>authorization code</strong> (одноразовий код).</li>
+                <li>Client обмінює authorization code на <strong>access token</strong> (та опціонально refresh token) через back-channel запит до Authorization Server (передаючи також client_secret).</li>
+                <li>Client використовує access token для доступу до Resource Server.</li>
+            </ol>
+
+            <div class="warning-box">
+                <strong>OAuth 2.0 — це не автентифікація!</strong>
+                OAuth 2.0 — це фреймворк авторизації: він дозволяє визначити, до яких ресурсів має доступ додаток, але не гарантує ідентифікацію користувача. Для автентифікації на базі OAuth 2.0 використовується надбудова OpenID Connect.
+            </div>
+
+            <h3>5.3. OpenID Connect (OIDC)</h3>
+
+            <p><strong>OpenID Connect</strong> — шар автентифікації поверх OAuth 2.0. Додає до OAuth 2.0 поняття <strong>ID Token</strong> — JWT (JSON Web Token), що містить інформацію про автентифікованого користувача.</p>
+
+            <h4>Структура ID Token (JWT)</h4>
+            <p>ID Token складається з трьох частин, розділених крапкою: Header.Payload.Signature</p>
+
+            <pre><code># Приклад декодованого ID Token (Payload):
+{
+  "iss": "https://auth.company.local",      # Issuer — хто видав токен
+  "sub": "user-uuid-12345",                 # Subject — ідентифікатор користувача
+  "aud": "client-app-id",                   # Audience — для якого додатка
+  "exp": 1700000000,                        # Expiration — термін дії
+  "iat": 1699996400,                        # Issued At — час видачі
+  "nonce": "random-nonce-value",            # Захист від replay-атак
+  "name": "Петро Іванов",                   # Ім'я користувача
+  "email": "p.ivanov@company.local",        # Email
+  "groups": ["sec-admins", "analysts"]       # Групи (custom claim)
+}
+
+# JWT підписується приватним ключем IdP
+# Client перевіряє підпис за допомогою публічного ключа (JWKS endpoint)</code></pre>
+
+            <h4>Потік OIDC (Authorization Code Flow)</h4>
+            <p>Аналогічний OAuth 2.0 Authorization Code Flow, але з додатковими параметрами:</p>
+            <ul>
+                <li>Запит включає <code>scope=openid</code> (обов'язково), а також <code>profile</code>, <code>email</code> для отримання додаткових claims.</li>
+                <li>Відповідь Token Endpoint включає <strong>id_token</strong> разом з access_token.</li>
+                <li>Client валідує id_token: перевіряє підпис, iss, aud, exp, nonce.</li>
+                <li>Опціонально: Client звертається до <strong>UserInfo Endpoint</strong> з access_token для отримання додаткових атрибутів.</li>
+            </ul>
+
+            <h3>5.4. Порівняння протоколів автентифікації та SSO</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Характеристика</th>
+                        <th>SAML 2.0</th>
+                        <th>OAuth 2.0</th>
+                        <th>OpenID Connect</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Призначення</strong></td>
+                        <td>Автентифікація + авторизація (SSO)</td>
+                        <td>Авторизація (делегування доступу)</td>
+                        <td>Автентифікація + авторизація</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Формат даних</strong></td>
+                        <td>XML (SAML Assertions)</td>
+                        <td>JSON (токени)</td>
+                        <td>JSON / JWT</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Транспорт</strong></td>
+                        <td>HTTP Redirect / POST</td>
+                        <td>HTTP REST API</td>
+                        <td>HTTP REST API</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Типове застосування</strong></td>
+                        <td>Корпоративний SSO (веб-додатки)</td>
+                        <td>API-авторизація, мобільні додатки</td>
+                        <td>Веб та мобільні додатки, SSO</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ID Token</strong></td>
+                        <td>SAML Assertion (XML)</td>
+                        <td>Немає (тільки access_token)</td>
+                        <td>JWT (id_token)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Складність інтеграції</strong></td>
+                        <td>Висока (XML, сертифікати)</td>
+                        <td>Середня</td>
+                        <td>Низька</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Приклади IdP</strong></td>
+                        <td>Azure AD, Okta, ADFS</td>
+                        <td>Google, GitHub, Facebook</td>
+                        <td>Azure AD, Okta, Keycloak</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Актуальність</strong></td>
+                        <td>Зрілий, широко впроваджений</td>
+                        <td>Стандарт для API</td>
+                        <td>Сучасний стандарт SSO</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="tip-box">
+                <strong>Рекомендація для нових проєктів</strong>
+                Для нових розробок рекомендується використовувати <strong>OpenID Connect</strong> як основний протокол SSO та автентифікації: він поєднує переваги OAuth 2.0 (JSON, REST, мобільна сумісність) з повноцінною автентифікацією (ID Token). SAML 2.0 залишається актуальним для інтеграції зі застарілими корпоративними системами. Відмінним відкритим рішенням для IdP є <code>Keycloak</code>, що підтримує SAML 2.0, OAuth 2.0 та OIDC.
+            </div>
+
+            <!-- ===== 6. Порівняння методів автентифікації ===== -->
+            <h2>6. Порівняння методів автентифікації</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Метод</th>
+                        <th>Фактор</th>
+                        <th>Стійкість до фішингу</th>
+                        <th>Зручність</th>
+                        <th>Вартість впровадження</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Пароль</td>
+                        <td>Знання</td>
+                        <td>Низька</td>
+                        <td>Висока</td>
+                        <td>Мінімальна</td>
+                    </tr>
+                    <tr>
+                        <td>Пароль + SMS OTP</td>
+                        <td>Знання + Володіння</td>
+                        <td>Низька (SS7 атаки, SIM swap)</td>
+                        <td>Середня</td>
+                        <td>Низька</td>
+                    </tr>
+                    <tr>
+                        <td>Пароль + TOTP</td>
+                        <td>Знання + Володіння</td>
+                        <td>Середня (real-time фішинг)</td>
+                        <td>Середня</td>
+                        <td>Низька</td>
+                    </tr>
+                    <tr>
+                        <td>Пароль + Push notification</td>
+                        <td>Знання + Володіння</td>
+                        <td>Середня (MFA fatigue attacks)</td>
+                        <td>Висока</td>
+                        <td>Середня</td>
+                    </tr>
+                    <tr>
+                        <td>FIDO2 / WebAuthn</td>
+                        <td>Володіння + Притаманність</td>
+                        <td>Дуже висока</td>
+                        <td>Висока</td>
+                        <td>Середня (апаратні ключі)</td>
+                    </tr>
+                    <tr>
+                        <td>Смарт-карта + PIN</td>
+                        <td>Володіння + Знання</td>
+                        <td>Висока</td>
+                        <td>Середня (потрібен рідер)</td>
+                        <td>Висока</td>
+                    </tr>
+                    <tr>
+                        <td>Сертифікат (mTLS)</td>
+                        <td>Володіння</td>
+                        <td>Висока</td>
+                        <td>Низька (складна інфраструктура)</td>
+                        <td>Висока</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="info-box">
+                <strong>Рекомендації NIST SP 800-63B</strong>
+                NIST класифікує автентифікатори за рівнями AAL (Authenticator Assurance Level):
+                <ul>
+                    <li><strong>AAL1</strong> — однофакторна автентифікація (пароль). Мінімальний рівень.</li>
+                    <li><strong>AAL2</strong> — багатофакторна автентифікація (пароль + TOTP або push). Рекомендований для більшості систем.</li>
+                    <li><strong>AAL3</strong> — апаратний автентифікатор з криптографічним підтвердженням (FIDO2, смарт-карта). Обов'язковий для критичних систем.</li>
+                </ul>
+                SMS OTP більше не рекомендується NIST як фактор автентифікації через вразливості протоколу SS7 та атаки SIM-swap.
+            </div>
+
+            <!-- ===== 7. Підсумки ===== -->
+            <h2>7. Підсумки</h2>
+
+            <p>У цій лекції ми розглянули фундаментальні аспекти управління доступом до ІКС:</p>
+
+            <ol>
+                <li><strong>Політика безпеки</strong> — формалізований документ, що є основою побудови КСЗІ. Він визначає правила, ролі, процедури та санкції.</li>
+                <li><strong>Моделі управління доступом:</strong>
+                    <ul>
+                        <li><strong>DAC</strong> — простий та гнучкий, але не контролює поширення інформації.</li>
+                        <li><strong>MAC</strong> — суворий, заснований на мітках, підходить для державних систем.</li>
+                        <li><strong>RBAC</strong> — збалансований, корпоративний стандарт, базується на ролях.</li>
+                        <li><strong>ABAC</strong> — найгнучкіший, контекстно-залежний, основа Zero Trust.</li>
+                    </ul>
+                </li>
+                <li><strong>Реалізація:</strong> Active Directory, FreeIPA, PAM-рішення (Vault, CyberArk) — реальні інструменти для впровадження моделей доступу.</li>
+                <li><strong>Автентифікація:</strong> MFA є обов'язковою вимогою сучасних систем. FIDO2/WebAuthn забезпечує найвищий рівень захисту від фішингу.</li>
+                <li><strong>SSO:</strong> SAML 2.0 — для корпоративного SSO, OAuth 2.0 — для API-авторизації, OpenID Connect — сучасний стандарт SSO.</li>
+            </ol>
+
+            <div class="tip-box">
+                <strong>Контрольні запитання</strong>
+                <ol>
+                    <li>Поясніть різницю між правилами "No Read Up" та "No Write Down" у моделі Bell-LaPadula.</li>
+                    <li>Чому DAC не підходить для систем з високими вимогами до конфіденційності?</li>
+                    <li>У чому переваги RBAC над прямим призначенням прав (DAC) у великій організації?</li>
+                    <li>Наведіть приклад правила ABAC, що використовує атрибути суб'єкта, об'єкта та середовища.</li>
+                    <li>Поясніть потік автентифікації FIDO2/WebAuthn та чому він стійкий до фішингу.</li>
+                    <li>У чому різниця між OAuth 2.0 та OpenID Connect?</li>
+                    <li>Чому SMS OTP більше не рекомендується NIST для MFA?</li>
+                </ol>
+            </div>
+
+        </article>
+
+        <nav class="page-nav">
+            <a href="02.html">&larr; Моделювання загроз</a>
+            <a href="04.html">Криптографічний захист &rarr;</a>
+        </nav>
+    </main>
+
+    <script>
+        document.getElementById('menuToggle').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('active');
+        });
+        document.getElementById('overlay').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.remove('open');
+            this.classList.remove('active');
+        });
+    </script>
+</body>
+</html>

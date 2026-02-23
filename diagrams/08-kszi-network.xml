@@ -1,0 +1,195 @@
+<mxfile host="app.diagrams.net" modified="2026-02-19T12:00:00.000Z" agent="Claude" version="24.0.0" type="device">
+  <diagram id="kszi-network-08" name="КСЗІ — Мережева архітектура TechSoft">
+    <mxGraphModel dx="1100" dy="860" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1000" pageHeight="800" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ===== ІНТЕРНЕТ (Cloud) ===== -->
+        <mxCell id="internet" value="ІНТЕРНЕТ" style="shape=cloud;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;fontSize=14;fontColor=#333333;verticalAlign=middle;align=center;" vertex="1" parent="1">
+          <mxGeometry x="370" y="10" width="260" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- ===== FIREWALL / IDS / VPN BOX ===== -->
+        <mxCell id="fw-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;strokeWidth=2;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="230" y="120" width="540" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-label" value="&lt;b&gt;pfSense Firewall&lt;/b&gt;  |  &lt;b&gt;Suricata IDS/IPS&lt;/b&gt;  |  &lt;b&gt;WireGuard VPN&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=13;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="280" y="125" width="440" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="fw-sublabel" value="&lt;font color=&quot;#CC0000&quot;&gt;pfSense (Firewall) — на периметрі  |  Suricata (IDS/IPS) — інлайн  |  WireGuard (VPN) — шлюз для віддалених&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="250" y="155" width="500" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow: Internet -> Firewall -->
+        <mxCell id="arr-inet-fw" style="edgeStyle=orthogonalEdgeStyle;rounded=0;strokeWidth=2;strokeColor=#666666;" edge="1" source="internet" target="fw-box" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ===== DMZ ZONE ===== -->
+        <mxCell id="dmz-zone" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=2;dashed=1;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="30" y="230" width="200" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="dmz-title" value="&lt;b&gt;DMZ&lt;/b&gt;&lt;br&gt;192.168.10.0/24" style="text;html=1;align=center;verticalAlign=top;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=12;fontColor=#7D6608;" vertex="1" parent="1">
+          <mxGeometry x="55" y="235" width="150" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="dmz-web" value="Веб-сервер&#xa;(демо-проєкти)" style="shape=mxgraph.cisco.servers.standard_server;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;sketch=0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="85" y="290" width="90" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow: Firewall -> DMZ -->
+        <mxCell id="arr-fw-dmz" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeWidth=2;strokeColor=#d6b656;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.15;exitY=1;exitDx=0;exitDy=0;" edge="1" source="fw-box" target="dmz-zone" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ===== LAN — ОФІС ZONE ===== -->
+        <mxCell id="lan-zone" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;dashed=1;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="260" y="230" width="280" height="230" as="geometry" />
+        </mxCell>
+        <mxCell id="lan-title" value="&lt;b&gt;LAN — Офіс&lt;/b&gt;&lt;br&gt;192.168.1.0/24" style="text;html=1;align=center;verticalAlign=top;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=12;fontColor=#23537D;" vertex="1" parent="1">
+          <mxGeometry x="325" y="235" width="150" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="lan-ws" value="35 робочих&#xa;станцій" style="shape=mxgraph.cisco.computers_and_peripherals.pc;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="280" y="285" width="60" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="lan-wifi" value="Wi-Fi AP" style="shape=mxgraph.cisco.wireless.wireless_router;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="365" y="285" width="50" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="lan-printer" value="Принтер" style="shape=mxgraph.cisco.computers_and_peripherals.printer;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="440" y="285" width="50" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="lan-edr" value="&lt;font color=&quot;#CC0000&quot;&gt;&lt;b&gt;[CrowdStrike Agent на кожній станції]&lt;/b&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="285" y="345" width="250" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="lan-edr-badge" value="&lt;font color=&quot;#CC0000&quot;&gt;CrowdStrike (EDR) — на робочих станціях&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="295" y="370" width="230" height="25" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow: Firewall -> LAN -->
+        <mxCell id="arr-fw-lan" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeWidth=2;strokeColor=#6c8ebf;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" source="fw-box" target="lan-zone" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ===== СЕРВЕРНИЙ СЕГМЕНТ ===== -->
+        <mxCell id="srv-zone" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;dashed=1;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="570" y="230" width="210" height="230" as="geometry" />
+        </mxCell>
+        <mxCell id="srv-title" value="&lt;b&gt;Серверний сегмент&lt;/b&gt;&lt;br&gt;192.168.2.0/24" style="text;html=1;align=center;verticalAlign=top;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=12;fontColor=#2D6E0F;" vertex="1" parent="1">
+          <mxGeometry x="595" y="235" width="160" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="srv-ad" value="Active&#xa;Directory" style="shape=mxgraph.cisco.servers.standard_server;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="590" y="285" width="50" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="srv-file" value="Файловий&#xa;сервер" style="shape=mxgraph.cisco.servers.standard_server;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="650" y="285" width="50" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="srv-nas" value="NAS&#xa;(Veeam Backup)" style="shape=mxgraph.cisco.storage.storage_server;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="710" y="285" width="55" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="srv-backup-label" value="&lt;font color=&quot;#CC0000&quot;&gt;&lt;b&gt;Veeam Backup — на NAS + AWS S3&lt;/b&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="595" y="360" width="180" height="25" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow: Firewall -> Server -->
+        <mxCell id="arr-fw-srv" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeWidth=2;strokeColor=#82b366;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitX=0.85;exitY=1;exitDx=0;exitDy=0;" edge="1" source="fw-box" target="srv-zone" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ===== WIREGUARD VPN — ВІДДАЛЕНІ ПРАЦІВНИКИ ===== -->
+        <mxCell id="vpn-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=2;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="30" y="490" width="230" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="vpn-title" value="&lt;b&gt;WireGuard VPN&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=top;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=12;fontColor=#5C3566;" vertex="1" parent="1">
+          <mxGeometry x="75" y="495" width="140" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="vpn-users" value="15 віддалених працівників" style="shape=mxgraph.cisco.people.standing_man;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="60" y="525" width="40" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="vpn-users-label" value="15 віддалених&#xa;працівників" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=11;fontColor=#5C3566;" vertex="1" parent="1">
+          <mxGeometry x="105" y="535" width="100" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow: VPN -> LAN (через Firewall) -->
+        <mxCell id="arr-vpn-lan" value="VPN-тунель" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeWidth=2;strokeColor=#9673a6;dashed=1;dashPattern=8 4;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=1;entryDx=0;entryDy=0;fontColor=#9673a6;fontSize=9;" edge="1" source="vpn-box" target="lan-zone" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="145" y="475" />
+              <mxPoint x="260" y="475" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ===== AWS CLOUD ===== -->
+        <mxCell id="aws-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=2;arcSize=8;" vertex="1" parent="1">
+          <mxGeometry x="560" y="510" width="220" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="aws-title" value="&lt;b&gt;AWS Cloud&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=top;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=13;fontColor=#B85C00;" vertex="1" parent="1">
+          <mxGeometry x="625" y="515" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="aws-ec2" value="EC2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="575" y="550" width="55" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="aws-rds" value="RDS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="640" y="550" width="55" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="aws-s3" value="S3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="705" y="550" width="55" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="aws-vpn-label" value="Site-to-Site VPN" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=10;fontStyle=1;fontColor=#B85C00;" vertex="1" parent="1">
+          <mxGeometry x="610" y="590" width="110" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="aws-glacier" value="S3 Glacier&#xa;(offsite backup)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="600" y="620" width="140" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="aws-backup-note" value="&lt;font color=&quot;#CC0000&quot;&gt;&lt;b&gt;Veeam Backup &amp;rarr; AWS S3 Glacier&lt;/b&gt;&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="600" y="668" width="180" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow: Server segment -> AWS (Site-to-Site VPN) -->
+        <mxCell id="arr-srv-aws" value="Site-to-Site VPN" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeWidth=2;strokeColor=#d79b00;dashed=1;dashPattern=8 4;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontColor=#B85C00;fontSize=9;" edge="1" source="srv-zone" target="aws-box" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="675" y="490" />
+              <mxPoint x="670" y="490" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ===== DIAGRAM TITLE ===== -->
+        <mxCell id="diagram-title" value="&lt;b&gt;Мережева архітектура КСЗІ — IT-компанія &quot;TechSoft&quot;&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=15;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="270" y="770" width="460" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- ===== LEGEND ===== -->
+        <mxCell id="legend-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#CCCCCC;strokeWidth=1;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="30" y="610" width="200" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-title" value="&lt;b&gt;Засоби захисту:&lt;/b&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=10;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="40" y="615" width="110" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-1" value="&lt;font color=&quot;#CC0000&quot;&gt;pfSense — периметровий FW&lt;/font&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="40" y="635" width="160" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-2" value="&lt;font color=&quot;#CC0000&quot;&gt;Suricata — IDS/IPS інлайн&lt;/font&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="40" y="655" width="150" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-3" value="&lt;font color=&quot;#CC0000&quot;&gt;WireGuard — VPN-шлюз&lt;/font&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="40" y="675" width="140" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-4" value="&lt;font color=&quot;#CC0000&quot;&gt;CrowdStrike — EDR агент&lt;/font&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="40" y="695" width="150" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-5" value="&lt;font color=&quot;#CC0000&quot;&gt;Veeam — резервне копіювання&lt;/font&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="40" y="715" width="170" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-6" value="&lt;font color=&quot;#CC0000&quot;&gt;AD — керування доступом&lt;/font&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="40" y="735" width="150" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-7" value="&lt;font color=&quot;#CC0000&quot;&gt;S3 Glacier — offsite backup&lt;/font&gt;" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="40" y="755" width="160" height="20" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

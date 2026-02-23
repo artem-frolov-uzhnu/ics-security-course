@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Приклади звітів — Захист ІКС</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .report-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+        .report-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text);
+            transition: box-shadow 0.2s, border-color 0.2s;
+        }
+        .report-link:hover {
+            border-color: var(--primary);
+            box-shadow: 0 2px 8px rgba(37,99,235,0.1);
+        }
+        .report-link.active {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+        .report-link .num {
+            background: var(--primary);
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.85rem;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .report-link .label {
+            font-size: 0.9rem;
+            line-height: 1.3;
+        }
+        .report-content {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 2rem 2.5rem;
+            background: var(--bg);
+            margin-top: 1.5rem;
+        }
+        .report-content h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+        .report-content h2 { font-size: 1.25rem; margin-top: 2rem; }
+        .report-content h3 { font-size: 1.1rem; margin-top: 1.5rem; }
+        .report-content table { font-size: 0.9rem; }
+        .report-content blockquote {
+            border-left: 3px solid var(--primary);
+            padding-left: 1rem;
+            color: var(--text-light);
+            margin: 1rem 0;
+        }
+        .report-placeholder {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-light);
+        }
+        .report-placeholder p { font-size: 1.1rem; }
+        .download-btn {
+            display: inline-block;
+            margin-top: 1rem;
+            padding: 0.5rem 1.25rem;
+            background: var(--primary);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        .download-btn:hover { background: var(--primary-dark); color: #fff; }
+        .report-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+        .loading { text-align: center; padding: 2rem; color: var(--text-light); }
+        @media print {
+            .report-list, .report-actions, .subtitle { display: none !important; }
+            .report-content { border: none; padding: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay" id="overlay"></div>
+    <button class="menu-toggle" id="menuToggle">&#9776;</button>
+
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="index.html">Технології захисту ІКС</a>
+        </div>
+        <div class="nav-section">
+            <h3>Лекції</h3>
+            <ul>
+                <li><a href="lectures/01.html">1. Вступ. ІКС як об'єкт захисту</a></li>
+                <li><a href="lectures/02.html">2. Моделювання загроз</a></li>
+                <li><a href="lectures/03.html">3. Політика безпеки та доступ</a></li>
+                <li><a href="lectures/04.html">4. Криптографічний захист</a></li>
+                <li><a href="lectures/05.html">5. Захист мережевої інфраструктури</a></li>
+                <li><a href="lectures/06.html">6. Захист кінцевих точок</a></li>
+                <li><a href="lectures/07.html">7. Zero Trust та SIEM</a></li>
+                <li><a href="lectures/08.html">8. Проєктування КСЗІ</a></li>
+                <li><a href="lectures/09.html">9. Впровадження та тестування</a></li>
+                <li><a href="lectures/10.html">10. Експлуатація та інциденти</a></li>
+            </ul>
+        </div>
+        <div class="nav-section">
+            <h3>Практичні</h3>
+            <ul>
+                <li><a href="practicals/01.html">1. Моделювання загроз</a></li>
+                <li><a href="practicals/02.html">2. Політика безпеки</a></li>
+                <li><a href="practicals/03.html">3. Криптографічні засоби</a></li>
+                <li><a href="practicals/04.html">4. Міжмережевий екран</a></li>
+                <li><a href="practicals/05.html">5. VPN та захист каналів</a></li>
+                <li><a href="practicals/06.html">6. IDS/IPS</a></li>
+                <li><a href="practicals/07.html">7. SIEM-системи</a></li>
+                <li><a href="practicals/08.html">8. Проєктування КСЗІ</a></li>
+                <li><a href="practicals/09.html">9. Тестування захищеності</a></li>
+                <li><a href="practicals/10.html">10. Захист проєктів</a></li>
+            </ul>
+        </div>
+        <div class="nav-section">
+            <h3>Звіти</h3>
+            <ul>
+                <li><a href="report-viewer.html" class="active">Приклади звітів</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="content">
+        <article>
+            <h1>Приклади звітів з практичних робіт</h1>
+            <p class="subtitle">Зразки оформлення звітів для кожної практичної роботи (Варіант 1 &mdash; IT-компанія &laquo;TechSoft&raquo;)</p>
+
+            <div class="report-list" id="reportList">
+                <a href="?r=01" class="report-link" data-report="01">
+                    <span class="num">1</span>
+                    <span class="label">Моделювання загроз для ІКС</span>
+                </a>
+                <a href="?r=02" class="report-link" data-report="02">
+                    <span class="num">2</span>
+                    <span class="label">Політика безпеки та управління доступом</span>
+                </a>
+                <a href="?r=03" class="report-link" data-report="03">
+                    <span class="num">3</span>
+                    <span class="label">Криптографічні засоби захисту</span>
+                </a>
+                <a href="?r=04" class="report-link" data-report="04">
+                    <span class="num">4</span>
+                    <span class="label">Міжмережевий екран</span>
+                </a>
+                <a href="?r=05" class="report-link" data-report="05">
+                    <span class="num">5</span>
+                    <span class="label">VPN та захист каналів зв'язку</span>
+                </a>
+                <a href="?r=06" class="report-link" data-report="06">
+                    <span class="num">6</span>
+                    <span class="label">IDS/IPS: виявлення вторгнень</span>
+                </a>
+                <a href="?r=07" class="report-link" data-report="07">
+                    <span class="num">7</span>
+                    <span class="label">SIEM: збір та аналіз подій безпеки</span>
+                </a>
+                <a href="?r=08" class="report-link" data-report="08">
+                    <span class="num">8</span>
+                    <span class="label">Проєктування КСЗІ</span>
+                </a>
+                <a href="?r=09" class="report-link" data-report="09">
+                    <span class="num">9</span>
+                    <span class="label">Тестування захищеності ІКС</span>
+                </a>
+                <a href="?r=10" class="report-link" data-report="10">
+                    <span class="num">10</span>
+                    <span class="label">Захист проєктів</span>
+                </a>
+            </div>
+
+            <div id="reportContainer">
+                <div class="report-placeholder" id="placeholder">
+                    <p>Оберіть звіт зі списку вище для перегляду</p>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        document.getElementById('menuToggle').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('active');
+        });
+        document.getElementById('overlay').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.remove('open');
+            this.classList.remove('active');
+        });
+
+        function getReportNum() {
+            var params = new URLSearchParams(window.location.search);
+            return params.get('r');
+        }
+
+        function loadReport(num) {
+            var container = document.getElementById('reportContainer');
+            container.innerHTML = '<div class="loading">Завантаження звіту...</div>';
+
+            document.querySelectorAll('.report-link').forEach(function(link) {
+                link.classList.toggle('active', link.dataset.report === num);
+            });
+
+            fetch('reports/report-' + num + '.md')
+                .then(function(response) {
+                    if (!response.ok) throw new Error('Звіт не знайдено');
+                    return response.text();
+                })
+                .then(function(md) {
+                    var html = marked.parse(md);
+                    container.innerHTML =
+                        '<div class="report-actions">' +
+                            '<a href="reports/report-' + num + '.md" download class="download-btn">Завантажити .md</a>' +
+                            '<a href="practicals/' + num + '.html" class="download-btn" style="background:var(--success)">Перейти до практичної</a>' +
+                        '</div>' +
+                        '<div class="report-content">' + html + '</div>';
+                })
+                .catch(function(err) {
+                    container.innerHTML =
+                        '<div class="report-placeholder"><p>' + err.message + '</p></div>';
+                });
+        }
+
+        var reportNum = getReportNum();
+        if (reportNum) {
+            loadReport(reportNum);
+        }
+
+        document.getElementById('reportList').addEventListener('click', function(e) {
+            var link = e.target.closest('.report-link');
+            if (link) {
+                e.preventDefault();
+                var num = link.dataset.report;
+                history.pushState(null, '', '?r=' + num);
+                loadReport(num);
+            }
+        });
+
+        window.addEventListener('popstate', function() {
+            var num = getReportNum();
+            if (num) {
+                loadReport(num);
+            } else {
+                document.getElementById('reportContainer').innerHTML =
+                    '<div class="report-placeholder"><p>Оберіть звіт зі списку вище для перегляду</p></div>';
+                document.querySelectorAll('.report-link').forEach(function(l) { l.classList.remove('active'); });
+            }
+        });
+    </script>
+</body>
+</html>

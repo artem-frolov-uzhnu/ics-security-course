@@ -1,0 +1,81 @@
+<mxfile host="app.diagrams.net" modified="2026-02-19T00:00:00.000Z" agent="Claude" version="21.0.0" type="device">
+  <diagram id="siem-logs-07" name="SIEM Log Collection and Analysis">
+    <mxGraphModel dx="900" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="900" pageHeight="600" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ========== TOP ROW: Log Sources (light blue) ========== -->
+
+        <!-- /var/log/auth.log -->
+        <mxCell id="src1" value="&lt;b&gt;/var/log/auth.log&lt;/b&gt;&lt;br&gt;SSH, sudo, su, PAM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;verticalAlign=middle;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="40" y="30" width="200" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- /var/log/syslog -->
+        <mxCell id="src2" value="&lt;b&gt;/var/log/syslog&lt;/b&gt;&lt;br&gt;сервіси, cron, ядро" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;verticalAlign=middle;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="270" y="30" width="200" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- journalctl -->
+        <mxCell id="src3" value="&lt;b&gt;journalctl&lt;/b&gt;&lt;br&gt;systemd, фільтрація" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;verticalAlign=middle;spacingTop=4;spacingBottom=4;" vertex="1" parent="1">
+          <mxGeometry x="500" y="30" width="200" height="70" as="geometry" />
+        </mxCell>
+
+        <!-- ========== MIDDLE: Analysis Layer (light orange) ========== -->
+
+        <!-- Analysis box (large) -->
+        <mxCell id="analysis" value="&lt;b&gt;Ручний аналіз (grep / wc / sort / uniq)&lt;/b&gt;&lt;br&gt;&lt;hr&gt;&lt;font face=&quot;monospace&quot; size=&quot;2&quot;&gt;grep &#39;authentication failure&#39; &amp;rarr; 2&lt;br&gt;grep &#39;sudo:&#39; | wc -l &amp;rarr; 5&lt;br&gt;sort | uniq -c &amp;rarr; топ-5 подій&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d6b656;fontSize=12;verticalAlign=top;spacingTop=8;spacingLeft=10;spacingRight=10;spacingBottom=8;align=left;" vertex="1" parent="1">
+          <mxGeometry x="100" y="160" width="540" height="110" as="geometry" />
+        </mxCell>
+
+        <!-- ========== BELOW: Dashboard (light green) ========== -->
+
+        <mxCell id="dashboard" value="&lt;b&gt;Дашборд&lt;/b&gt;&lt;br&gt;&lt;hr&gt;&lt;table style=&quot;font-size:12px;border-collapse:collapse;width:100%&quot;&gt;&lt;tr&gt;&lt;td style=&quot;padding:3px 8px;&quot;&gt;Невдалі входи:&lt;/td&gt;&lt;td style=&quot;padding:3px 8px;&quot;&gt;&lt;b&gt;2&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;padding:3px 8px;&quot;&gt;sudo команди:&lt;/td&gt;&lt;td style=&quot;padding:3px 8px;&quot;&gt;&lt;b&gt;5&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;padding:3px 8px;&quot;&gt;Зміна /etc:&lt;/td&gt;&lt;td style=&quot;padding:3px 8px;&quot;&gt;&lt;b&gt;2&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;verticalAlign=top;spacingTop=6;spacingLeft=10;spacingRight=10;spacingBottom=6;" vertex="1" parent="1">
+          <mxGeometry x="200" y="340" width="240" height="140" as="geometry" />
+        </mxCell>
+
+        <!-- ========== RIGHT SIDE: SIEM Comparison (light purple) ========== -->
+
+        <mxCell id="siem" value="&lt;b&gt;Реальна SIEM&lt;br&gt;(Wazuh, Splunk)&lt;/b&gt;&lt;br&gt;&lt;hr&gt;&lt;font size=&quot;2&quot;&gt;Агенти&lt;br&gt;&amp;darr;&lt;br&gt;Збір&lt;br&gt;&amp;darr;&lt;br&gt;Нормалізація&lt;br&gt;&amp;darr;&lt;br&gt;Кореляція&lt;br&gt;&amp;darr;&lt;br&gt;Алертинг&lt;br&gt;&amp;darr;&lt;br&gt;Дашборд&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;verticalAlign=top;spacingTop=6;spacingLeft=10;spacingRight=10;spacingBottom=6;" vertex="1" parent="1">
+          <mxGeometry x="700" y="140" width="170" height="280" as="geometry" />
+        </mxCell>
+
+        <!-- ========== ARROWS: Log sources → Analysis ========== -->
+
+        <!-- auth.log → analysis -->
+        <mxCell id="arr1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#333333;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="src1" target="analysis" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- syslog → analysis -->
+        <mxCell id="arr2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#333333;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="src2" target="analysis" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- journalctl → analysis -->
+        <mxCell id="arr3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#333333;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="src3" target="analysis" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ========== ARROW: Analysis → Dashboard ========== -->
+
+        <mxCell id="arr4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#333333;strokeWidth=2;endArrow=block;endFill=1;" edge="1" source="analysis" target="dashboard" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ========== DOTTED ARROW: Dashboard → SIEM (comparison) ========== -->
+
+        <mxCell id="arr5" value="&lt;i&gt;порівняння&lt;/i&gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#9673a6;strokeWidth=2;dashed=1;dashPattern=8 4;endArrow=block;endFill=1;fontSize=11;labelBackgroundColor=#ffffff;" edge="1" source="dashboard" target="siem" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="560" y="410" />
+              <mxPoint x="560" y="410" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

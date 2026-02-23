@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Практична 7. SIEM: збір та аналіз подій безпеки — Захист ІКС</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="overlay" id="overlay"></div>
+    <button class="menu-toggle" id="menuToggle">&#9776;</button>
+
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="../index.html">Технології захисту ІКС</a>
+        </div>
+        <div class="nav-section">
+            <h3>Лекції</h3>
+            <ul>
+                <li><a href="../lectures/01.html">1. Вступ. ІКС як об'єкт захисту</a></li>
+                <li><a href="../lectures/02.html">2. Моделювання загроз</a></li>
+                <li><a href="../lectures/03.html">3. Політика безпеки та доступ</a></li>
+                <li><a href="../lectures/04.html">4. Криптографічний захист</a></li>
+                <li><a href="../lectures/05.html">5. Захист мережевої інфраструктури</a></li>
+                <li><a href="../lectures/06.html">6. Захист кінцевих точок</a></li>
+                <li><a href="../lectures/07.html">7. Zero Trust та SIEM</a></li>
+                <li><a href="../lectures/08.html">8. Проєктування КСЗІ</a></li>
+                <li><a href="../lectures/09.html">9. Впровадження та тестування</a></li>
+                <li><a href="../lectures/10.html">10. Експлуатація та інциденти</a></li>
+            </ul>
+        </div>
+        <div class="nav-section">
+            <h3>Практичні</h3>
+            <ul>
+                <li><a href="../practicals/01.html">1. Моделювання загроз</a></li>
+                <li><a href="../practicals/02.html">2. Політика безпеки</a></li>
+                <li><a href="../practicals/03.html">3. Криптографічні засоби</a></li>
+                <li><a href="../practicals/04.html">4. Міжмережевий екран</a></li>
+                <li><a href="../practicals/05.html">5. VPN та захист каналів</a></li>
+                <li><a href="../practicals/06.html">6. IDS/IPS</a></li>
+                <li><a href="../practicals/07.html" class="active">7. SIEM-системи</a></li>
+                <li><a href="../practicals/08.html">8. Проєктування КСЗІ</a></li>
+                <li><a href="../practicals/09.html">9. Тестування захищеності</a></li>
+                <li><a href="../practicals/10.html">10. Захист проєктів</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="content">
+        <article>
+            <h1>Практична робота 7. SIEM: збір та аналіз подій безпеки</h1>
+            <p class="subtitle">Аналіз системних журналів та імітація SIEM-дашборду</p>
+
+            <!-- ===== Мета ===== -->
+            <h2>Мета роботи</h2>
+            <p>Зрозуміти принципи роботи SIEM-систем (Security Information and Event Management), навчитися працювати із системними журналами Linux, генерувати та аналізувати події безпеки, будувати простий аналітичний дашборд вручну та порівняти ручний підхід із можливостями повноцінної SIEM-системи.</p>
+
+            <!-- ===== Теоретичні відомості ===== -->
+            <h2>Теоретичні відомості</h2>
+
+            <h3>Що таке SIEM?</h3>
+            <p><strong>SIEM (Security Information and Event Management)</strong> &mdash; це клас систем, що забезпечують централізований збір, нормалізацію, кореляцію та аналіз подій безпеки з різних джерел. SIEM дозволяє виявляти інциденти в реальному часі, проводити розслідування та формувати звітність для відповідності нормативним вимогам.</p>
+
+            <p>Основні функції SIEM:</p>
+            <ul>
+                <li><strong>Збір логів</strong> &mdash; агрегація подій з серверів, мережевого обладнання, додатків та засобів захисту</li>
+                <li><strong>Нормалізація</strong> &mdash; перетворення різнорідних форматів у єдиний формат для аналізу</li>
+                <li><strong>Кореляція подій</strong> &mdash; аналіз зв'язків між подіями для виявлення складних атак</li>
+                <li><strong>Алертинг</strong> &mdash; сповіщення при спрацюванні правил або перевищенні порогових значень</li>
+                <li><strong>Візуалізація</strong> &mdash; побудова дашбордів, графіків та звітів для SOC-команди</li>
+            </ul>
+
+            <div class="info-box">
+                <strong>Приклади SIEM-систем</strong>
+                <strong>Комерційні:</strong> Splunk Enterprise Security, IBM QRadar, Microsoft Sentinel.
+                <strong>Відкриті:</strong> Wazuh, ELK Stack (Elasticsearch + Logstash + Kibana), Security Onion.
+                У цій роботі ми імітуємо базові функції SIEM за допомогою стандартних інструментів Linux.
+            </div>
+
+            <h3>Структура системних журналів Linux</h3>
+            <p>Linux зберігає журнали подій у каталозі <code>/var/log/</code>. Для аналізу безпеки найважливіші такі файли:</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Файл</th>
+                        <th>Що записується</th>
+                        <th>Приклади подій</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>/var/log/auth.log</code></td>
+                        <td>Автентифікація та авторизація</td>
+                        <td>Вхід у систему (SSH, su), використання sudo, невдалі спроби входу</td>
+                    </tr>
+                    <tr>
+                        <td><code>/var/log/syslog</code></td>
+                        <td>Загальносистемні повідомлення</td>
+                        <td>Запуск/зупинка сервісів, повідомлення ядра, мережеві події</td>
+                    </tr>
+                    <tr>
+                        <td><code>/var/log/kern.log</code></td>
+                        <td>Повідомлення ядра</td>
+                        <td>Апаратні помилки, завантаження модулів, мережеві проблеми</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p>Кожен запис у лог-файлі містить стандартні поля:</p>
+            <ul>
+                <li><strong>Дата та час</strong> &mdash; мітка часу події</li>
+                <li><strong>Хост (hostname)</strong> &mdash; ім'я машини, де подія відбулась</li>
+                <li><strong>Процес</strong> &mdash; назва програми та PID (наприклад, <code>sshd[1234]</code>)</li>
+                <li><strong>Повідомлення</strong> &mdash; опис події</li>
+            </ul>
+
+            <h3>Утиліта journalctl</h3>
+            <p>Сучасні дистрибутиви Linux використовують <code>systemd-journald</code> для збору логів. Команда <code>journalctl</code> дозволяє переглядати структуровані журнали з фільтрацією за часом, сервісом або рівнем важливості:</p>
+            <pre><code>journalctl --since "1 hour ago"      # події за останню годину
+journalctl -u ssh                     # лише події SSH-сервісу
+journalctl -p err                     # лише помилки та критичніше</code></pre>
+
+            <h3>Чому аналіз логів важливий для безпеки</h3>
+            <p>Системні журнали є першоджерелом інформації для виявлення інцидентів безпеки. Регулярний аналіз логів дозволяє:</p>
+            <ul>
+                <li>Виявляти спроби несанкціонованого доступу (brute-force, підбір паролів)</li>
+                <li>Фіксувати зміни в конфігурації системи та підвищення привілеїв</li>
+                <li>Визначати аномальну активність облікових записів</li>
+                <li>Забезпечувати відповідність вимогам стандартів (PCI DSS, NIST 800-53)</li>
+            </ul>
+
+            <div class="warning-box">
+                <strong>Обмеження ручного аналізу</strong>
+                Ручний перегляд логів за допомогою grep та wc ефективний для навчання та невеликих систем. У реальних ІКС, де генеруються тисячі подій на хвилину з десятків джерел, необхідна автоматизація через повноцінну SIEM-систему.
+            </div>
+
+            <!-- ===== Необхідне ПЗ ===== -->
+            <h2>Необхідне ПЗ та інструменти</h2>
+            <ul>
+                <li><strong>Ubuntu 22.04+</strong> (реальна або віртуальна машина) або <strong>WSL (Windows Subsystem for Linux)</strong></li>
+                <li>Доступ до терміналу з правами <code>sudo</code></li>
+                <li>Стандартні утиліти Linux: <code>grep</code>, <code>wc</code>, <code>sort</code>, <code>uniq</code>, <code>journalctl</code></li>
+            </ul>
+
+            <div class="tip-box">
+                <strong>Порада для WSL</strong>
+                У WSL файл <code>/var/log/auth.log</code> може не існувати за замовчуванням. Потрібно встановити та запустити <code>rsyslog</code>:
+                <pre><code>sudo apt install rsyslog
+sudo service rsyslog start</code></pre>
+                Після цього логи автентифікації будуть записуватись у <code>/var/log/auth.log</code>.
+            </div>
+
+            <h2>Варіанти завдань</h2>
+            <p>Студент обирає один із варіантів або отримує варіант від викладача. Варіант визначає тип подій для генерації, лог-файл для аналізу та акцент дашборду.</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Варіант</th>
+                        <th>Тип події для генерації</th>
+                        <th>Лог-файл для аналізу</th>
+                        <th>Фокус дашборду</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Невдалий su + успішний/невдалий sudo</td>
+                        <td>/var/log/auth.log</td>
+                        <td>Автентифікація та привілеї</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Множинні невдалі SSH-входи (ssh localhost з невірним паролем)</td>
+                        <td>/var/log/auth.log</td>
+                        <td>SSH brute-force спроби</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Створення/видалення користувачів (useradd/userdel)</td>
+                        <td>/var/log/auth.log</td>
+                        <td>Управління обліковими записами</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>Запуск/зупинка системних сервісів (systemctl start/stop)</td>
+                        <td>/var/log/syslog</td>
+                        <td>Стан критичних сервісів</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>Зміна файлів у /etc через sudo (touch, chmod, rm)</td>
+                        <td>/var/log/auth.log</td>
+                        <td>Зміни конфігурації системи</td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td>Помилки cron та заплановані завдання</td>
+                        <td>/var/log/syslog</td>
+                        <td>Планові завдання та помилки</td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td>Встановлення/видалення пакетів (apt install/remove)</td>
+                        <td>/var/log/auth.log + /var/log/syslog</td>
+                        <td>Зміни програмного забезпечення</td>
+                    </tr>
+                    <tr>
+                        <td>8</td>
+                        <td>Невдалі спроби sudo + зміна паролів (passwd)</td>
+                        <td>/var/log/auth.log</td>
+                        <td>Парольна безпека</td>
+                    </tr>
+                    <tr>
+                        <td>9</td>
+                        <td>Мережеві події (перезапуск мережевих інтерфейсів)</td>
+                        <td>/var/log/syslog + /var/log/kern.log</td>
+                        <td>Мережева активність</td>
+                    </tr>
+                    <tr>
+                        <td>10</td>
+                        <td>Комбіновані: невдалий вхід + sudo + зміна /etc</td>
+                        <td>/var/log/auth.log + /var/log/syslog</td>
+                        <td>Комплексний аналіз подій безпеки</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- ===== Хід роботи ===== -->
+            <h2>Хід роботи</h2>
+
+            <h3>Крок 1. Ознайомлення зі структурою системних логів Linux</h3>
+            <p>Перегляньте основні лог-файли та їх вміст:</p>
+            <ol>
+                <li>Переглянути останні 10 рядків <code>/var/log/auth.log</code>:
+                    <pre><code>sudo tail -10 /var/log/auth.log</code></pre>
+                </li>
+                <li>Переглянути останні 10 рядків <code>/var/log/syslog</code>:
+                    <pre><code>sudo tail -10 /var/log/syslog</code></pre>
+                </li>
+                <li>Використати <code>journalctl</code> для перегляду подій за останню годину:
+                    <pre><code>journalctl --since "1 hour ago" --no-pager | tail -20</code></pre>
+                </li>
+                <li>Для кожного лог-файлу визначити: які поля містить запис (дата, хост, процес, повідомлення), які типи подій фіксуються.</li>
+            </ol>
+
+            <h3>Крок 2. Генерація подій безпеки (4 типи)</h3>
+            <p>Згенеруйте чотири типи подій безпеки та зафіксуйте їх у системних журналах:</p>
+
+            <p><strong>2.1. Невдала спроба входу</strong></p>
+            <pre><code>su - fakeuser123</code></pre>
+            <p>Введіть будь-який пароль. Ця команда створить запис про невдалу автентифікацію в <code>auth.log</code>.</p>
+
+            <p><strong>2.2. Успішне використання sudo</strong></p>
+            <pre><code>sudo whoami</code></pre>
+            <p>Успішне виконання sudo фіксується в <code>auth.log</code> із зазначенням користувача та виконаної команди.</p>
+
+            <p><strong>2.3. Невдала спроба sudo</strong></p>
+            <pre><code>sudo -k
+sudo -S whoami <<< "wrongpassword" 2>&1 || true</code></pre>
+            <p>Невірний пароль при sudo створює запис про невдалу автентифікацію.</p>
+
+            <p><strong>2.4. Зміна критичного файлу</strong></p>
+            <pre><code>sudo touch /etc/test-siem-file
+sudo rm /etc/test-siem-file</code></pre>
+            <p>Ці дії зафіксуються як використання sudo для створення та видалення файлу в каталозі <code>/etc</code>.</p>
+
+            <div class="tip-box">
+                <strong>Порада</strong>
+                Між генерацією подій зачекайте 2-3 секунди, щоб записи мали різні часові мітки &mdash; це полегшить їх ідентифікацію під час аналізу.
+            </div>
+
+            <h3>Крок 3. Пошук подій у auth.log за допомогою grep</h3>
+            <p>Знайдіть кожну згенеровану подію у журналі автентифікації:</p>
+            <ol>
+                <li>Знайти невдалі спроби входу:
+                    <pre><code>sudo grep "authentication failure" /var/log/auth.log</code></pre>
+                </li>
+                <li>Знайти успішні команди sudo:
+                    <pre><code>sudo grep "COMMAND=" /var/log/auth.log</code></pre>
+                </li>
+                <li>Знайти невдалі спроби sudo:
+                    <pre><code>sudo grep "auth could not identify password" /var/log/auth.log</code></pre>
+                </li>
+                <li>Знайти події, пов'язані з вашим тестовим файлом:
+                    <pre><code>sudo grep "test-siem-file" /var/log/auth.log</code></pre>
+                </li>
+            </ol>
+            <p>Для кожної знайденої події визначте: тип події, час, який процес створив запис, серйозність.</p>
+
+            <h3>Крок 4. Простий аналіз &mdash; імітація SIEM-дашборду</h3>
+            <p>Виконайте статистичний аналіз журналу подій, імітуючи базові функції SIEM-дашборду:</p>
+
+            <p><strong>4.1. Підрахувати кількість невдалих спроб входу за останню годину:</strong></p>
+            <pre><code>sudo grep "authentication failure" /var/log/auth.log | wc -l</code></pre>
+
+            <p><strong>4.2. Знайти топ-5 джерел подій (процесів):</strong></p>
+            <pre><code>sudo grep -oP "\S+\[" /var/log/auth.log | sort | uniq -c | sort -rn | head -5</code></pre>
+
+            <p><strong>4.3. Заповнити таблицю-дашборд:</strong></p>
+            <p>На основі зібраних даних заповніть зведену таблицю за таким шаблоном:</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Тип події</th>
+                        <th>Кількість</th>
+                        <th>Останній час</th>
+                        <th>Серйозність</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Невдалі спроби входу</td>
+                        <td><em>(підрахувати)</em></td>
+                        <td><em>(з логу)</em></td>
+                        <td>Середня</td>
+                    </tr>
+                    <tr>
+                        <td>Успішне використання sudo</td>
+                        <td><em>(підрахувати)</em></td>
+                        <td><em>(з логу)</em></td>
+                        <td>Низька</td>
+                    </tr>
+                    <tr>
+                        <td>Невдалі спроби sudo</td>
+                        <td><em>(підрахувати)</em></td>
+                        <td><em>(з логу)</em></td>
+                        <td>Висока</td>
+                    </tr>
+                    <tr>
+                        <td>Зміна файлів в /etc</td>
+                        <td><em>(підрахувати)</em></td>
+                        <td><em>(з логу)</em></td>
+                        <td>Висока</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Крок 5. Порівняння ручного аналізу з можливостями SIEM</h3>
+            <p>Поясніть, як ті самі дані виглядали б у повноцінній SIEM-системі (наприклад, Wazuh або Splunk). Опишіть переваги SIEM за 3&ndash;5 пунктами:</p>
+            <ul>
+                <li>Автоматичний збір логів з багатьох джерел (замість ручного перегляду файлів)</li>
+                <li>Кореляція подій (наприклад, виявлення brute-force &mdash; серія невдалих спроб, а потім успішний вхід)</li>
+                <li>Візуальні дашборди з графіками в реальному часі (замість таблиці у звіті)</li>
+                <li>Автоматичне сповіщення (email, Slack) при виявленні критичних подій</li>
+                <li>Зберігання та пошук по великих обсягах історичних даних</li>
+            </ul>
+
+            <!-- ===== Приклад виконання ===== -->
+            <h2>Приклад виконання</h2>
+            <p>Нижче наведено повний приклад виконання практичної роботи. Середовище: Ubuntu 22.04 у WSL (Windows Subsystem for Linux), hostname: <code>lab-pc</code>, користувач: <code>student</code>.</p>
+
+            <div class="info-box">
+                <strong>Зверніть увагу</strong>
+                Цей приклад є орієнтовним. Конкретний вміст логів на вашій машині буде відрізнятися. Не копіюйте приклад дослівно &mdash; виконайте команди на своїй системі та зафіксуйте реальні результати.
+            </div>
+
+            <h3>1. Ознайомлення зі структурою системних логів</h3>
+
+            <p>Перевіряємо наявність логів та переглядаємо їх структуру:</p>
+
+            <pre><code>$ sudo tail -10 /var/log/auth.log
+Feb 18 09:45:12 lab-pc sshd[2041]: Accepted publickey for student from 127.0.0.1 port 54312 ssh2
+Feb 18 09:45:12 lab-pc sshd[2041]: pam_unix(sshd:session): session opened for user student(uid=1000) by (uid=0)
+Feb 18 09:45:12 lab-pc systemd-logind[845]: New session 14 of user student.
+Feb 18 09:50:01 lab-pc CRON[2198]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Feb 18 09:50:01 lab-pc CRON[2198]: pam_unix(cron:session): session closed for user root
+Feb 18 09:55:33 lab-pc sudo: student : TTY=pts/1 ; PWD=/home/student ; USER=root ; COMMAND=/usr/bin/apt update
+Feb 18 09:55:33 lab-pc sudo: pam_unix(sudo:session): session opened for user root(uid=0) by student(uid=1000)
+Feb 18 09:55:38 lab-pc sudo: pam_unix(sudo:session): session closed for user root
+Feb 18 10:00:01 lab-pc CRON[2305]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Feb 18 10:00:01 lab-pc CRON[2305]: pam_unix(cron:session): session closed for user root</code></pre>
+
+            <p>Кожен запис містить: <strong>дату/час</strong> (Feb 18 09:45:12), <strong>hostname</strong> (lab-pc), <strong>процес[PID]</strong> (sshd[2041]) та <strong>повідомлення</strong>.</p>
+
+            <pre><code>$ sudo tail -10 /var/log/syslog
+Feb 18 09:45:01 lab-pc systemd[1]: Starting Daily apt download activities...
+Feb 18 09:45:02 lab-pc systemd[1]: apt-daily.service: Deactivated successfully.
+Feb 18 09:50:01 lab-pc cron[845]: (root) CMD (test -e /run/systemd/system || run-parts --report /etc/cron.hourly)
+Feb 18 09:55:33 lab-pc systemd[1]: Started session 15 of user root.
+Feb 18 09:55:38 lab-pc systemd[1]: session-15.scope: Deactivated successfully.
+Feb 18 10:00:01 lab-pc cron[845]: (root) CMD (test -e /run/systemd/system || run-parts --report /etc/cron.hourly)
+Feb 18 10:01:15 lab-pc rsyslogd[712]: [origin software="rsyslogd"] rsyslogd was HUPed
+Feb 18 10:05:22 lab-pc systemd[1]: Starting Cleanup of Temporary Directories...
+Feb 18 10:05:22 lab-pc systemd-tmpfiles[2410]: /tmp: removed 3 files
+Feb 18 10:05:22 lab-pc systemd[1]: systemd-tmpfiles-clean.service: Deactivated successfully.</code></pre>
+
+            <pre><code>$ journalctl --since "1 hour ago" --no-pager | tail -10
+Feb 18 10:00:01 lab-pc CRON[2305]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Feb 18 10:00:01 lab-pc CRON[2305]: pam_unix(cron:session): session closed for user root
+Feb 18 10:01:15 lab-pc rsyslogd[712]: [origin software="rsyslogd"] rsyslogd was HUPed
+Feb 18 10:05:22 lab-pc systemd[1]: Starting Cleanup of Temporary Directories...
+Feb 18 10:05:22 lab-pc systemd-tmpfiles[2410]: /tmp: removed 3 files
+Feb 18 10:05:22 lab-pc systemd[1]: systemd-tmpfiles-clean.service: Deactivated successfully.
+Feb 18 10:10:01 lab-pc CRON[2498]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)
+Feb 18 10:10:01 lab-pc CRON[2498]: pam_unix(cron:session): session closed for user root
+Feb 18 10:12:05 lab-pc systemd-logind[845]: New session 16 of user student.
+Feb 18 10:12:05 lab-pc systemd[1]: Started session 16 of user student.</code></pre>
+
+            <div class="example-box">
+                <strong>Висновок по структурі логів</strong>
+                <br><br>
+                <strong>auth.log</strong> &mdash; фіксує всі події автентифікації: вхід SSH, використання sudo, роботу cron-сесій. Основні процеси: sshd, sudo, CRON, systemd-logind.<br>
+                <strong>syslog</strong> &mdash; фіксує загальносистемні повідомлення: запуск/зупинку сервісів, роботу cron, очищення тимчасових файлів. Основні процеси: systemd, cron, rsyslogd.<br>
+                <strong>journalctl</strong> &mdash; показує ті самі дані у структурованому вигляді, з можливістю фільтрації за часом та сервісом.
+            </div>
+
+            <h3>2. Генерація подій безпеки</h3>
+
+            <p><strong>2.1. Невдала спроба входу:</strong></p>
+            <pre><code>$ su - fakeuser123
+Password:
+su: Authentication failure</code></pre>
+
+            <p><strong>2.2. Успішне використання sudo:</strong></p>
+            <pre><code>$ sudo whoami
+[sudo] password for student:
+root</code></pre>
+
+            <p><strong>2.3. Невдала спроба sudo:</strong></p>
+            <pre><code>$ sudo -k
+$ sudo -S whoami <<< "wrongpassword" 2>&1 || true
+[sudo] password for student: Sorry, try again.
+sudo: 1 incorrect password attempt</code></pre>
+
+            <p><strong>2.4. Зміна критичного файлу:</strong></p>
+            <pre><code>$ sudo touch /etc/test-siem-file
+$ ls -la /etc/test-siem-file
+-rw-r--r-- 1 root root 0 Feb 18 10:15 /etc/test-siem-file
+
+$ sudo rm /etc/test-siem-file
+$ ls /etc/test-siem-file
+ls: cannot access '/etc/test-siem-file': No such file or directory</code></pre>
+
+            <h3>3. Пошук подій у auth.log</h3>
+
+            <p><strong>3.1. Невдалі спроби входу:</strong></p>
+            <pre><code>$ sudo grep "authentication failure" /var/log/auth.log
+Feb 18 10:13:41 lab-pc su[2612]: pam_unix(su:auth): authentication failure; logname=student uid=1000 euid=0 tty=/dev/pts/1 ruser=student rhost=  user=fakeuser123
+Feb 18 10:14:22 lab-pc sudo: pam_unix(sudo:auth): authentication failure; logname=student uid=1000 euid=0 tty=/dev/pts/1 ruser=student rhost=  user=student</code></pre>
+
+            <p>Знайдено 2 записи: невдалий su для неіснуючого користувача та невдалий sudo з неправильним паролем.</p>
+
+            <p><strong>3.2. Успішні команди sudo:</strong></p>
+            <pre><code>$ sudo grep "COMMAND=" /var/log/auth.log | tail -5
+Feb 18 09:55:33 lab-pc sudo: student : TTY=pts/1 ; PWD=/home/student ; USER=root ; COMMAND=/usr/bin/apt update
+Feb 18 10:14:05 lab-pc sudo: student : TTY=pts/1 ; PWD=/home/student ; USER=root ; COMMAND=/usr/bin/whoami
+Feb 18 10:15:01 lab-pc sudo: student : TTY=pts/1 ; PWD=/home/student ; USER=root ; COMMAND=/usr/bin/touch /etc/test-siem-file
+Feb 18 10:15:18 lab-pc sudo: student : TTY=pts/1 ; PWD=/home/student ; USER=root ; COMMAND=/usr/bin/rm /etc/test-siem-file
+Feb 18 10:16:02 lab-pc sudo: student : TTY=pts/1 ; PWD=/home/student ; USER=root ; COMMAND=/usr/bin/grep COMMAND= /var/log/auth.log</code></pre>
+
+            <p>Видно успішні sudo-команди: whoami, touch, rm та grep. Кожен запис містить ім'я користувача, TTY, поточний каталог та повну команду.</p>
+
+            <p><strong>3.3. Невдалі спроби sudo:</strong></p>
+            <pre><code>$ sudo grep "auth could not identify password" /var/log/auth.log
+Feb 18 10:14:20 lab-pc sudo: pam_unix(sudo:auth): auth could not identify password for [student]</code></pre>
+
+            <p><strong>3.4. Дії з тестовим файлом у /etc:</strong></p>
+            <pre><code>$ sudo grep "test-siem-file" /var/log/auth.log
+Feb 18 10:15:01 lab-pc sudo: student : TTY=pts/1 ; PWD=/home/student ; USER=root ; COMMAND=/usr/bin/touch /etc/test-siem-file
+Feb 18 10:15:18 lab-pc sudo: student : TTY=pts/1 ; PWD=/home/student ; USER=root ; COMMAND=/usr/bin/rm /etc/test-siem-file</code></pre>
+
+            <p>Обидві дії (створення та видалення файлу) зафіксовано як sudo-команди.</p>
+
+            <div class="example-box">
+                <strong>Класифікація знайдених подій</strong>
+                <br><br>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Подія</th>
+                            <th>Час</th>
+                            <th>Процес</th>
+                            <th>Серйозність</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Невдалий su для fakeuser123</td>
+                            <td>10:13:41</td>
+                            <td>su[2612]</td>
+                            <td>Середня</td>
+                        </tr>
+                        <tr>
+                            <td>Успішний sudo whoami</td>
+                            <td>10:14:05</td>
+                            <td>sudo</td>
+                            <td>Низька</td>
+                        </tr>
+                        <tr>
+                            <td>Невдалий sudo (невірний пароль)</td>
+                            <td>10:14:22</td>
+                            <td>sudo</td>
+                            <td>Висока</td>
+                        </tr>
+                        <tr>
+                            <td>sudo touch /etc/test-siem-file</td>
+                            <td>10:15:01</td>
+                            <td>sudo</td>
+                            <td>Висока</td>
+                        </tr>
+                        <tr>
+                            <td>sudo rm /etc/test-siem-file</td>
+                            <td>10:15:18</td>
+                            <td>sudo</td>
+                            <td>Висока</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>4. Простий аналіз &mdash; імітація SIEM-дашборду</h3>
+
+            <p><strong>4.1. Кількість невдалих спроб входу:</strong></p>
+            <pre><code>$ sudo grep "authentication failure" /var/log/auth.log | wc -l
+2</code></pre>
+
+            <p><strong>4.2. Топ-5 джерел подій (процесів) у auth.log:</strong></p>
+            <pre><code>$ sudo grep -oP "\S+\[" /var/log/auth.log | sort | uniq -c | sort -rn | head -5
+     18 CRON[
+     12 sshd[
+      8 sudo:
+      4 systemd-logind[
+      2 su[</code></pre>
+
+            <p>Найбільше подій генерує CRON (планові завдання), за ним SSH-сервіс, sudo, системний логін та su.</p>
+
+            <p><strong>4.3. Підрахунок подій sudo за типом:</strong></p>
+            <pre><code>$ sudo grep "COMMAND=" /var/log/auth.log | wc -l
+5
+
+$ sudo grep "auth could not identify password\|authentication failure.*sudo" /var/log/auth.log | wc -l
+2</code></pre>
+
+            <p><strong>4.4. Заповнена таблиця-дашборд:</strong></p>
+
+            <div class="example-box">
+                <strong>SIEM-дашборд (імітація)</strong>
+                <br><br>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Тип події</th>
+                            <th>Кількість</th>
+                            <th>Останній час</th>
+                            <th>Серйозність</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Невдалі спроби входу (su/ssh)</td>
+                            <td>2</td>
+                            <td>Feb 18 10:14:22</td>
+                            <td>Середня</td>
+                        </tr>
+                        <tr>
+                            <td>Успішні sudo-команди</td>
+                            <td>5</td>
+                            <td>Feb 18 10:16:02</td>
+                            <td>Низька</td>
+                        </tr>
+                        <tr>
+                            <td>Невдалі спроби sudo</td>
+                            <td>2</td>
+                            <td>Feb 18 10:14:22</td>
+                            <td>Висока</td>
+                        </tr>
+                        <tr>
+                            <td>Зміна файлів у /etc (через sudo)</td>
+                            <td>2</td>
+                            <td>Feb 18 10:15:18</td>
+                            <td>Висока</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <br>
+                <strong>Топ-5 процесів за кількістю подій:</strong>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Ранг</th>
+                            <th>Процес</th>
+                            <th>Кількість подій</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td>CRON</td><td>18</td></tr>
+                        <tr><td>2</td><td>sshd</td><td>12</td></tr>
+                        <tr><td>3</td><td>sudo</td><td>8</td></tr>
+                        <tr><td>4</td><td>systemd-logind</td><td>4</td></tr>
+                        <tr><td>5</td><td>su</td><td>2</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>5. Порівняння ручного аналізу з можливостями SIEM</h3>
+
+            <div class="example-box">
+                <strong>Ручний аналіз vs SIEM-система</strong>
+                <br><br>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Критерій</th>
+                            <th>Ручний аналіз (grep/wc)</th>
+                            <th>SIEM (Wazuh, Splunk)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Джерела даних</td>
+                            <td>Один файл на одній машині</td>
+                            <td>Сотні джерел з десятків машин одночасно</td>
+                        </tr>
+                        <tr>
+                            <td>Швидкість аналізу</td>
+                            <td>Хвилини на кожен запит</td>
+                            <td>Результати за секунди через індексовану базу</td>
+                        </tr>
+                        <tr>
+                            <td>Кореляція подій</td>
+                            <td>Неможлива або вимагає складних скриптів</td>
+                            <td>Автоматична: наприклад, 5 невдалих входів + 1 успішний = brute-force</td>
+                        </tr>
+                        <tr>
+                            <td>Візуалізація</td>
+                            <td>Текстова таблиця у звіті</td>
+                            <td>Інтерактивні графіки, кругові діаграми, часові шкали</td>
+                        </tr>
+                        <tr>
+                            <td>Алертинг</td>
+                            <td>Відсутній (лише ручна перевірка)</td>
+                            <td>Автоматичні сповіщення (email, Slack, Telegram)</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <br>
+                <p>У реальній ІКС компанії &laquo;TechSoft&raquo; (50 працівників) із десятками серверів та робочих станцій SIEM-система (наприклад, Wazuh) забезпечила б централізований збір логів з усіх машин, автоматичне виявлення brute-force атак через кореляцію подій, моніторинг цілісності файлів (FIM) у реальному часі та відповідність вимогам PCI DSS та NIST 800-53. Ручний аналіз grep-командами для такого масштабу був би практично неможливий.</p>
+            </div>
+
+            <!-- ===== Вимоги до звіту ===== -->
+            <h2>Вимоги до звіту</h2>
+            <p>Звіт має містити такі розділи (3&ndash;4 сторінки):</p>
+            <ol>
+                <li><strong>Титульна сторінка</strong> &mdash; назва роботи, ПІБ студента, група, дата</li>
+                <li><strong>Мета роботи</strong></li>
+                <li><strong>Опис структури системних логів</strong> &mdash; вивід tail для auth.log та syslog, пояснення полів запису</li>
+                <li><strong>Згенеровані події та їх пошук у логах</strong> &mdash; команди генерації подій та результати grep</li>
+                <li><strong>Таблиця-дашборд з підсумками</strong> &mdash; зведена таблиця подій із кількістю, часом та серйозністю</li>
+                <li><strong>Порівняння: ручний аналіз vs SIEM</strong> &mdash; 3&ndash;5 пунктів</li>
+                <li><strong>Відповіді на контрольні питання</strong></li>
+                <li><strong>Висновки</strong></li>
+            </ol>
+
+            <!-- ===== Контрольні питання ===== -->
+            <h2>Контрольні питання</h2>
+            <ol>
+                <li>Що таке SIEM-система? Назвіть основні функції SIEM та наведіть приклади комерційних і відкритих рішень.</li>
+                <li>Які основні лог-файли Linux використовуються для аналізу подій безпеки? Що записується в кожен із них?</li>
+                <li>Що таке кореляція подій у контексті SIEM? Наведіть приклад сценарію атаки, який можна виявити лише через кореляцію.</li>
+                <li>Чим SIEM відрізняється від IDS/IPS? Як ці системи доповнюють одна одну?</li>
+                <li>Які переваги автоматизованого аналізу логів (SIEM) порівняно з ручним аналізом за допомогою grep та wc?</li>
+            </ol>
+
+        </article>
+
+        <nav class="page-nav">
+            <a href="06.html">&larr; IDS/IPS</a>
+            <a href="08.html">Проєктування КСЗІ &rarr;</a>
+        </nav>
+    </main>
+
+    <script>
+        document.getElementById('menuToggle').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('active');
+        });
+        document.getElementById('overlay').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.remove('open');
+            this.classList.remove('active');
+        });
+    </script>
+</body>
+</html>

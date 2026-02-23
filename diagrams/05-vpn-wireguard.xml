@@ -1,0 +1,101 @@
+<mxfile host="app.diagrams.net" modified="2026-02-19T12:00:00.000Z" agent="Claude" version="24.0.0" type="device">
+  <diagram id="vpn-wireguard-topology" name="WireGuard VPN Topology">
+    <mxGraphModel dx="900" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="900" pageHeight="600" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- VPN Server Rectangle -->
+        <mxCell id="2" value="&lt;b&gt;VPN-сервер (techsoft-srv)&lt;/b&gt;&lt;br&gt;&lt;br&gt;eth0: 192.168.1.1&lt;br&gt;wg0: 10.0.0.1/24&lt;br&gt;ListenPort: 51820" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;fontSize=12;verticalAlign=middle;spacingTop=5;spacingBottom=5;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="220" height="130" as="geometry" />
+        </mxCell>
+
+        <!-- VPN Client Rectangle -->
+        <mxCell id="3" value="&lt;b&gt;VPN-клієнт&lt;br&gt;(віддалений працівник)&lt;/b&gt;&lt;br&gt;&lt;br&gt;wg0: 10.0.0.2/24" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;fontSize=12;verticalAlign=middle;spacingTop=5;spacingBottom=5;" vertex="1" parent="1">
+          <mxGeometry x="640" y="40" width="220" height="130" as="geometry" />
+        </mxCell>
+
+        <!-- WireGuard Tunnel - thick green connection -->
+        <mxCell id="4" value="" style="endArrow=classic;startArrow=classic;html=1;strokeWidth=4;strokeColor=#82b366;fillColor=#d5e8d4;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="2" target="3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Tunnel Label -->
+        <mxCell id="5" value="&lt;b&gt;WireGuard VPN (UDP :51820)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot;&gt;ChaCha20-Poly1305, Curve25519&lt;/font&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="320" y="60" width="260" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Tunnel visual background (green rounded rect behind arrow) -->
+        <mxCell id="6" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;opacity=30;" vertex="1" parent="1">
+          <mxGeometry x="280" y="85" width="340" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Internet Cloud -->
+        <mxCell id="7" value="&lt;b style=&quot;font-size: 14px;&quot;&gt;ІНТЕРНЕТ&lt;/b&gt;" style="ellipse;shape=cloud;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;strokeWidth=2;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="300" y="190" width="300" height="120" as="geometry" />
+        </mxCell>
+
+        <!-- Connection: Server to Internet -->
+        <mxCell id="8" value="" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#666666;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.16;entryY=0.55;entryDx=0;entryDy=0;entryPerimeter=0;dashed=1;" edge="1" parent="1" source="2" target="7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Connection: Client to Internet -->
+        <mxCell id="9" value="" style="endArrow=classic;html=1;strokeWidth=2;strokeColor=#666666;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.84;entryY=0.55;entryDx=0;entryDy=0;entryPerimeter=0;dashed=1;" edge="1" parent="1" source="3" target="7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Encrypted traffic label -->
+        <mxCell id="10" value="&lt;i&gt;Зашифрований трафік&lt;/i&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=11;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="365" y="310" width="140" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Lock icon on tunnel -->
+        <mxCell id="11" value="&#128274;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=18;" vertex="1" parent="1">
+          <mxGeometry x="430" y="80" width="40" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Comparison section divider -->
+        <mxCell id="12" value="&lt;b&gt;Порівняння трафіку:&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="340" y="350" width="150" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Left box - HTTP unencrypted (red) -->
+        <mxCell id="13" value="&lt;b style=&quot;color:#b85450;&quot;&gt;HTTP (незахищений)&lt;/b&gt;&lt;hr style=&quot;border-color:#f8cecc;&quot;&gt;&lt;font face=&quot;Courier New&quot; style=&quot;font-size: 11px;&quot;&gt;GET /secret.txt&lt;br&gt;password=qwerty123&lt;br&gt;&lt;br&gt;&lt;b style=&quot;color:#b85450;&quot;&gt;[все видно!]&lt;/b&gt;&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=2;fontSize=12;verticalAlign=top;spacingTop=5;spacingLeft=10;spacingRight=10;align=left;" vertex="1" parent="1">
+          <mxGeometry x="80" y="385" width="300" height="130" as="geometry" />
+        </mxCell>
+
+        <!-- Right box - VPN/TLS encrypted (green) -->
+        <mxCell id="14" value="&lt;b style=&quot;color:#82b366;&quot;&gt;VPN/TLS (захищений)&lt;/b&gt;&lt;hr style=&quot;border-color:#d5e8d4;&quot;&gt;&lt;font face=&quot;Courier New&quot; style=&quot;font-size: 11px;&quot;&gt;8e1a 4d5e 91c6 f3b7&lt;br&gt;a02d 7e8f cc41 59e2&lt;br&gt;&lt;br&gt;&lt;b style=&quot;color:#82b366;&quot;&gt;[шифротекст]&lt;/b&gt;&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;fontSize=12;verticalAlign=top;spacingTop=5;spacingLeft=10;spacingRight=10;align=left;" vertex="1" parent="1">
+          <mxGeometry x="520" y="385" width="300" height="130" as="geometry" />
+        </mxCell>
+
+        <!-- Cross icon on HTTP box -->
+        <mxCell id="15" value="&#10060;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=20;" vertex="1" parent="1">
+          <mxGeometry x="340" y="430" width="40" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Check icon on VPN box -->
+        <mxCell id="16" value="&#9989;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=20;" vertex="1" parent="1">
+          <mxGeometry x="480" y="430" width="40" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- VS label between boxes -->
+        <mxCell id="17" value="&lt;b&gt;VS&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="415" y="440" width="40" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Server icon -->
+        <mxCell id="18" value="" style="shape=image;verticalLabelPosition=bottom;labelBackgroundColor=default;verticalAlign=top;aspect=fixed;imageAspect=0;image=data:image/svg+xml,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzZjOGViZiI+PHBhdGggZD0iTTIwIDJINGMtMS4xIDAtMiAuOS0yIDJ2MTJjMCAxLjEuOSAyIDIgMmg0djJIOHYyaDh2LTJoLTJ2LTJoNGMxLjEgMCAyLS45IDItMlY0YzAtMS4xLS45LTItMi0yem0wIDE0SDRWNGgxNnYxMnoiLz48L3N2Zz4=;" vertex="1" parent="1">
+          <mxGeometry x="10" y="70" width="30" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Client icon -->
+        <mxCell id="19" value="" style="shape=image;verticalLabelPosition=bottom;labelBackgroundColor=default;verticalAlign=top;aspect=fixed;imageAspect=0;image=data:image/svg+xml,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzZjOGViZiI+PHBhdGggZD0iTTEyIDEyYzIuMjEgMCA0LTEuNzkgNC00cy0xLjc5LTQtNC00LTQgMS43OS00IDQgMS43OSA0IDQgNHptMCAyYy0yLjY3IDAtOCAxLjM0LTggNHYyaDE2di0yYzAtMi42Ni01LjMzLTQtOC00eiIvPjwvc3ZnPg==;" vertex="1" parent="1">
+          <mxGeometry x="860" y="70" width="30" height="30" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

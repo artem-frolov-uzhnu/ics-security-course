@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Практична 9. Тестування захищеності ІКС — Захист ІКС</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="overlay" id="overlay"></div>
+    <button class="menu-toggle" id="menuToggle">&#9776;</button>
+
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="../index.html">Технології захисту ІКС</a>
+        </div>
+        <div class="nav-section">
+            <h3>Лекції</h3>
+            <ul>
+                <li><a href="../lectures/01.html">1. Вступ. ІКС як об'єкт захисту</a></li>
+                <li><a href="../lectures/02.html">2. Моделювання загроз</a></li>
+                <li><a href="../lectures/03.html">3. Політика безпеки та доступ</a></li>
+                <li><a href="../lectures/04.html">4. Криптографічний захист</a></li>
+                <li><a href="../lectures/05.html">5. Захист мережевої інфраструктури</a></li>
+                <li><a href="../lectures/06.html">6. Захист кінцевих точок</a></li>
+                <li><a href="../lectures/07.html">7. Zero Trust та SIEM</a></li>
+                <li><a href="../lectures/08.html">8. Проєктування КСЗІ</a></li>
+                <li><a href="../lectures/09.html">9. Впровадження та тестування</a></li>
+                <li><a href="../lectures/10.html">10. Експлуатація та інциденти</a></li>
+            </ul>
+        </div>
+        <div class="nav-section">
+            <h3>Практичні</h3>
+            <ul>
+                <li><a href="../practicals/01.html">1. Моделювання загроз</a></li>
+                <li><a href="../practicals/02.html">2. Політика безпеки</a></li>
+                <li><a href="../practicals/03.html">3. Криптографічні засоби</a></li>
+                <li><a href="../practicals/04.html">4. Міжмережевий екран</a></li>
+                <li><a href="../practicals/05.html">5. VPN та захист каналів</a></li>
+                <li><a href="../practicals/06.html">6. IDS/IPS</a></li>
+                <li><a href="../practicals/07.html">7. SIEM-системи</a></li>
+                <li><a href="../practicals/08.html">8. Проєктування КСЗІ</a></li>
+                <li><a href="../practicals/09.html" class="active">9. Тестування захищеності</a></li>
+                <li><a href="../practicals/10.html">10. Захист проєктів</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="content">
+        <article>
+            <h1>Практична робота 9. Тестування захищеності ІКС</h1>
+            <p class="subtitle">Базова оцінка захищеності за допомогою Nmap та Lynis</p>
+
+            <!-- ===== Мета ===== -->
+            <h2>Мета роботи</h2>
+            <p>Навчитися проводити базову оцінку захищеності інформаційно-комунікаційної системи: виявляти відкриті порти та сервіси за допомогою Nmap, перевіряти HTTP-заголовки безпеки веб-серверів, проводити аудит конфігурації Linux за допомогою Lynis, а також формувати зведену таблицю знахідок із рекомендаціями щодо усунення виявлених проблем.</p>
+
+            <!-- ===== Теоретичні відомості ===== -->
+            <h2>Теоретичні відомості</h2>
+
+            <h3>Оцінка захищеності (Vulnerability Assessment)</h3>
+            <p>Оцінка захищеності &mdash; це процес систематичного виявлення, класифікації та пріоритизації вразливостей в інформаційній системі. На відміну від повноцінного тестування на проникнення (пентесту), оцінка захищеності зосереджується на виявленні потенційних проблем без їх активної експлуатації.</p>
+            <p>Основні етапи оцінки захищеності:</p>
+            <ol>
+                <li><strong>Збір інформації</strong> &mdash; виявлення активних хостів, відкритих портів, запущених сервісів та їх версій</li>
+                <li><strong>Аналіз конфігурації</strong> &mdash; перевірка налаштувань ОС, мережевих сервісів, веб-серверів на відповідність найкращим практикам</li>
+                <li><strong>Ідентифікація вразливостей</strong> &mdash; зіставлення виявлених версій ПЗ із базами відомих вразливостей (CVE)</li>
+                <li><strong>Формування рекомендацій</strong> &mdash; складання звіту з конкретними кроками усунення знахідок</li>
+            </ol>
+
+            <h3>Сканування портів та сервісів</h3>
+            <p>Порт &mdash; це логічна точка доступу до сервісу на хості. TCP/UDP-порти мають номери від 0 до 65535. Стан порту визначає доступність сервісу:</p>
+            <ul>
+                <li><strong>open</strong> &mdash; порт відкритий, сервіс приймає з'єднання. Це потенційна точка входу для зловмисника</li>
+                <li><strong>closed</strong> &mdash; порт доступний, але жодний сервіс не слухає. Менша загроза, але свідчить про відсутність фільтрації</li>
+                <li><strong>filtered</strong> &mdash; файрвол блокує доступ до порту. Найбезпечніший стан для невикористовуваних портів</li>
+            </ul>
+            <p>Кожен відкритий порт збільшує <strong>поверхню атаки</strong> (attack surface) &mdash; сукупність точок, через які зловмисник може спробувати проникнути в систему. Принцип мінімальної поверхні атаки вимагає залишати відкритими лише ті порти, які необхідні для роботи.</p>
+
+            <div class="info-box">
+                <strong>Nmap (Network Mapper)</strong>
+                Найпопулярніший інструмент мережевого сканування з відкритим кодом. Підтримує десятки типів сканування, визначення версій сервісів (<code>-sV</code>), операційної системи (<code>-O</code>), а також має вбудований скриптовий рушій NSE (Nmap Scripting Engine) з сотнями скриптів для автоматичного аналізу вразливостей.
+            </div>
+
+            <h3>HTTP-заголовки безпеки</h3>
+            <p>Веб-сервери можуть надсилати спеціальні HTTP-заголовки, які інструктують браузер застосовувати додаткові заходи безпеки. Відсутність цих заголовків робить веб-додаток вразливим до ряду атак:</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Заголовок</th>
+                        <th>Призначення</th>
+                        <th>Загроза при відсутності</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>Strict-Transport-Security</code></td>
+                        <td>Примусове використання HTTPS (HSTS)</td>
+                        <td>Атака downgrade, перехоплення трафіку (MITM)</td>
+                    </tr>
+                    <tr>
+                        <td><code>X-Frame-Options</code></td>
+                        <td>Захист від вбудовування сторінки в iframe</td>
+                        <td>Clickjacking &mdash; зловмисник накладає прозорий фрейм поверх легітимної сторінки</td>
+                    </tr>
+                    <tr>
+                        <td><code>X-Content-Type-Options</code></td>
+                        <td>Заборона MIME-type sniffing</td>
+                        <td>Браузер може інтерпретувати файл як виконуваний скрипт</td>
+                    </tr>
+                    <tr>
+                        <td><code>Content-Security-Policy</code></td>
+                        <td>Обмеження джерел завантаження ресурсів (CSP)</td>
+                        <td>XSS (Cross-Site Scripting) &mdash; виконання шкідливого JavaScript</td>
+                    </tr>
+                    <tr>
+                        <td><code>X-XSS-Protection</code></td>
+                        <td>Активація вбудованого XSS-фільтра браузера</td>
+                        <td>Відображені XSS-атаки (reflected XSS)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Аудит конфігурації системи</h3>
+            <p>Аудит конфігурації &mdash; це перевірка налаштувань операційної системи на відповідність стандартам безпеки (CIS Benchmarks, DISA STIG). Аудит включає перевірку: налаштувань файрволу, політики паролів та автентифікації, конфігурації SSH, прав доступу до файлів та каталогів, увімкнених сервісів, наявності оновлень безпеки та налаштувань журналювання (logging).</p>
+
+            <div class="info-box">
+                <strong>Lynis</strong>
+                Інструмент аудиту безпеки для Linux/Unix з відкритим кодом. Виконує понад 300 перевірок конфігурації системи та видає числову оцінку &mdash; <strong>Hardening Index</strong> (від 0 до 100). Чим вищий індекс, тим краще захищена система. Lynis надає конкретні рекомендації з ідентифікаторами (наприклад, <code>SSH-7408</code>, <code>FIRE-4512</code>), за якими можна знайти детальний опис проблеми та способу виправлення.
+            </div>
+
+            <!-- ===== Необхідне ПЗ ===== -->
+            <h2>Необхідне ПЗ та інструменти</h2>
+            <ul>
+                <li><strong>Ubuntu</strong> (22.04/24.04) або <strong>WSL (Windows Subsystem for Linux)</strong> &mdash; робоче середовище</li>
+                <li><strong><a href="https://nmap.org/" target="_blank">Nmap</a></strong> &mdash; мережевий сканер. Встановлення: <code>sudo apt install nmap</code></li>
+                <li><strong><a href="https://cisofy.com/lynis/" target="_blank">Lynis</a></strong> &mdash; аудит безпеки. Встановлення: <code>sudo apt install lynis</code></li>
+                <li><strong>curl</strong> &mdash; HTTP-клієнт для перевірки заголовків (зазвичай встановлений за замовчуванням)</li>
+            </ul>
+
+            <div class="tip-box">
+                <strong>Порада</strong>
+                Якщо ви працюєте у WSL, всі команди виконуються в терміналі Ubuntu. Для сканування локальної мережі переконайтеся, що WSL має мережевий доступ до вашої локальної мережі. У деяких конфігураціях WSL2 може мати обмежений доступ до хост-мережі.
+            </div>
+
+            <h2>Варіанти завдань</h2>
+            <p>Студент обирає один із варіантів або отримує варіант від викладача. Варіант визначає сайт для перевірки HTTP-заголовків, тип Nmap-сканування та фокус аудиту Lynis.</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Варіант</th>
+                        <th>Сайт для перевірки HTTP-заголовків</th>
+                        <th>Тип Nmap-сканування</th>
+                        <th>Фокус Lynis-аудиту</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>google.com та github.com</td>
+                        <td><code>nmap -sV localhost</code></td>
+                        <td>Загальний аудит (усі категорії)</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>facebook.com та gitlab.com</td>
+                        <td><code>nmap -sV -sC localhost</code></td>
+                        <td>Автентифікація та паролі (AUTH)</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>twitter.com та stackoverflow.com</td>
+                        <td><code>nmap -sV localhost</code></td>
+                        <td>Мережева безпека та файрвол (FIRE, NETW)</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>linkedin.com та cloudflare.com</td>
+                        <td><code>nmap -sV --top-ports 100 localhost</code></td>
+                        <td>SSH-конфігурація (SSH)</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>amazon.com та microsoft.com</td>
+                        <td><code>nmap -sV localhost</code></td>
+                        <td>Оновлення та пакети (PKGS)</td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td>wikipedia.org та mozilla.org</td>
+                        <td><code>nmap -sV -sC localhost</code></td>
+                        <td>Файлова система та права доступу (FILE)</td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td>reddit.com та dropbox.com</td>
+                        <td><code>nmap -sV localhost</code></td>
+                        <td>Журналювання та аудит (ACCT, LOG)</td>
+                    </tr>
+                    <tr>
+                        <td>8</td>
+                        <td>apple.com та slack.com</td>
+                        <td><code>nmap -sV --top-ports 100 localhost</code></td>
+                        <td>Завантаження та ядро (BOOT, KRNL)</td>
+                    </tr>
+                    <tr>
+                        <td>9</td>
+                        <td>yahoo.com та bitbucket.org</td>
+                        <td><code>nmap -sV -sC localhost</code></td>
+                        <td>Криптографія та сертифікати (CRYP)</td>
+                    </tr>
+                    <tr>
+                        <td>10</td>
+                        <td>telegram.org та signal.org</td>
+                        <td><code>nmap -sV localhost</code></td>
+                        <td>Загальний аудит із акцентом на hardening</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- ===== Хід роботи ===== -->
+            <h2>Хід роботи</h2>
+
+            <h3>Крок 1. Сканування мережі за допомогою Nmap</h3>
+
+            <p>Встановіть Nmap, якщо він ще не встановлений, та виконайте сканування:</p>
+
+            <h4>1.1. Сканування localhost з визначенням сервісів</h4>
+            <pre><code># Встановлення Nmap
+sudo apt install nmap -y
+
+# Сканування localhost з визначенням версій сервісів
+nmap -sV localhost</code></pre>
+            <p>Для кожного знайденого відкритого порту визначте: який сервіс працює, яка його версія, чи потрібен цей сервіс, та сформулюйте рекомендацію (закрити/залишити/оновити).</p>
+
+            <h4>1.2. Сканування локальної мережі</h4>
+            <pre><code># Визначити свою IP-адресу та підмережу
+ip addr show
+
+# Ping-сканування для виявлення активних хостів
+# Замініть підмережу на вашу
+nmap -sn 192.168.1.0/24</code></pre>
+
+            <div class="warning-box">
+                <strong>Увага!</strong>
+                Сканувати можна лише власну локальну мережу або мережу, на сканування якої ви маєте дозвіл. Несанкціоноване сканування чужих мереж є порушенням законодавства. Якщо ви працюєте в університетській мережі, обмежтеся скануванням localhost.
+            </div>
+
+            <p>Заповніть таблицю результатів сканування портів:</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Порт</th>
+                        <th>Стан</th>
+                        <th>Сервіс</th>
+                        <th>Версія</th>
+                        <th>Потрібен?</th>
+                        <th>Рекомендація</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>22/tcp</td>
+                        <td>open</td>
+                        <td>ssh</td>
+                        <td>OpenSSH 8.9p1</td>
+                        <td>Так</td>
+                        <td>Залишити, зміцнити конфігурацію</td>
+                    </tr>
+                    <tr>
+                        <td>...</td>
+                        <td>...</td>
+                        <td>...</td>
+                        <td>...</td>
+                        <td>...</td>
+                        <td>...</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Крок 2. Перевірка HTTP-заголовків безпеки</h3>
+
+            <p>Перевірте HTTP-заголовки безпеки будь-якого публічного веб-сайту за допомогою <code>curl</code>:</p>
+            <pre><code># Перевірка заголовків безпеки (параметр -I повертає лише заголовки)
+curl -I https://google.com
+
+# Перевірка іншого сайту для порівняння
+curl -I https://github.com</code></pre>
+
+            <p>Для кожного сайту визначте:</p>
+            <ul>
+                <li>Які заголовки безпеки присутні?</li>
+                <li>Яких заголовків бракує?</li>
+                <li>Які загрози створює відсутність кожного заголовка?</li>
+            </ul>
+
+            <h3>Крок 3. Аудит системи за допомогою Lynis</h3>
+
+            <pre><code># Встановлення Lynis
+sudo apt install lynis -y
+
+# Запуск повного аудиту системи
+sudo lynis audit system</code></pre>
+
+            <p>Після завершення аудиту:</p>
+            <ol>
+                <li>Зафіксуйте <strong>Hardening Index</strong> &mdash; числову оцінку рівня захищеності (0&ndash;100)</li>
+                <li>Перегляньте секцію <strong>Warnings</strong> (попередження) &mdash; це критичні проблеми</li>
+                <li>Перегляньте секцію <strong>Suggestions</strong> (рекомендації) &mdash; це можливості для поліпшення</li>
+                <li>Виберіть <strong>5 найважливіших рекомендацій</strong> та для кожної опишіть: що означає проблема, як її виправити (конкретна команда або зміна конфігурації)</li>
+            </ol>
+
+            <div class="tip-box">
+                <strong>Порада</strong>
+                Повний звіт Lynis зберігається у файлі <code>/var/log/lynis-report.dat</code>. Для швидкого перегляду попереджень та рекомендацій використовуйте:<br>
+                <code>sudo grep "warning\[\]" /var/log/lynis-report.dat</code><br>
+                <code>sudo grep "suggestion\[\]" /var/log/lynis-report.dat</code>
+            </div>
+
+            <h3>Крок 4. Зведена таблиця знахідок</h3>
+
+            <p>На основі результатів кроків 1&ndash;3 складіть зведену таблицю всіх виявлених проблем:</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>№</th>
+                        <th>Джерело</th>
+                        <th>Опис знахідки</th>
+                        <th>Серйозність</th>
+                        <th>Рекомендація</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Nmap</td>
+                        <td>Відкритий порт 3306 (MySQL) &mdash; доступний з мережі</td>
+                        <td>Висока</td>
+                        <td>Обмежити доступ лише з localhost (<code>bind-address = 127.0.0.1</code>)</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>curl</td>
+                        <td>Відсутній заголовок Content-Security-Policy</td>
+                        <td>Середня</td>
+                        <td>Додати CSP-заголовок у конфігурацію веб-сервера</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Lynis</td>
+                        <td>Файрвол не активовано (FIRE-4512)</td>
+                        <td>Висока</td>
+                        <td><code>sudo ufw enable &amp;&amp; sudo ufw default deny incoming</code></td>
+                    </tr>
+                    <tr>
+                        <td>...</td>
+                        <td>...</td>
+                        <td>...</td>
+                        <td>...</td>
+                        <td>...</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- ===== Приклад виконання ===== -->
+            <h2>Приклад виконання</h2>
+
+            <p>Нижче наведено повний приклад виконання практичної роботи на машині з Ubuntu 22.04 (WSL). Усі команди та їх вивід є реалістичними прикладами того, що студент може отримати при виконанні роботи.</p>
+
+            <div class="info-box">
+                <strong>Середовище виконання</strong>
+                <p><strong>ОС:</strong> Ubuntu 22.04.3 LTS (WSL2 на Windows 11)</p>
+                <p><strong>IP-адреса:</strong> 172.24.0.5 (WSL), 192.168.1.0/24 (локальна мережа хосту)</p>
+                <p><strong>Інструменти:</strong> Nmap 7.93, Lynis 3.0.8, curl 7.81.0</p>
+            </div>
+
+            <!-- Крок 1. Nmap -->
+            <h3>Крок 1. Сканування мережі (Nmap)</h3>
+
+            <h4>1.1. Сканування localhost з визначенням сервісів</h4>
+            <pre><code>student@ubuntu:~$ nmap -sV localhost
+Starting Nmap 7.93 ( https://nmap.org ) at 2026-02-18 10:15 EET
+Nmap scan report for localhost (127.0.0.1)
+Host is up (0.00008s latency).
+Not shown: 995 closed tcp ports (conn-refused)
+PORT     STATE SERVICE     VERSION
+22/tcp   open  ssh         OpenSSH 8.9p1 Ubuntu 3ubuntu0.6 (Ubuntu Linux; protocol 2.0)
+80/tcp   open  http        Apache httpd 2.4.52 ((Ubuntu))
+3306/tcp open  mysql       MySQL 8.0.36-0ubuntu0.22.04.1
+5432/tcp open  postgresql  PostgreSQL DB 14.11
+8080/tcp open  http-proxy  Node.js Express framework
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 8.42 seconds</code></pre>
+
+            <div class="example-box">
+                <strong>Аналіз результатів сканування localhost</strong>
+                <p>Виявлено <strong>5 відкритих портів</strong>. Аналіз кожного:</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Порт</th>
+                            <th>Сервіс</th>
+                            <th>Версія</th>
+                            <th>Потрібен?</th>
+                            <th>Рекомендація</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>22/tcp</td>
+                            <td>SSH</td>
+                            <td>OpenSSH 8.9p1</td>
+                            <td>Так</td>
+                            <td>Залишити. Зміцнити: заборонити root-логін, увімкнути автентифікацію за ключами</td>
+                        </tr>
+                        <tr>
+                            <td>80/tcp</td>
+                            <td>HTTP</td>
+                            <td>Apache 2.4.52</td>
+                            <td>Так</td>
+                            <td>Залишити. Оновити до 2.4.58+. Налаштувати заголовки безпеки</td>
+                        </tr>
+                        <tr>
+                            <td>3306/tcp</td>
+                            <td>MySQL</td>
+                            <td>MySQL 8.0.36</td>
+                            <td>Так, для додатку</td>
+                            <td>Обмежити доступ: <code>bind-address = 127.0.0.1</code> (закрити для зовнішніх з'єднань)</td>
+                        </tr>
+                        <tr>
+                            <td>5432/tcp</td>
+                            <td>PostgreSQL</td>
+                            <td>PostgreSQL 14.11</td>
+                            <td>Так, для додатку</td>
+                            <td>Перевірити <code>pg_hba.conf</code>, обмежити доступ лише з localhost</td>
+                        </tr>
+                        <tr>
+                            <td>8080/tcp</td>
+                            <td>Node.js</td>
+                            <td>Express framework</td>
+                            <td>Для розробки</td>
+                            <td>Закрити у продакшені або обмежити файрволом. Не залишати dev-сервер відкритим</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p><strong>Висновок:</strong> бази даних MySQL та PostgreSQL доступні з мережі, що є ризиком. Порт 8080 (dev-сервер) не повинен бути відкритий у продуктивному середовищі.</p>
+            </div>
+
+            <h4>1.2. Сканування локальної мережі</h4>
+            <pre><code>student@ubuntu:~$ nmap -sn 192.168.1.0/24
+Starting Nmap 7.93 ( https://nmap.org ) at 2026-02-18 10:18 EET
+Nmap scan report for 192.168.1.1
+Host is up (0.0021s latency).
+Nmap scan report for 192.168.1.5
+Host is up (0.0045s latency).
+Nmap scan report for 192.168.1.12
+Host is up (0.0038s latency).
+Nmap scan report for 192.168.1.20
+Host is up (0.0052s latency).
+Nmap scan report for 192.168.1.105
+Host is up (0.00012s latency).
+Nmap done: 256 IP addresses (5 hosts up) scanned in 3.14 seconds</code></pre>
+
+            <div class="example-box">
+                <strong>Аналіз результатів сканування мережі</strong>
+                <p>У мережі 192.168.1.0/24 виявлено <strong>5 активних хостів</strong>:</p>
+                <ul>
+                    <li><strong>192.168.1.1</strong> &mdash; маршрутизатор (шлюз за замовчуванням)</li>
+                    <li><strong>192.168.1.5</strong> &mdash; невідомий пристрій (потребує перевірки)</li>
+                    <li><strong>192.168.1.12</strong> &mdash; невідомий пристрій (потребує перевірки)</li>
+                    <li><strong>192.168.1.20</strong> &mdash; невідомий пристрій (потребує перевірки)</li>
+                    <li><strong>192.168.1.105</strong> &mdash; наша робоча станція (WSL-хост)</li>
+                </ul>
+                <p>Для повноцінного аудиту мережі кожен невідомий хост варто просканувати додатково за допомогою <code>nmap -sV</code>, щоб визначити запущені сервіси та виявити несанкціоновані пристрої.</p>
+            </div>
+
+            <!-- Крок 2. HTTP-заголовки -->
+            <h3>Крок 2. Перевірка HTTP-заголовків безпеки</h3>
+
+            <pre><code>student@ubuntu:~$ curl -I https://google.com
+HTTP/2 301
+location: https://www.google.com/
+content-type: text/html; charset=UTF-8
+content-security-policy-report-only: object-src 'none';base-uri 'self';script-src 'nonce-randomvalue' 'strict-dynamic' 'report-sample' 'unsafe-eval' 'unsafe-inline' https: http:;report-uri https://csp.withgoogle.com/csp/gws/other-hp
+date: Tue, 18 Feb 2026 08:20:15 GMT
+expires: Thu, 20 Mar 2026 08:20:15 GMT
+cache-control: public, max-age=2592000
+server: gws
+content-length: 220
+x-xss-protection: 0
+x-frame-options: SAMEORIGIN
+alt-svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000</code></pre>
+
+            <pre><code>student@ubuntu:~$ curl -I https://github.com
+HTTP/2 200
+server: GitHub.com
+date: Tue, 18 Feb 2026 08:21:03 GMT
+content-type: text/html; charset=utf-8
+vary: X-PJAX, X-PJAX-Container, Turbo-Visit, Turbo-Frame
+content-security-policy: default-src 'none'; base-uri 'self'; child-src github.com/assets-cdn/worker/ *.githubusercontent.com/assets/; connect-src 'self' uploads.github.com; font-src github.githubassets.com; form-action 'self' github.com/session; frame-ancestors 'none'; img-src 'self' *.githubusercontent.com github.githubassets.com; script-src github.githubassets.com; style-src 'unsafe-inline' github.githubassets.com
+strict-transport-security: max-age=31536000; includeSubdomains; preload
+x-frame-options: deny
+x-content-type-options: nosniff
+x-xss-protection: 0
+referrer-policy: origin-when-cross-origin, strict-origin-when-cross-origin
+expect-ct: max-age=2592000, report-uri="https://api.github.com/_private/browser/errors"</code></pre>
+
+            <div class="example-box">
+                <strong>Порівняльний аналіз HTTP-заголовків безпеки</strong>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Заголовок</th>
+                            <th>google.com</th>
+                            <th>github.com</th>
+                            <th>Пояснення</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>Strict-Transport-Security</code></td>
+                            <td>Відсутній</td>
+                            <td>Присутній (max-age=31536000; includeSubdomains; preload)</td>
+                            <td>GitHub примусово використовує HTTPS з усіма піддоменами та включенням у preload-список браузерів. Google не надсилає HSTS на кореневому домені (але надсилає на www.google.com)</td>
+                        </tr>
+                        <tr>
+                            <td><code>X-Frame-Options</code></td>
+                            <td>SAMEORIGIN</td>
+                            <td>DENY</td>
+                            <td>Google дозволяє вбудовування у фрейми з того ж домену. GitHub повністю забороняє вбудовування &mdash; суворіший захист від clickjacking</td>
+                        </tr>
+                        <tr>
+                            <td><code>X-Content-Type-Options</code></td>
+                            <td>Відсутній</td>
+                            <td>nosniff</td>
+                            <td>GitHub забороняє браузеру "вгадувати" тип контенту. Відсутність цього заголовка на Google може дозволити MIME-type confusion атаки</td>
+                        </tr>
+                        <tr>
+                            <td><code>Content-Security-Policy</code></td>
+                            <td>Тільки report-only</td>
+                            <td>Повна політика з обмеженнями</td>
+                            <td>GitHub має суворий CSP із забороною inline-скриптів. Google використовує CSP лише в режимі звітування &mdash; порушення фіксуються, але не блокуються</td>
+                        </tr>
+                        <tr>
+                            <td><code>X-XSS-Protection</code></td>
+                            <td>0 (вимкнено)</td>
+                            <td>0 (вимкнено)</td>
+                            <td>Обидва сайти вимикають застарілий XSS-фільтр браузера, покладаючись натомість на CSP як сучасний механізм захисту від XSS</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p><strong>Висновок:</strong> GitHub демонструє більш зрілу безпекову конфігурацію HTTP-заголовків. Усі ключові заголовки присутні та налаштовані суворо. Google використовує менш суворий підхід на кореневому домені, що пояснюється складною архітектурою з багатьма піддоменами та сервісами.</p>
+            </div>
+
+            <!-- Крок 3. Lynis -->
+            <h3>Крок 3. Аудит системи (Lynis)</h3>
+
+            <pre><code>student@ubuntu:~$ sudo lynis audit system
+[...]
+
+================================================================================
+
+  Lynis security scan details:
+
+  Hardening index : 56 [###########         ]
+  Tests performed : 271
+  Plugins enabled : 2
+
+  Components:
+  - Firewall               [X]
+  - Malware scanner        [X]
+
+  Scan mode:
+  Normal [V]  Forensics [ ]  Integration [ ]  Pentest [ ]
+
+  Lynis version          : 3.0.8
+  Auditing started       : 2026-02-18 10:25:01
+  Report file            : /var/log/lynis-report.dat
+  Log file               : /var/log/lynis.log
+
+================================================================================
+
+  == Warnings (3) ==
+  ----------------------------
+  ! No password set for single mode                          [AUTH-9308]
+      https://cisofy.com/lynis/controls/AUTH-9308/
+
+  ! Found one or more vulnerable packages.                   [PKGS-7392]
+      https://cisofy.com/lynis/controls/PKGS-7392/
+
+  ! iptables module(s) loaded, but no rules active           [FIRE-4512]
+      https://cisofy.com/lynis/controls/FIRE-4512/
+
+  == Suggestions (12) ==
+  ----------------------------
+  * Set a password on GRUB boot loader to prevent altering boot configuration
+    (e.g. boot in single user mode without password)         [BOOT-5122]
+      https://cisofy.com/lynis/controls/BOOT-5122/
+
+  * Install a PAM module for password strength testing like pam_cracklib or
+    pam_passwdqc                                             [AUTH-9262]
+      https://cisofy.com/lynis/controls/AUTH-9262/
+
+  * Configure minimum password age in /etc/login.defs        [AUTH-9286]
+      https://cisofy.com/lynis/controls/AUTH-9286/
+
+  * Configure maximum password age in /etc/login.defs        [AUTH-9286]
+      https://cisofy.com/lynis/controls/AUTH-9286/
+
+  * Default umask in /etc/login.defs could be more strict like 027 [AUTH-9328]
+      https://cisofy.com/lynis/controls/AUTH-9328/
+
+  * Consider hardening SSH configuration                     [SSH-7408]
+      - Details  : AllowTcpForwarding (set YES to NO)
+      - Details  : ClientAliveCountMax (set 3 to 2)
+      - Details  : PermitRootLogin (set YES to NO)
+      - Details  : TCPKeepAlive (set YES to NO)
+      https://cisofy.com/lynis/controls/SSH-7408/
+
+  * Enable auditd to collect audit information               [ACCT-9628]
+      https://cisofy.com/lynis/controls/ACCT-9628/
+
+  * Install a file integrity tool to monitor changes to critical and sensitive
+    files                                                    [FINT-4350]
+      https://cisofy.com/lynis/controls/FINT-4350/
+
+  * Add a legal banner to /etc/issue, to warn unauthorized users [BANN-7126]
+      https://cisofy.com/lynis/controls/BANN-7126/
+
+  * Enable process accounting                                [ACCT-9622]
+      https://cisofy.com/lynis/controls/ACCT-9622/
+
+  * Run 'dpkg --audit' to check for any unfinished package installations
+                                                             [PKGS-7398]
+      https://cisofy.com/lynis/controls/PKGS-7398/
+
+  * Install package apt-show-versions for patch management purposes
+                                                             [PKGS-7394]
+      https://cisofy.com/lynis/controls/PKGS-7394/
+
+================================================================================</code></pre>
+
+            <div class="example-box">
+                <strong>Аналіз Hardening Index та топ-5 рекомендацій</strong>
+                <p><strong>Hardening Index: 56/100</strong> &mdash; це відповідає середньому рівню захищеності. Система потребує суттєвого зміцнення.</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>№</th>
+                            <th>ID Lynis</th>
+                            <th>Проблема</th>
+                            <th>Як виправити</th>
+                            <th>Пріоритет</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>FIRE-4512</td>
+                            <td><strong>Файрвол не активовано.</strong> Модулі iptables завантажені, але жодних правил фільтрації немає. Система приймає будь-які вхідні з'єднання</td>
+                            <td><code>sudo ufw enable</code>, потім <code>sudo ufw default deny incoming</code> та <code>sudo ufw allow ssh</code>. Це заблокує всі вхідні з'єднання, крім SSH</td>
+                            <td>Високий</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>SSH-7408</td>
+                            <td><strong>SSH-сервер не зміцнено.</strong> Дозволено вхід root через SSH, увімкнено TCP forwarding &mdash; це розширює можливості зловмисника при компрометації SSH</td>
+                            <td>Відредагувати <code>/etc/ssh/sshd_config</code>: встановити <code>PermitRootLogin no</code>, <code>AllowTcpForwarding no</code>, <code>ClientAliveCountMax 2</code>. Потім <code>sudo systemctl restart sshd</code></td>
+                            <td>Високий</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>PKGS-7392</td>
+                            <td><strong>Наявні пакети з відомими вразливостями.</strong> Деякі встановлені пакети мають опубліковані CVE, які можуть бути використані зловмисником</td>
+                            <td><code>sudo apt update &amp;&amp; sudo apt upgrade -y</code>. Для автоматичних оновлень безпеки: <code>sudo apt install unattended-upgrades &amp;&amp; sudo dpkg-reconfigure -plow unattended-upgrades</code></td>
+                            <td>Високий</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>AUTH-9262</td>
+                            <td><strong>Відсутня перевірка складності паролів.</strong> Без модуля PAM для перевірки якості паролів користувачі можуть встановлювати слабкі паролі (наприклад, "123456")</td>
+                            <td><code>sudo apt install libpam-pwquality</code>, потім налаштувати <code>/etc/security/pwquality.conf</code>: <code>minlen = 12</code>, <code>dcredit = -1</code>, <code>ucredit = -1</code>, <code>lcredit = -1</code></td>
+                            <td>Середній</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>ACCT-9628</td>
+                            <td><strong>Аудит системних подій не увімкнено.</strong> Без auditd неможливо відстежити дії користувачів (хто, коли і що змінював у системі), що критично для розслідування інцидентів</td>
+                            <td><code>sudo apt install auditd</code>, потім <code>sudo systemctl enable --now auditd</code>. Додати правила аудиту: <code>sudo auditctl -w /etc/passwd -p wa -k user_changes</code></td>
+                            <td>Середній</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>Після впровадження всіх рекомендацій очікуване підвищення Hardening Index: <strong>56 &rarr; 75+</strong>.</p>
+            </div>
+
+            <!-- Крок 4. Зведена таблиця -->
+            <h3>Крок 4. Зведена таблиця знахідок</h3>
+
+            <div class="example-box">
+                <strong>Зведена таблиця знахідок</strong>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>№</th>
+                            <th>Джерело</th>
+                            <th>Опис знахідки</th>
+                            <th>Серйозність</th>
+                            <th>Рекомендація</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>Nmap</td>
+                            <td>MySQL (3306/tcp) доступний із мережі &mdash; можливий несанкціонований доступ до бази даних</td>
+                            <td>Висока</td>
+                            <td>Встановити <code>bind-address = 127.0.0.1</code> у <code>/etc/mysql/mysql.conf.d/mysqld.cnf</code></td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Nmap</td>
+                            <td>PostgreSQL (5432/tcp) доступний із мережі &mdash; аналогічний ризик</td>
+                            <td>Висока</td>
+                            <td>Обмежити у <code>postgresql.conf</code>: <code>listen_addresses = 'localhost'</code></td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Nmap</td>
+                            <td>Dev-сервер Node.js (8080/tcp) відкритий &mdash; потенційний витік інформації через debug-режим</td>
+                            <td>Середня</td>
+                            <td>Закрити порт файрволом або зупинити dev-сервер у продакшені</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>curl</td>
+                            <td>google.com: відсутній заголовок Strict-Transport-Security на кореневому домені</td>
+                            <td>Середня</td>
+                            <td>Додати заголовок HSTS у конфігурацію веб-сервера</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>curl</td>
+                            <td>google.com: відсутній заголовок X-Content-Type-Options</td>
+                            <td>Низька</td>
+                            <td>Додати <code>X-Content-Type-Options: nosniff</code></td>
+                        </tr>
+                        <tr>
+                            <td>6</td>
+                            <td>Lynis</td>
+                            <td>Файрвол не активовано (FIRE-4512) &mdash; система не фільтрує вхідний трафік</td>
+                            <td>Висока</td>
+                            <td><code>sudo ufw enable &amp;&amp; sudo ufw default deny incoming</code></td>
+                        </tr>
+                        <tr>
+                            <td>7</td>
+                            <td>Lynis</td>
+                            <td>SSH не зміцнено (SSH-7408) &mdash; дозволено root-логін, TCP forwarding</td>
+                            <td>Висока</td>
+                            <td>Налаштувати <code>/etc/ssh/sshd_config</code>: <code>PermitRootLogin no</code></td>
+                        </tr>
+                        <tr>
+                            <td>8</td>
+                            <td>Lynis</td>
+                            <td>Вразливі пакети (PKGS-7392) &mdash; є пакети з відомими CVE</td>
+                            <td>Висока</td>
+                            <td><code>sudo apt update &amp;&amp; sudo apt upgrade -y</code></td>
+                        </tr>
+                        <tr>
+                            <td>9</td>
+                            <td>Lynis</td>
+                            <td>Відсутня перевірка складності паролів (AUTH-9262)</td>
+                            <td>Середня</td>
+                            <td>Встановити <code>libpam-pwquality</code>, налаштувати мінімальну довжину 12 символів</td>
+                        </tr>
+                        <tr>
+                            <td>10</td>
+                            <td>Lynis</td>
+                            <td>Аудит подій не увімкнено (ACCT-9628) &mdash; неможливо відстежити дії користувачів</td>
+                            <td>Середня</td>
+                            <td>Встановити та увімкнути <code>auditd</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p><strong>Підсумок:</strong> виявлено 10 знахідок, з них 4 &mdash; високої серйозності (відкриті порти БД, відсутній файрвол, вразливі пакети, незміцнений SSH), 4 &mdash; середньої серйозності, 2 &mdash; низької. Першочергові дії: увімкнути файрвол, обмежити доступ до баз даних, оновити пакети та зміцнити SSH.</p>
+            </div>
+
+            <!-- ===== Вимоги до звіту ===== -->
+            <h2>Вимоги до звіту</h2>
+            <p>Звіт має містити такі розділи:</p>
+            <ol>
+                <li><strong>Титульна сторінка</strong> &mdash; назва дисципліни, номер та назва практичної роботи, ПІБ студента, група, дата</li>
+                <li><strong>Мета роботи</strong></li>
+                <li><strong>Результати Nmap-сканування</strong> &mdash; таблиця портів і сервісів з рекомендаціями</li>
+                <li><strong>Аналіз HTTP-заголовків безпеки</strong> &mdash; порівняльна таблиця для двох сайтів</li>
+                <li><strong>Результати Lynis</strong> &mdash; Hardening Index та топ-5 рекомендацій з поясненнями</li>
+                <li><strong>Зведена таблиця знахідок</strong> &mdash; мінімум 8&ndash;10 записів з усіх джерел</li>
+                <li><strong>Відповіді на контрольні питання</strong> (5 питань)</li>
+                <li><strong>Висновки</strong></li>
+            </ol>
+
+            <div class="warning-box">
+                <strong>Важливо</strong>
+                Для кожної команди у звіті наведіть вивід (скріншот або текст). Не копіюйте приклад із цієї сторінки дослівно &mdash; ваші результати будуть відрізнятися залежно від конфігурації вашої системи.
+            </div>
+
+            <!-- ===== Контрольні питання ===== -->
+            <h2>Контрольні питання</h2>
+            <ol>
+                <li>Що таке поверхня атаки (attack surface)? Як сканування портів допомагає її оцінити та зменшити?</li>
+                <li>Поясніть різницю між станами портів open, closed та filtered у Nmap. Який стан є найбезпечнішим для невикористовуваних портів і чому?</li>
+                <li>Що таке HTTP-заголовок Strict-Transport-Security (HSTS) і від яких атак він захищає? Що означає параметр <code>includeSubdomains</code>?</li>
+                <li>Що таке Hardening Index у Lynis? Які основні категорії перевірок виконує Lynis під час аудиту Linux-системи?</li>
+                <li>Чим відрізняється оцінка захищеності (vulnerability assessment) від тестування на проникнення (penetration testing)? У яких випадках доцільно використовувати кожен підхід?</li>
+            </ol>
+
+        </article>
+
+        <nav class="page-nav">
+            <a href="08.html">&larr; Проєктування КСЗІ</a>
+            <a href="10.html">Захист проєктів &rarr;</a>
+        </nav>
+    </main>
+
+    <script>
+        document.getElementById('menuToggle').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('active');
+        });
+        document.getElementById('overlay').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.remove('open');
+            this.classList.remove('active');
+        });
+    </script>
+</body>
+</html>

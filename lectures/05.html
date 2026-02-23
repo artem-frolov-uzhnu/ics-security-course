@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лекція 5. Захист мережевої інфраструктури ІКС — Захист ІКС</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <div class="overlay" id="overlay"></div>
+    <button class="menu-toggle" id="menuToggle">☰</button>
+
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="../index.html">Технології захисту ІКС</a>
+        </div>
+        <div class="nav-section">
+            <h3>Лекції</h3>
+            <ul>
+                <li><a href="../lectures/01.html">1. Вступ. ІКС як об'єкт захисту</a></li>
+                <li><a href="../lectures/02.html">2. Моделювання загроз</a></li>
+                <li><a href="../lectures/03.html">3. Політика безпеки та доступ</a></li>
+                <li><a href="../lectures/04.html">4. Криптографічний захист</a></li>
+                <li><a href="../lectures/05.html" class="active">5. Захист мережевої інфраструктури</a></li>
+                <li><a href="../lectures/06.html">6. Захист кінцевих точок</a></li>
+                <li><a href="../lectures/07.html">7. Zero Trust та SIEM</a></li>
+                <li><a href="../lectures/08.html">8. Проєктування КСЗІ</a></li>
+                <li><a href="../lectures/09.html">9. Впровадження та тестування</a></li>
+                <li><a href="../lectures/10.html">10. Експлуатація та інциденти</a></li>
+            </ul>
+        </div>
+        <div class="nav-section">
+            <h3>Практичні</h3>
+            <ul>
+                <li><a href="../practicals/01.html">1. Моделювання загроз</a></li>
+                <li><a href="../practicals/02.html">2. Політика безпеки</a></li>
+                <li><a href="../practicals/03.html">3. Криптографічні засоби</a></li>
+                <li><a href="../practicals/04.html">4. Міжмережевий екран</a></li>
+                <li><a href="../practicals/05.html">5. VPN та захист каналів</a></li>
+                <li><a href="../practicals/06.html">6. IDS/IPS</a></li>
+                <li><a href="../practicals/07.html">7. SIEM-системи</a></li>
+                <li><a href="../practicals/08.html">8. Проєктування КСЗІ</a></li>
+                <li><a href="../practicals/09.html">9. Тестування захищеності</a></li>
+                <li><a href="../practicals/10.html">10. Захист проєктів</a></li>
+            </ul>
+        </div>
+        <div class="nav-section">
+            <h3>Звіти</h3>
+            <ul>
+                <li><a href="../report-viewer.html">Приклади звітів</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="content">
+        <article>
+            <h1>Лекція 5. Захист мережевої інфраструктури ІКС</h1>
+            <p class="subtitle">Міжмережеві екрани, IDS/IPS, VPN та сегментація мережі</p>
+
+            <!-- ================= SECTION 1 ================= -->
+            <h2>1. Мережевий периметр та його еволюція</h2>
+
+            <h3>1.1. Класичний мережевий периметр</h3>
+            <p>Традиційна модель захисту інформаційно-комунікаційних систем базувалася на концепції <strong>мережевого периметру</strong> — чіткої межі між довіреною внутрішньою мережею організації та недовіреним зовнішнім середовищем (Інтернетом). Ця модель, яку часто називають <em>"castle-and-moat"</em> (замок і рів), передбачала розміщення основних засобів захисту на кордоні мережі.</p>
+
+            <p>Ключові елементи класичного периметру:</p>
+            <ul>
+                <li><strong>Прикордонний маршрутизатор</strong> — перша лінія оборони, базова фільтрація трафіку (ACL)</li>
+                <li><strong>Міжмережевий екран</strong> — основний інструмент контролю доступу між зонами</li>
+                <li><strong>DMZ (демілітаризована зона)</strong> — сегмент для публічних сервісів</li>
+                <li><strong>IDS/IPS</strong> — системи виявлення та запобігання вторгненням</li>
+                <li><strong>VPN-шлюз</strong> — забезпечення захищеного віддаленого доступу</li>
+            </ul>
+
+            <h3>1.2. Еволюція: від чіткого периметру до розмитих меж</h3>
+            <p>Сучасні тенденції суттєво змінили ландшафт мережевої безпеки. Традиційний периметр "розмився" під впливом кількох факторів:</p>
+
+            <ul>
+                <li><strong>Хмарні технології</strong> — ресурси організації розподілені між on-premise інфраструктурою, IaaS, PaaS та SaaS провайдерами</li>
+                <li><strong>Мобільні пристрої та BYOD</strong> — користувачі підключаються з будь-яких пристроїв, з будь-якого місця</li>
+                <li><strong>Віддалена робота</strong> — масовий перехід на дистанційний режим роботи</li>
+                <li><strong>IoT-пристрої</strong> — збільшення кількості підключених пристроїв із обмеженими можливостями захисту</li>
+                <li><strong>API-інтеграції</strong> — численні зв'язки з зовнішніми сервісами через API</li>
+            </ul>
+
+            <div class="info-box">
+                <strong>Сучасний підхід</strong>
+                Замість покладання виключно на периметровий захист, сучасні архітектури безпеки реалізують концепцію <em>Defense in Depth</em> (глибокий захист) — багаторівневу систему безпеки, де кожен рівень функціонує незалежно. Це доповнюється підходом Zero Trust (розглядається у лекції 7), який передбачає перевірку кожного запиту незалежно від його джерела.
+            </div>
+
+            <p>Незважаючи на еволюцію, мережевий периметр не зникає повністю — він трансформується. Сучасний підхід передбачає:</p>
+            <ul>
+                <li>Множинні точки контролю замість єдиної межі</li>
+                <li>Мікросегментацію внутрішньої мережі</li>
+                <li>Контроль трафіку як на рівні мережі, так і на рівні додатків</li>
+                <li>Інтеграцію хмарних та локальних засобів захисту (SASE — Secure Access Service Edge)</li>
+            </ul>
+
+            <!-- ================= SECTION 2 ================= -->
+            <h2>2. Міжмережеві екрани (Firewalls)</h2>
+
+            <h3>2.1. Типи міжмережевих екранів</h3>
+            <p>Міжмережевий екран (firewall) — це система мережевої безпеки, яка моніторить та контролює вхідний і вихідний мережевий трафік на основі заздалегідь визначених правил безпеки. Еволюція міжмережевих екранів пройшла через кілька поколінь:</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Тип</th>
+                        <th>Рівень OSI</th>
+                        <th>Можливості</th>
+                        <th>Обмеження</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Пакетні фільтри</strong></td>
+                        <td>L3-L4 (мережевий, транспортний)</td>
+                        <td>Фільтрація за IP-адресами, портами, протоколами. Висока швидкість обробки</td>
+                        <td>Не аналізує вміст пакетів. Не відстежує стан з'єднання. Вразливий до IP-spoofing</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Stateful Inspection</strong></td>
+                        <td>L3-L4 з відстеженням стану</td>
+                        <td>Відстежує стан TCP-з'єднань (state table). Дозволяє відповідний трафік автоматично. Захист від несанкціонованих пакетів</td>
+                        <td>Не інспектує вміст прикладного рівня. Обмежене розуміння протоколів L7</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Application-Level Gateway (проксі)</strong></td>
+                        <td>L7 (прикладний)</td>
+                        <td>Повний аналіз прикладних протоколів (HTTP, FTP, SMTP). Приховує внутрішню мережу. Глибокий контроль вмісту</td>
+                        <td>Значне навантаження на продуктивність. Потребує окремого проксі для кожного протоколу. Може порушувати роботу деяких додатків</td>
+                    </tr>
+                    <tr>
+                        <td><strong>NGFW (Next-Generation Firewall)</strong></td>
+                        <td>L3-L7</td>
+                        <td>Deep Packet Inspection (DPI). Ідентифікація додатків (App-ID). Інтеграція IPS, антивірусу, пісочниці. Розпізнавання користувачів (User-ID). Розшифрування TLS/SSL</td>
+                        <td>Висока вартість. Вимоги до продуктивності при DPI. Складність налаштування</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>2.2. iptables/nftables: архітектура та практика</h3>
+
+            <h4>Архітектура iptables</h4>
+            <p><code>iptables</code> — це утиліта для управління підсистемою фільтрації пакетів <code>netfilter</code> в ядрі Linux. Архітектура побудована на трьох ключових концепціях:</p>
+
+            <p><strong>Таблиці (Tables):</strong></p>
+            <ul>
+                <li><code>filter</code> — основна таблиця для фільтрації пакетів (за замовчуванням)</li>
+                <li><code>nat</code> — трансляція мережевих адрес (NAT)</li>
+                <li><code>mangle</code> — модифікація заголовків пакетів (QoS, TTL тощо)</li>
+                <li><code>raw</code> — обробка пакетів до відстеження з'єднань (conntrack)</li>
+                <li><code>security</code> — правила для SELinux</li>
+            </ul>
+
+            <p><strong>Ланцюжки (Chains):</strong></p>
+            <ul>
+                <li><code>INPUT</code> — вхідний трафік, призначений для самого хоста</li>
+                <li><code>OUTPUT</code> — вихідний трафік, згенерований хостом</li>
+                <li><code>FORWARD</code> — транзитний трафік, що проходить через хост (маршрутизація)</li>
+                <li><code>PREROUTING</code> — обробка до прийняття рішення про маршрутизацію (DNAT)</li>
+                <li><code>POSTROUTING</code> — обробка після прийняття рішення про маршрутизацію (SNAT)</li>
+            </ul>
+
+            <p><strong>Правила (Rules):</strong></p>
+            <p>Кожне правило складається з умов відповідності (match) та цілі (target/action):</p>
+            <ul>
+                <li><code>ACCEPT</code> — дозволити пакет</li>
+                <li><code>DROP</code> — відкинути пакет мовчки</li>
+                <li><code>REJECT</code> — відкинути пакет з повідомленням ICMP</li>
+                <li><code>LOG</code> — записати інформацію про пакет у лог</li>
+                <li><code>SNAT</code> / <code>DNAT</code> / <code>MASQUERADE</code> — трансляція адрес</li>
+            </ul>
+
+            <h4>Практичні приклади правил iptables</h4>
+
+            <p><strong>Базова конфігурація серверного міжмережевого екрану:</strong></p>
+<pre><code># Очистити всі правила та встановити політику за замовчуванням
+iptables -F
+iptables -X
+iptables -P INPUT DROP
+iptables -P FORWARD DROP
+iptables -P OUTPUT ACCEPT
+
+# Дозволити трафік на loopback-інтерфейсі
+iptables -A INPUT -i lo -j ACCEPT
+
+# Дозволити встановлені та пов'язані з'єднання
+iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+
+# Дозволити SSH лише з внутрішньої мережі
+iptables -A INPUT -p tcp --dport 22 -s 192.168.1.0/24 -j ACCEPT
+
+# Дозволити HTTP та HTTPS з будь-якого джерела
+iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+
+# Дозволити DNS-запити
+iptables -A INPUT -p udp --dport 53 -j ACCEPT
+iptables -A INPUT -p tcp --dport 53 -j ACCEPT
+
+# Дозволити ICMP (ping) з обмеженням частоти
+iptables -A INPUT -p icmp --icmp-type echo-request -m limit --limit 1/s --limit-burst 4 -j ACCEPT
+
+# Логувати відкинуті пакети (для діагностики)
+iptables -A INPUT -j LOG --log-prefix "IPT-DROP: " --log-level 4
+iptables -A INPUT -j DROP</code></pre>
+
+            <p><strong>Захист від типових атак:</strong></p>
+<pre><code># Захист від SYN-flood (обмеження кількості нових з'єднань)
+iptables -A INPUT -p tcp --syn -m limit --limit 25/s --limit-burst 50 -j ACCEPT
+iptables -A INPUT -p tcp --syn -j DROP
+
+# Блокування пакетів з невалідним станом
+iptables -A INPUT -m conntrack --ctstate INVALID -j DROP
+
+# Захист від port scanning (FIN/XMAS/NULL scan)
+iptables -A INPUT -p tcp --tcp-flags ALL NONE -j DROP
+iptables -A INPUT -p tcp --tcp-flags ALL ALL -j DROP
+iptables -A INPUT -p tcp --tcp-flags ALL FIN,URG,PSH -j DROP
+
+# Блокування smurf attack (broadcast ICMP)
+iptables -A INPUT -p icmp -d 255.255.255.255 -j DROP
+iptables -A INPUT -p icmp -d 192.168.1.255 -j DROP</code></pre>
+
+            <h4>NAT: SNAT та DNAT</h4>
+            <p>NAT (Network Address Translation) дозволяє перетворювати мережеві адреси при проходженні пакетів через маршрутизатор:</p>
+
+<pre><code># Увімкнення IP-форвардингу (необхідно для маршрутизації)
+echo 1 > /proc/sys/net/ipv4/ip_forward
+
+# SNAT — заміна адреси джерела (вихідний трафік з LAN в Інтернет)
+# Використовується, коли зовнішня IP-адреса статична
+iptables -t nat -A POSTROUTING -s 192.168.1.0/24 -o eth0 -j SNAT --to-source 203.0.113.10
+
+# MASQUERADE — аналог SNAT для динамічної зовнішньої адреси
+iptables -t nat -A POSTROUTING -s 192.168.1.0/24 -o eth0 -j MASQUERADE
+
+# DNAT — перенаправлення вхідного трафіку на внутрішній сервер
+# Публікація веб-сервера з DMZ назовні
+iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 80 -j DNAT --to-destination 10.0.0.5:80
+iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 443 -j DNAT --to-destination 10.0.0.5:443
+
+# Дозволити форвардинг для DNAT-трафіку
+iptables -A FORWARD -i eth0 -o eth1 -p tcp --dport 80 -d 10.0.0.5 -j ACCEPT
+iptables -A FORWARD -i eth0 -o eth1 -p tcp --dport 443 -d 10.0.0.5 -j ACCEPT
+
+# Дозволити зворотній трафік
+iptables -A FORWARD -i eth1 -o eth0 -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT</code></pre>
+
+            <div class="tip-box">
+                <strong>Перехід на nftables</strong>
+                Починаючи з ядра Linux 3.13, <code>nftables</code> є наступником <code>iptables</code>. Основні переваги: єдиний інструмент замість iptables/ip6tables/arptables/ebtables; більш читабельний синтаксис правил; краща продуктивність завдяки новому API Netlink; атомарне застосування наборів правил. У сучасних дистрибутивах (Debian 11+, RHEL 9+) <code>nftables</code> є стандартом за замовчуванням.
+            </div>
+
+            <h4>Приклад конфігурації nftables</h4>
+<pre><code>#!/usr/sbin/nft -f
+
+flush ruleset
+
+table inet filter {
+    chain input {
+        type filter hook input priority 0; policy drop;
+
+        # Дозволити loopback
+        iif "lo" accept
+
+        # Встановлені та пов'язані з'єднання
+        ct state established,related accept
+
+        # Відкинути невалідні
+        ct state invalid drop
+
+        # SSH з внутрішньої мережі
+        ip saddr 192.168.1.0/24 tcp dport 22 accept
+
+        # HTTP/HTTPS
+        tcp dport { 80, 443 } accept
+
+        # ICMP
+        ip protocol icmp icmp type echo-request limit rate 1/second accept
+
+        # Логування решти
+        log prefix "NFT-DROP: " counter drop
+    }
+
+    chain forward {
+        type filter hook forward priority 0; policy drop;
+        ct state established,related accept
+    }
+
+    chain output {
+        type filter hook output priority 0; policy accept;
+    }
+}
+
+table ip nat {
+    chain prerouting {
+        type nat hook prerouting priority -100;
+        iifname "eth0" tcp dport 80 dnat to 10.0.0.5:80
+    }
+
+    chain postrouting {
+        type nat hook postrouting priority 100;
+        oifname "eth0" masquerade
+    }
+}</code></pre>
+
+            <h3>2.3. pfSense та OPNsense</h3>
+            <p><code>pfSense</code> та <code>OPNsense</code> — це дистрибутиви на основі FreeBSD, які перетворюють звичайний комп'ютер або віртуальну машину на повнофункціональний міжмережевий екран з веб-інтерфейсом управління.</p>
+
+            <h4>Основні можливості pfSense/OPNsense</h4>
+            <ul>
+                <li><strong>Stateful Firewall</strong> — правила фільтрації з відстеженням стану з'єднань</li>
+                <li><strong>NAT</strong> — Port Forward, 1:1 NAT, Outbound NAT</li>
+                <li><strong>VPN</strong> — OpenVPN, IPsec, WireGuard (через плагін)</li>
+                <li><strong>IDS/IPS</strong> — інтеграція з Suricata або Snort</li>
+                <li><strong>Traffic Shaping</strong> — QoS, обмеження швидкості</li>
+                <li><strong>High Availability</strong> — CARP (Common Address Redundancy Protocol) для кластеризації</li>
+                <li><strong>Captive Portal</strong> — автентифікація користувачів Wi-Fi</li>
+                <li><strong>DNS/DHCP</strong> — вбудовані служби DNS (Unbound) та DHCP</li>
+                <li><strong>Моніторинг</strong> — графіки трафіку, логи, дашборд стану</li>
+            </ul>
+
+            <h4>Типові сценарії використання</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Сценарій</th>
+                        <th>Конфігурація</th>
+                        <th>Ключові функції</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Периметровий FW для малої організації</td>
+                        <td>WAN + LAN + DMZ інтерфейси</td>
+                        <td>NAT, правила FW, VPN для віддаленого доступу</td>
+                    </tr>
+                    <tr>
+                        <td>UTM (Unified Threat Management)</td>
+                        <td>FW + IDS/IPS + антивірус + веб-фільтр</td>
+                        <td>Suricata IDS, pfBlockerNG, Squid proxy</td>
+                    </tr>
+                    <tr>
+                        <td>Site-to-Site VPN hub</td>
+                        <td>Центральний вузол IPsec/OpenVPN</td>
+                        <td>Множинні VPN-тунелі, маршрутизація між сайтами</td>
+                    </tr>
+                    <tr>
+                        <td>Мережевий сегментатор</td>
+                        <td>Множинні VLAN-інтерфейси</td>
+                        <td>Inter-VLAN routing з фільтрацією</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="info-box">
+                <strong>pfSense vs OPNsense</strong>
+                OPNsense є форком pfSense, створеним у 2015 році. Основні відмінності: OPNsense має сучасніший інтерфейс (на базі MVC-фреймворку), частіші оновлення безпеки, кращу підтримку плагінів, вбудовану підтримку WireGuard. pfSense має більшу спільноту та більше комерційних плагінів. Обидва рішення є повнофункціональними для використання в ІКС.
+            </div>
+
+            <h3>2.4. Комерційні NGFW</h3>
+            <p>Next-Generation Firewall (NGFW) — це міжмережеві екрани, які поєднують традиційну фільтрацію з глибоким аналізом трафіку на рівні додатків. Розглянемо три провідних рішення на ринку:</p>
+
+            <h4>Palo Alto Networks</h4>
+            <ul>
+                <li><strong>App-ID</strong> — ідентифікація додатків незалежно від порту, протоколу або шифрування. Класифікує трафік за допомогою множинних механізмів: сигнатури додатків, декодери протоколів, евристика</li>
+                <li><strong>User-ID</strong> — прив'язка мережевого трафіку до конкретних користувачів через інтеграцію з Active Directory, LDAP, Captive Portal. Дозволяє створювати правила на основі імені користувача або групи</li>
+                <li><strong>Content-ID</strong> — аналіз вмісту: IPS, антивірус, anti-spyware, URL-фільтрація, DLP, файлова блокіровка</li>
+                <li><strong>WildFire</strong> — хмарна пісочниця для аналізу невідомих файлів та zero-day загроз</li>
+                <li><strong>Panorama</strong> — централізоване управління множинними пристроями</li>
+            </ul>
+
+            <h4>Fortinet FortiGate</h4>
+            <ul>
+                <li><strong>ASIC-прискорення</strong> — спеціалізовані процесори (SPU — Security Processing Unit) для апаратного прискорення операцій безпеки</li>
+                <li><strong>Security Fabric</strong> — інтеграція з іншими продуктами Fortinet (FortiAnalyzer, FortiManager, FortiSandbox, FortiWeb)</li>
+                <li><strong>FortiGuard Services</strong> — хмарні сервіси: IPS, антивірус, веб-фільтрація, антиспам</li>
+                <li><strong>SD-WAN</strong> — вбудована функціональність програмно-визначеної WAN</li>
+                <li><strong>Висока продуктивність</strong> — один із лідерів за показником пропускної здатності завдяки ASIC</li>
+            </ul>
+
+            <h4>Check Point</h4>
+            <ul>
+                <li><strong>Software Blades</strong> — модульна архітектура, де кожна функція безпеки є окремим "блейдом" (FW, IPS, App Control, URL Filtering, Anti-Bot, SandBlast тощо)</li>
+                <li><strong>SmartConsole</strong> — централізована консоль управління для всіх шлюзів</li>
+                <li><strong>ThreatCloud</strong> — хмарна база знань загроз з big data аналітикою та ML</li>
+                <li><strong>R81+ Unified Security Management</strong> — єдина політика для фізичних, віртуальних та хмарних шлюзів</li>
+            </ul>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Критерій</th>
+                        <th>Palo Alto</th>
+                        <th>Fortinet FortiGate</th>
+                        <th>Check Point</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Ідентифікація додатків</td>
+                        <td>App-ID (лідер)</td>
+                        <td>Application Control</td>
+                        <td>App Control blade</td>
+                    </tr>
+                    <tr>
+                        <td>Продуктивність</td>
+                        <td>Висока</td>
+                        <td>Дуже висока (ASIC)</td>
+                        <td>Висока</td>
+                    </tr>
+                    <tr>
+                        <td>Управління</td>
+                        <td>Panorama</td>
+                        <td>FortiManager</td>
+                        <td>SmartConsole</td>
+                    </tr>
+                    <tr>
+                        <td>Пісочниця</td>
+                        <td>WildFire</td>
+                        <td>FortiSandbox</td>
+                        <td>SandBlast</td>
+                    </tr>
+                    <tr>
+                        <td>Цінова категорія</td>
+                        <td>Висока</td>
+                        <td>Середня-висока</td>
+                        <td>Висока</td>
+                    </tr>
+                    <tr>
+                        <td>Кваданти Gartner</td>
+                        <td>Лідер</td>
+                        <td>Лідер</td>
+                        <td>Лідер</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- ================= SECTION 3 ================= -->
+            <h2>3. Системи виявлення та запобігання вторгненням (IDS/IPS)</h2>
+
+            <h3>3.1. Принципи роботи IDS/IPS</h3>
+            <p>IDS (Intrusion Detection System) та IPS (Intrusion Prevention System) — це системи, які аналізують мережевий трафік або події на хості для виявлення зловмисної активності. Основна відмінність: IDS лише виявляє та оповіщає, тоді як IPS може активно блокувати загрози.</p>
+
+            <h4>Класифікація за типом аналізу</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Метод</th>
+                        <th>Принцип</th>
+                        <th>Переваги</th>
+                        <th>Недоліки</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Сигнатурний аналіз</strong></td>
+                        <td>Порівняння трафіку з базою відомих шаблонів атак (сигнатур). Кожна сигнатура описує конкретну атаку або шкідливу активність</td>
+                        <td>Висока точність для відомих атак. Низький рівень false positive. Швидкість обробки</td>
+                        <td>Не виявляє невідомі атаки (zero-day). Потребує постійного оновлення бази сигнатур. Можливість обходу через модифікацію атаки</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Поведінковий (аномальний) аналіз</strong></td>
+                        <td>Побудова моделі "нормальної" поведінки мережі та виявлення відхилень. Використовує статистичні методи та машинне навчання</td>
+                        <td>Здатність виявляти невідомі атаки. Виявлення аномальної поведінки інсайдерів. Адаптивність</td>
+                        <td>Вищий рівень false positive. Потребує періоду навчання. Складність налаштування порогів</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Гібридний підхід</strong></td>
+                        <td>Поєднання сигнатурного та поведінкового аналізу. Використання протокольного аналізу для валідації</td>
+                        <td>Комплексне покриття загроз. Зменшення false positive/negative</td>
+                        <td>Вищі вимоги до ресурсів. Складність адміністрування</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h4>Inline vs Passive Mode</h4>
+            <ul>
+                <li><strong>Passive (IDS) режим</strong> — сенсор підключений до SPAN-порту (дзеркалювання) комутатора або через мережевий TAP. Аналізує копію трафіку, не впливаючи на мережу. Може лише оповіщати про виявлені загрози. Переваги: відсутність впливу на продуктивність мережі, безпечне тестування правил</li>
+                <li><strong>Inline (IPS) режим</strong> — сенсор розміщений безпосередньо на шляху трафіку (inline bridge). Може активно блокувати загрози в реальному часі (дії: drop, reject, replace). Ризики: збій IPS може порушити мережевий зв'язок (рішення: bypass mode)</li>
+            </ul>
+
+            <div class="warning-box">
+                <strong>Увага при впровадженні IPS</strong>
+                Перехід від IDS до IPS-режиму слід здійснювати поетапно. Спочатку система працює в режимі IDS (passive) для збору статистики та налаштування правил. Після ретельного аналізу false positive правила поступово переводяться в режим блокування. Невірно налаштований IPS може заблокувати легітимний трафік та спричинити порушення бізнес-процесів.
+            </div>
+
+            <h3>3.2. Snort</h3>
+            <p><code>Snort</code> — одна з найпоширеніших систем IDS/IPS з відкритим кодом, розроблена Мартіном Решем у 1998 році. Наразі підтримується компанією Cisco (Talos Intelligence Group). Snort 3 є повністю переписаною версією з покращеною архітектурою.</p>
+
+            <h4>Архітектура Snort</h4>
+            <p>Обробка пакетів у Snort відбувається через кілька послідовних компонентів:</p>
+            <ol>
+                <li><strong>Packet Decoder</strong> — розбирає пакет за рівнями протоколів (Ethernet → IP → TCP/UDP → Application). Визначає тип протоколу та формує структуру даних для подальшого аналізу</li>
+                <li><strong>Preprocessors</strong> — виконують нормалізацію трафіку перед аналізом правилами:
+                    <ul>
+                        <li><em>Frag3</em> — дефрагментація IP-пакетів (захист від обходу через фрагментацію)</li>
+                        <li><em>Stream5</em> — реасемблювання TCP-потоків (відновлення повного сеансу)</li>
+                        <li><em>HTTP Inspect</em> — нормалізація HTTP-трафіку (декодування URL, Unicode)</li>
+                        <li><em>SSH, SMTP, FTP</em> — спеціалізовані препроцесори для відповідних протоколів</li>
+                    </ul>
+                </li>
+                <li><strong>Detection Engine</strong> — основний компонент, що зіставляє нормалізований трафік з базою правил (rules). Використовує алгоритми пошуку шаблонів (Aho-Corasick, Wu-Manber) для ефективного множинного зіставлення</li>
+                <li><strong>Output Plugins</strong> — формують та записують результати виявлення:
+                    <ul>
+                        <li>Лог-файли (unified2 формат)</li>
+                        <li>Syslog</li>
+                        <li>Бази даних (через Barnyard2)</li>
+                        <li>Консольний вивід</li>
+                    </ul>
+                </li>
+            </ol>
+
+            <h4>Синтаксис правил Snort</h4>
+            <p>Кожне правило Snort складається з <strong>заголовка</strong> та <strong>опцій</strong>:</p>
+<pre><code>action protocol src_ip src_port -> dst_ip dst_port (options)</code></pre>
+
+            <p>Де:</p>
+            <ul>
+                <li><strong>action</strong>: <code>alert</code>, <code>log</code>, <code>pass</code>, <code>drop</code> (IPS), <code>reject</code> (IPS)</li>
+                <li><strong>protocol</strong>: <code>tcp</code>, <code>udp</code>, <code>icmp</code>, <code>ip</code></li>
+                <li><strong>src_ip/dst_ip</strong>: IP-адреса або мережа (CIDR), <code>any</code>, <code>$HOME_NET</code>, <code>$EXTERNAL_NET</code></li>
+                <li><strong>src_port/dst_port</strong>: номер порту, діапазон, <code>any</code></li>
+                <li><strong>-></strong>: напрямок (однонаправлене), <code><></code> (двонаправлене)</li>
+            </ul>
+
+            <p><strong>Приклад: виявлення спроби SQL-ін'єкції:</strong></p>
+<pre><code>alert tcp $EXTERNAL_NET any -> $HOME_NET 80 (
+    msg:"SQL Injection Attempt - UNION SELECT";
+    flow:to_server,established;
+    content:"UNION"; nocase;
+    content:"SELECT"; nocase; distance:0; within:20;
+    content:"FROM"; nocase; distance:0; within:30;
+    classtype:web-application-attack;
+    sid:1000001;
+    rev:1;
+    priority:1;
+)</code></pre>
+
+            <p>Пояснення опцій правила:</p>
+            <ul>
+                <li><code>msg</code> — повідомлення алерту</li>
+                <li><code>flow:to_server,established</code> — спрацьовує лише для встановлених TCP-з'єднань у напрямку сервера</li>
+                <li><code>content</code> — пошук рядка у вмісті пакета; <code>nocase</code> — без урахування регістру</li>
+                <li><code>distance:0; within:20</code> — обмеження позиції пошуку відносно попереднього збігу</li>
+                <li><code>classtype</code> — категорія загрози</li>
+                <li><code>sid</code> — унікальний ідентифікатор правила (>1000000 для користувацьких)</li>
+                <li><code>rev</code> — версія правила</li>
+                <li><code>priority</code> — пріоритет (1 — найвищий)</li>
+            </ul>
+
+            <p><strong>Приклад: виявлення сканування портів:</strong></p>
+<pre><code>alert tcp $EXTERNAL_NET any -> $HOME_NET any (
+    msg:"Possible Nmap SYN Scan Detected";
+    flags:S;
+    threshold:type both, track by_src, count 30, seconds 10;
+    classtype:attempted-recon;
+    sid:1000002;
+    rev:1;
+)</code></pre>
+
+            <h3>3.3. Suricata</h3>
+            <p><code>Suricata</code> — це високопродуктивна система IDS/IPS/NSM (Network Security Monitoring) з відкритим кодом, розроблена фондом OISF (Open Information Security Foundation). Suricata є сучасною альтернативою Snort з низкою значних переваг.</p>
+
+            <h4>Переваги Suricata</h4>
+            <ul>
+                <li><strong>Multi-threaded архітектура</strong> — повноцінна багатопотоковість, що дозволяє ефективно використовувати всі ядра сучасних процесорів. Snort 2.x був однопотоковим (Snort 3 також підтримує багатопотоковість)</li>
+                <li><strong>EVE JSON logging</strong> — структуроване логування у форматі JSON, що значно спрощує інтеграцію з SIEM-системами (ELK Stack, Splunk, Wazuh). Кожна подія містить повну метаінформацію</li>
+                <li><strong>Протокольний аналіз</strong> — вбудовані парсери для HTTP, TLS, DNS, SMB, SSH, FTP, DCERPC та інших протоколів. Автоматичне визначення протоколу незалежно від порту</li>
+                <li><strong>Файлове вилучення</strong> — можливість автоматичного витягування файлів з мережевого трафіку для подальшого аналізу</li>
+                <li><strong>Lua-скрипти</strong> — підтримка розширених правил на мові Lua для складної логіки виявлення</li>
+                <li><strong>Сумісність з правилами Snort</strong> — підтримує формат правил Snort, а також власні розширення</li>
+            </ul>
+
+            <h4>Правила Emerging Threats</h4>
+            <p>Emerging Threats (ET) — це набір правил IDS/IPS, що підтримується спільнотою та компанією Proofpoint:</p>
+            <ul>
+                <li><strong>ET Open</strong> — безкоштовний набір правил, що оновлюється щодня</li>
+                <li><strong>ET Pro</strong> — комерційний набір з розширеним покриттям загроз</li>
+            </ul>
+            <p>Встановлення та оновлення правил:</p>
+<pre><code># Оновлення правил Suricata (Emerging Threats Open)
+sudo suricata-update
+
+# Перевірка списку доступних джерел правил
+sudo suricata-update list-sources
+
+# Увімкнення додаткового джерела правил
+sudo suricata-update enable-source et/open
+
+# Перезавантаження правил без зупинки Suricata
+sudo kill -USR2 $(pidof suricata)</code></pre>
+
+            <h4>Приклад правила Suricata з поясненням</h4>
+<pre><code># Виявлення спроби завантаження виконуваного файлу через HTTP
+alert http $EXTERNAL_NET any -> $HOME_NET any (
+    msg:"ET POLICY Executable Download from Suspicious TLD";
+    flow:established,to_client;
+    http.uri; content:".exe"; endswith;
+    http.host; content:".xyz"; endswith;
+    filestore;
+    classtype:policy-violation;
+    sid:2025001;
+    rev:1;
+    metadata:created_at 2024_01_15, updated_at 2024_01_15;
+)</code></pre>
+
+            <p>Розширені можливості правил Suricata:</p>
+            <ul>
+                <li><code>http.uri</code>, <code>http.host</code>, <code>http.header</code> — sticky buffers для точного вказання частини HTTP-запиту для аналізу</li>
+                <li><code>filestore</code> — зберегти витягнутий файл для подальшого аналізу</li>
+                <li><code>tls.sni</code> — аналіз Server Name Indication в TLS-handshake (без розшифрування)</li>
+                <li><code>dns.query</code> — аналіз DNS-запитів</li>
+                <li><code>ja3.hash</code> / <code>ja3s.hash</code> — ідентифікація TLS-клієнтів та серверів за JA3-відбитком</li>
+            </ul>
+
+            <div class="example-box">
+                <strong>Приклад аналізу EVE JSON логу Suricata</strong>
+                EVE (Extensible Event Format) генерує JSON-записи для кожної події. Приклад алерту:
+<pre><code>{
+  "timestamp": "2024-03-15T14:32:17.456789+0200",
+  "flow_id": 1234567890123456,
+  "event_type": "alert",
+  "src_ip": "198.51.100.42",
+  "src_port": 45678,
+  "dest_ip": "192.168.1.100",
+  "dest_port": 80,
+  "proto": "TCP",
+  "alert": {
+    "action": "allowed",
+    "gid": 1,
+    "signature_id": 2025001,
+    "rev": 1,
+    "signature": "ET POLICY Executable Download from Suspicious TLD",
+    "category": "policy-violation",
+    "severity": 3
+  },
+  "http": {
+    "hostname": "malware.xyz",
+    "url": "/payload.exe",
+    "http_method": "GET",
+    "status": 200,
+    "length": 524288
+  }
+}</code></pre>
+                Такий формат легко парсити за допомогою <code>jq</code>, інтегрувати з ELK Stack або передавати в SIEM.
+            </div>
+
+            <!-- ================= SECTION 4 ================= -->
+            <h2>4. VPN-технології</h2>
+
+            <p>VPN (Virtual Private Network) — технологія створення захищеного логічного з'єднання (тунелю) через незахищену мережу (зазвичай Інтернет). VPN забезпечує конфіденційність, цілісність та автентифікацію даних, що передаються.</p>
+
+            <h3>4.1. OpenVPN</h3>
+            <p><code>OpenVPN</code> — це повнофункціональний SSL/TLS VPN, що працює в просторі користувача (user-space). Використовує бібліотеку OpenSSL для шифрування та може працювати через TCP або UDP.</p>
+
+            <h4>Ключові характеристики</h4>
+            <ul>
+                <li><strong>SSL/TLS VPN</strong> — працює поверх TLS, може проходити через більшість міжмережевих екранів та NAT (особливо на порту TCP 443)</li>
+                <li><strong>PKI-based автентифікація</strong> — використовує сертифікати X.509 для взаємної автентифікації клієнта та сервера. Додатково може використовувати логін/пароль</li>
+                <li><strong>Режими роботи</strong>:
+                    <ul>
+                        <li><em>TUN</em> — маршрутизований тунель (L3), передає IP-пакети</li>
+                        <li><em>TAP</em> — мостовий тунель (L2), передає Ethernet-кадри</li>
+                    </ul>
+                </li>
+                <li><strong>Push routes</strong> — сервер може "проштовхувати" маршрути клієнтам, направляючи їх трафік через VPN</li>
+                <li><strong>Конфігураційна гнучкість</strong> — підтримка Split Tunneling, Full Tunnel, Client-to-Client routing</li>
+            </ul>
+
+            <p><strong>Приклад конфігурації сервера OpenVPN:</strong></p>
+<pre><code># /etc/openvpn/server.conf
+port 1194
+proto udp
+dev tun
+
+# PKI сертифікати
+ca /etc/openvpn/pki/ca.crt
+cert /etc/openvpn/pki/server.crt
+key /etc/openvpn/pki/server.key
+dh /etc/openvpn/pki/dh.pem
+
+# Мережа VPN
+server 10.8.0.0 255.255.255.0
+
+# Маршрути, що проштовхуються клієнтам
+push "route 192.168.1.0 255.255.255.0"
+push "dhcp-option DNS 192.168.1.1"
+
+# Шифрування
+cipher AES-256-GCM
+auth SHA256
+tls-version-min 1.2
+
+# Безпека
+user nobody
+group nogroup
+persist-key
+persist-tun
+
+# Логування
+status /var/log/openvpn/status.log
+log-append /var/log/openvpn/openvpn.log
+verb 3</code></pre>
+
+            <h3>4.2. WireGuard</h3>
+            <p><code>WireGuard</code> — це сучасний VPN-протокол, що вирізняється простотою, швидкістю та безпекою. Включений до ядра Linux починаючи з версії 5.6 (2020). Розроблений Джейсоном Доненфельдом.</p>
+
+            <h4>Технічні особливості</h4>
+            <ul>
+                <li><strong>Noise Protocol Framework</strong> — криптографічний фреймворк, на якому побудований WireGuard. Реалізує паттерн Noise_IKpsk2 для обміну ключами з post-quantum resistance (PSK)</li>
+                <li><strong>Криптографічні примітиви</strong>: Curve25519 (DH обмін ключами), ChaCha20 (шифрування), Poly1305 (MAC), BLAKE2s (хешування), SipHash24 (хеш-таблиці), HKDF (деривація ключів)</li>
+                <li><strong>Кодова база</strong> — приблизно 4000 рядків коду (порівняно з ~100000 для OpenVPN), що значно спрощує аудит безпеки</li>
+                <li><strong>Kernel-space реалізація</strong> — працює як модуль ядра Linux, що забезпечує мінімальні затримки та високу пропускну здатність</li>
+                <li><strong>Cryptokey Routing</strong> — кожен пір має публічний ключ та список дозволених IP-адрес (AllowedIPs), що одночасно визначає маршрутизацію та авторизацію</li>
+            </ul>
+
+            <p><strong>Приклад конфігурації WireGuard (сервер):</strong></p>
+<pre><code># Генерація ключів
+wg genkey | tee /etc/wireguard/server_private.key | wg pubkey > /etc/wireguard/server_public.key
+
+# /etc/wireguard/wg0.conf (сервер)
+[Interface]
+Address = 10.0.0.1/24
+ListenPort = 51820
+PrivateKey = &lt;server_private_key&gt;
+
+# NAT для доступу клієнтів до Інтернету
+PostUp = iptables -A FORWARD -i wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+PostDown = iptables -D FORWARD -i wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE
+
+# Пір (клієнт)
+[Peer]
+PublicKey = &lt;client_public_key&gt;
+AllowedIPs = 10.0.0.2/32
+PresharedKey = &lt;preshared_key&gt;</code></pre>
+
+            <p><strong>Конфігурація клієнта:</strong></p>
+<pre><code># /etc/wireguard/wg0.conf (клієнт)
+[Interface]
+Address = 10.0.0.2/24
+PrivateKey = &lt;client_private_key&gt;
+DNS = 192.168.1.1
+
+[Peer]
+PublicKey = &lt;server_public_key&gt;
+PresharedKey = &lt;preshared_key&gt;
+Endpoint = vpn.example.com:51820
+AllowedIPs = 0.0.0.0/0   # Full tunnel (весь трафік через VPN)
+PersistentKeepalive = 25  # Для роботи за NAT</code></pre>
+
+            <p><strong>Управління WireGuard:</strong></p>
+<pre><code># Запуск інтерфейсу
+sudo wg-quick up wg0
+
+# Перевірка стану
+sudo wg show
+
+# Зупинка інтерфейсу
+sudo wg-quick down wg0
+
+# Перегляд поточних пірів та статистики
+sudo wg show wg0</code></pre>
+
+            <h4>Порівняння WireGuard та OpenVPN</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Критерій</th>
+                        <th>WireGuard</th>
+                        <th>OpenVPN</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Пропускна здатність</td>
+                        <td>~1000+ Мбіт/с (kernel-space)</td>
+                        <td>~500 Мбіт/с (user-space)</td>
+                    </tr>
+                    <tr>
+                        <td>Затримка (latency)</td>
+                        <td>Мінімальна (kernel module)</td>
+                        <td>Вища (TLS overhead, user-space)</td>
+                    </tr>
+                    <tr>
+                        <td>Кодова база</td>
+                        <td>~4 000 рядків</td>
+                        <td>~100 000 рядків</td>
+                    </tr>
+                    <tr>
+                        <td>Криптографія</td>
+                        <td>Фіксований набір (Curve25519, ChaCha20)</td>
+                        <td>Конфігурується (OpenSSL)</td>
+                    </tr>
+                    <tr>
+                        <td>Автентифікація</td>
+                        <td>Публічні ключі + PSK</td>
+                        <td>PKI (сертифікати X.509) + логін/пароль</td>
+                    </tr>
+                    <tr>
+                        <td>Протокол транспорту</td>
+                        <td>Тільки UDP</td>
+                        <td>TCP або UDP</td>
+                    </tr>
+                    <tr>
+                        <td>Обхід блокувань</td>
+                        <td>Складніше (UDP only)</td>
+                        <td>Легше (TCP 443, обфускація)</td>
+                    </tr>
+                    <tr>
+                        <td>Управління користувачами</td>
+                        <td>Базове (ключі)</td>
+                        <td>Розвинене (PKI, LDAP, RADIUS)</td>
+                    </tr>
+                    <tr>
+                        <td>Платформи</td>
+                        <td>Linux, Windows, macOS, iOS, Android</td>
+                        <td>Linux, Windows, macOS, iOS, Android</td>
+                    </tr>
+                    <tr>
+                        <td>Зрілість</td>
+                        <td>З 2020 (в ядрі Linux)</td>
+                        <td>З 2001 (20+ років)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="tip-box">
+                <strong>Рекомендація щодо вибору VPN</strong>
+                <strong>WireGuard</strong> — оптимальний вибір для нових розгортань, де потрібна висока швидкість та простота конфігурації. Ідеальний для site-to-site VPN та мобільних клієнтів. <strong>OpenVPN</strong> — кращий вибір для корпоративних середовищ, де потрібна інтеграція з PKI, LDAP/RADIUS-автентифікація, або коли необхідно працювати через обмежувальні проксі та міжмережеві екрани (TCP 443).
+            </div>
+
+            <h3>4.3. IPsec VPN</h3>
+            <p><code>IPsec</code> (Internet Protocol Security) — набір протоколів для забезпечення захисту даних на мережевому рівні (L3). IPsec є стандартом IETF та вбудований у більшість мережевого обладнання.</p>
+
+            <h4>Компоненти IPsec</h4>
+            <ul>
+                <li><strong>IKE (Internet Key Exchange)</strong> — протокол для автоматичного встановлення захищеного каналу та обміну ключами:
+                    <ul>
+                        <li><em>IKEv1</em> — старіша версія, два режими (Main Mode, Aggressive Mode), дві фази узгодження</li>
+                        <li><em>IKEv2</em> — сучасна версія (RFC 7296), простіша, швидша, підтримує MOBIKE (мобільність), EAP-автентифікацію</li>
+                    </ul>
+                </li>
+                <li><strong>ESP (Encapsulating Security Payload)</strong> — основний протокол IPsec (IP protocol 50), забезпечує шифрування, автентифікацію та захист від повторного відправлення (replay protection)</li>
+                <li><strong>AH (Authentication Header)</strong> — забезпечує лише автентифікацію та цілісність без шифрування (рідко використовується окремо)</li>
+            </ul>
+
+            <h4>Режими роботи IPsec</h4>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Режим</th>
+                        <th>Сценарій</th>
+                        <th>Опис</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Site-to-Site VPN</strong></td>
+                        <td>З'єднання двох офісних мереж через Інтернет</td>
+                        <td>Тунельний режим: весь пакет інкапсулюється в новий IP-пакет з ESP-заголовком. Шлюзи на обох кінцях встановлюють постійний тунель. Трафік між підмережами автоматично шифрується</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Remote Access VPN</strong></td>
+                        <td>Підключення віддаленого працівника до корпоративної мережі</td>
+                        <td>Клієнт IPsec (StrongSwan, Cisco AnyConnect, Windows built-in) встановлює тунель до VPN-шлюзу. IKEv2 + EAP дозволяє використовувати логін/пароль або сертифікати. Підтримка MOBIKE для переключення між Wi-Fi та мобільною мережею</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p><strong>Приклад конфігурації StrongSwan (site-to-site):</strong></p>
+<pre><code># /etc/swanctl/swanctl.conf (Site A)
+connections {
+    site-to-site {
+        local_addrs = 203.0.113.10          # Зовнішня IP Site A
+        remote_addrs = 198.51.100.20        # Зовнішня IP Site B
+
+        local {
+            auth = psk
+            id = site-a@example.com
+        }
+        remote {
+            auth = psk
+            id = site-b@example.com
+        }
+
+        children {
+            lan-to-lan {
+                local_ts = 192.168.1.0/24   # Підмережа Site A
+                remote_ts = 192.168.2.0/24  # Підмережа Site B
+                esp_proposals = aes256gcm128-sha256-modp2048
+                start_action = start
+            }
+        }
+
+        version = 2                          # IKEv2
+        proposals = aes256-sha256-modp2048
+    }
+}
+
+secrets {
+    ike-1 {
+        id-a = site-a@example.com
+        id-b = site-b@example.com
+        secret = "SuperSecretPSK123!"
+    }
+}</code></pre>
+
+            <!-- ================= SECTION 5 ================= -->
+            <h2>5. Сегментація мережі</h2>
+
+            <p>Сегментація мережі — це практика поділу мережі на менші ізольовані сегменти з контрольованим доступом між ними. Це один із ключових принципів мережевої безпеки, який обмежує бічне переміщення (lateral movement) зловмисника у разі компрометації одного сегменту.</p>
+
+            <h3>5.1. VLAN (Virtual LAN) — стандарт IEEE 802.1Q</h3>
+            <p>VLAN — це технологія логічного розділення локальної мережі на кілька широкомовних доменів на рівні канального рівня (L2). Стандарт IEEE 802.1Q визначає механізм тегування Ethernet-кадрів для ідентифікації приналежності до VLAN.</p>
+
+            <h4>Принцип роботи 802.1Q</h4>
+            <ul>
+                <li>До Ethernet-кадру додається 4-байтний тег, що містить VLAN ID (VID, 12 біт — від 1 до 4094)</li>
+                <li>Порти комутатора можуть бути <strong>Access</strong> (належать до одного VLAN) або <strong>Trunk</strong> (передають трафік кількох VLAN з тегами)</li>
+                <li>Пристрої в різних VLAN не бачать широкомовний трафік одне одного</li>
+                <li>Зв'язок між VLAN можливий лише через маршрутизатор або L3-комутатор (Inter-VLAN Routing)</li>
+            </ul>
+
+            <p><strong>Типова схема VLAN-сегментації організації:</strong></p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>VLAN ID</th>
+                        <th>Назва</th>
+                        <th>Підмережа</th>
+                        <th>Призначення</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>10</td>
+                        <td>Management</td>
+                        <td>10.0.10.0/24</td>
+                        <td>Управління мережевим обладнанням</td>
+                    </tr>
+                    <tr>
+                        <td>20</td>
+                        <td>Servers</td>
+                        <td>10.0.20.0/24</td>
+                        <td>Серверний сегмент</td>
+                    </tr>
+                    <tr>
+                        <td>30</td>
+                        <td>Users</td>
+                        <td>10.0.30.0/24</td>
+                        <td>Робочі станції користувачів</td>
+                    </tr>
+                    <tr>
+                        <td>40</td>
+                        <td>VoIP</td>
+                        <td>10.0.40.0/24</td>
+                        <td>IP-телефонія</td>
+                    </tr>
+                    <tr>
+                        <td>50</td>
+                        <td>Guest</td>
+                        <td>10.0.50.0/24</td>
+                        <td>Гостьова мережа (тільки Інтернет)</td>
+                    </tr>
+                    <tr>
+                        <td>100</td>
+                        <td>DMZ</td>
+                        <td>10.0.100.0/24</td>
+                        <td>Публічні сервіси (веб, пошта)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p><strong>Налаштування VLAN у Linux:</strong></p>
+<pre><code># Створення VLAN-інтерфейсу (VLAN 20 на eth0)
+sudo ip link add link eth0 name eth0.20 type vlan id 20
+sudo ip addr add 10.0.20.1/24 dev eth0.20
+sudo ip link set eth0.20 up
+
+# Перевірка VLAN-інтерфейсів
+cat /proc/net/vlan/config
+
+# Альтернативно, через netplan (Ubuntu):
+# /etc/netplan/01-vlans.yaml
+# network:
+#   vlans:
+#     vlan20:
+#       id: 20
+#       link: eth0
+#       addresses: [10.0.20.1/24]</code></pre>
+
+            <h3>5.2. Мікросегментація</h3>
+            <p>Мікросегментація — це подальший розвиток концепції сегментації, де контроль доступу застосовується не лише між мережевими сегментами, а й між окремими робочими навантаженнями (workloads), додатками або навіть процесами.</p>
+
+            <h4>Рівні сегментації</h4>
+            <ol>
+                <li><strong>Макросегментація</strong> — традиційні VLAN та підмережі, міжмережевий екран між зонами</li>
+                <li><strong>Мікросегментація</strong> — контроль трафіку між окремими серверами/контейнерами:
+                    <ul>
+                        <li>Host-based firewalls (iptables/nftables на кожному хості)</li>
+                        <li>Software-defined networking (SDN) — VMware NSX, Cisco ACI</li>
+                        <li>Kubernetes Network Policies — контроль трафіку між подами</li>
+                        <li>Service Mesh (Istio, Linkerd) — mTLS та авторизація між мікросервісами</li>
+                    </ul>
+                </li>
+                <li><strong>Наносегментація</strong> — контроль на рівні окремих процесів та системних викликів (SELinux, AppArmor)</li>
+            </ol>
+
+            <div class="info-box">
+                <strong>Мікросегментація та Zero Trust</strong>
+                Мікросегментація є одним із ключових технічних механізмів реалізації архітектури Zero Trust (детально розглядається у лекції 7). Замість довіри до всього, що знаходиться "всередині периметру", мікросегментація забезпечує контроль кожного мережевого з'єднання за принципом "deny by default" — за замовчуванням весь трафік заборонений, дозволяються лише явно визначені потоки.
+            </div>
+
+            <h3>5.3. DMZ (Демілітаризована зона)</h3>
+            <p>DMZ — це мережевий сегмент, що розміщується між зовнішньою (недовіреною) та внутрішньою (довіреною) мережами. DMZ містить сервіси, які повинні бути доступні ззовні (веб-сервери, поштові сервери, DNS), але при цьому ізольовані від внутрішньої мережі.</p>
+
+            <h4>Архітектура 3-leg DMZ (три інтерфейси)</h4>
+            <p>Найпоширеніша архітектура, де один міжмережевий екран має три мережевих інтерфейси:</p>
+            <ul>
+                <li><strong>WAN (зовнішній)</strong> — підключення до Інтернету</li>
+                <li><strong>LAN (внутрішній)</strong> — корпоративна мережа</li>
+                <li><strong>DMZ</strong> — сегмент публічних сервісів</li>
+            </ul>
+            <p>Правила доступу:</p>
+            <ul>
+                <li>WAN → DMZ: дозволено лише конкретні порти (80, 443, 25, 53)</li>
+                <li>DMZ → LAN: заборонено (або дозволено лише конкретні з'єднання, наприклад, до бази даних)</li>
+                <li>LAN → DMZ: дозволено (адміністрування серверів)</li>
+                <li>LAN → WAN: дозволено (через NAT)</li>
+                <li>DMZ → WAN: обмежено (лише необхідні оновлення, DNS)</li>
+                <li>WAN → LAN: заборонено</li>
+            </ul>
+
+            <h4>Архітектура 2-leg DMZ (два міжмережевих екрани)</h4>
+            <p>Більш безпечна архітектура з двома міжмережевими екранами різних виробників (для захисту від single point of failure та zero-day у одного вендора):</p>
+            <ul>
+                <li><strong>Зовнішній FW</strong> — між WAN та DMZ. Пропускає вхідний трафік до DMZ-серверів</li>
+                <li><strong>Внутрішній FW</strong> — між DMZ та LAN. Контролює доступ з DMZ до внутрішньої мережі (зазвичай повністю блокує)</li>
+                <li>DMZ розміщується <strong>між двома FW</strong>, утворюючи додатковий рівень захисту</li>
+            </ul>
+
+            <div class="example-box">
+                <strong>Приклад: DMZ для веб-додатку</strong>
+                Типова архітектура для веб-додатку з базою даних:
+                <ul>
+                    <li><strong>DMZ:</strong> Reverse Proxy (Nginx) — приймає HTTPS-запити з Інтернету, передає їх до Application Server</li>
+                    <li><strong>DMZ або окремий сегмент Application:</strong> Application Server (Java/Python/Node.js) — обробляє бізнес-логіку</li>
+                    <li><strong>LAN (Database segment):</strong> Database Server (PostgreSQL/MySQL) — доступний лише для Application Server на порту 5432/3306</li>
+                </ul>
+                Такий розподіл забезпечує, що навіть при компрометації веб-сервера, зловмисник не отримає прямий доступ до бази даних.
+            </div>
+
+            <h4>Правила iptables для 3-leg DMZ</h4>
+<pre><code># Інтерфейси:
+# eth0 = WAN (203.0.113.1)
+# eth1 = LAN (192.168.1.1/24)
+# eth2 = DMZ (10.0.100.1/24)
+# Веб-сервер у DMZ: 10.0.100.10
+
+# Політика за замовчуванням — заборонити все
+iptables -P FORWARD DROP
+
+# Дозволити встановлені з'єднання
+iptables -A FORWARD -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+
+# WAN -> DMZ: HTTP/HTTPS до веб-сервера
+iptables -A FORWARD -i eth0 -o eth2 -p tcp -d 10.0.100.10 --dport 80 -j ACCEPT
+iptables -A FORWARD -i eth0 -o eth2 -p tcp -d 10.0.100.10 --dport 443 -j ACCEPT
+
+# LAN -> DMZ: повний доступ (адміністрування)
+iptables -A FORWARD -i eth1 -o eth2 -s 192.168.1.0/24 -j ACCEPT
+
+# LAN -> WAN: повний доступ через NAT
+iptables -A FORWARD -i eth1 -o eth0 -s 192.168.1.0/24 -j ACCEPT
+
+# DMZ -> LAN: ЗАБОРОНЕНО (за замовчуванням DROP)
+# DMZ -> WAN: лише DNS та оновлення
+iptables -A FORWARD -i eth2 -o eth0 -p udp --dport 53 -j ACCEPT
+iptables -A FORWARD -i eth2 -o eth0 -p tcp --dport 80 -j ACCEPT
+iptables -A FORWARD -i eth2 -o eth0 -p tcp --dport 443 -j ACCEPT
+
+# DNAT для публікації веб-сервера
+iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 80 -j DNAT --to-destination 10.0.100.10:80
+iptables -t nat -A PREROUTING -i eth0 -p tcp --dport 443 -j DNAT --to-destination 10.0.100.10:443
+
+# SNAT для вихідного трафіку LAN та DMZ
+iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE</code></pre>
+
+            <!-- ================= SECTION 6: Summary ================= -->
+            <h2>6. Підсумки та контрольні питання</h2>
+
+            <h3>Ключові висновки лекції</h3>
+            <ul>
+                <li>Мережевий периметр еволюціонував від чіткої межі до розподіленої моделі захисту</li>
+                <li>Міжмережеві екрани пройшли шлях від простих пакетних фільтрів до NGFW з глибоким аналізом трафіку</li>
+                <li><code>iptables</code>/<code>nftables</code> є потужними інструментами для побудови міжмережевого екрану на Linux</li>
+                <li>IDS/IPS системи (<code>Snort</code>, <code>Suricata</code>) забезпечують виявлення та запобігання вторгненням на основі сигнатурного та поведінкового аналізу</li>
+                <li>VPN-технології (<code>WireGuard</code>, <code>OpenVPN</code>, <code>IPsec</code>) забезпечують захист даних при передачі через незахищені мережі</li>
+                <li>Сегментація мережі (VLAN, DMZ, мікросегментація) є фундаментальним принципом обмеження впливу інцидентів безпеки</li>
+            </ul>
+
+            <h3>Контрольні питання</h3>
+            <ol>
+                <li>Порівняйте Stateful Inspection та NGFW. У чому ключові переваги NGFW?</li>
+                <li>Поясніть різницю між SNAT та DNAT. Наведіть приклади використання кожного типу.</li>
+                <li>Чим відрізняється режим IDS (passive) від IPS (inline)? Які ризики inline-режиму?</li>
+                <li>Напишіть правило Snort/Suricata для виявлення ICMP-flood (більше 100 ping-запитів за 10 секунд з однієї IP-адреси).</li>
+                <li>Порівняйте WireGuard та OpenVPN. У яких сценаріях кожне рішення є оптимальним?</li>
+                <li>Опишіть архітектуру 3-leg DMZ. Які правила доступу повинні бути між зонами?</li>
+                <li>Що таке мікросегментація і чим вона відрізняється від традиційної VLAN-сегментації?</li>
+                <li>Поясніть, як App-ID у Palo Alto NGFW дозволяє ідентифікувати додатки незалежно від порту.</li>
+            </ol>
+        </article>
+
+        <nav class="page-nav">
+            <a href="04.html">&larr; Криптографічний захист</a>
+            <a href="06.html">Захист кінцевих точок &rarr;</a>
+        </nav>
+    </main>
+
+    <script>
+        document.getElementById('menuToggle').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('active');
+        });
+        document.getElementById('overlay').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.remove('open');
+            this.classList.remove('active');
+        });
+    </script>
+</body>
+</html>
